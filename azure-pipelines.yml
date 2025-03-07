@@ -8,6 +8,8 @@ trigger:
 
 pool:
   name: Azure Pipelines
+  demands:
+  - Agent.Name -equals Hosted Agent
 
 variables:
   RENDER_SERVICE_ID: 'your-render-service-id'  # Replace with your Render service ID
