@@ -7,7 +7,7 @@ trigger:
 - main  # Trigger the pipeline on changes to the main branch
 
 pool:
-  vmImage: 'ubuntu-latest'
+  name: Azure Pipelines
 
 variables:
   RENDER_SERVICE_ID: 'your-render-service-id'  # Replace with your Render service ID
