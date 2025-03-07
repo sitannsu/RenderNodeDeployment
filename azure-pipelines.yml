@@ -1,0 +1,41 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- main  # Trigger the pipeline on changes to the main branch
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  RENDER_SERVICE_ID: 'your-render-service-id'  # Replace with your Render service ID
+  RENDER_API_KEY_PROD: '$(RENDER_API_KEY_PROD)'  # Reference the Render API key from the variable group
+
+steps:
+- script: |
+    echo "Checking out code..."
+    git checkout main
+  displayName: 'Checkout code'
+
+- script: |
+    echo "Installing dependencies..."
+    npm install  # Replace with your build command if necessary
+  displayName: 'Install dependencies'
+
+- script: |
+    echo "Building the application..."
+    npm run build  # Replace with your build command if necessary
+  displayName: 'Build application'
+
+- script: |
+    echo "Deploying to Render..."
+    curl -X POST \
+      -H "Authorization: Bearer $RENDER_API_KEY_PROD" \
+      -H "Content-Type: application/json" \
+      -d '{
+            "clearCache": "do_not_clear"
+          }' \
+      "https://api.render.com/v1/services/$RENDER_SERVICE_ID/deploys"
+  displayName: 'Deploy to Render'
