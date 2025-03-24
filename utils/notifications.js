@@ -6,11 +6,43 @@ async function sendFCMNotification(token, title, body, data = {}) {
       token: token,
       notification: {
         title: title,
-        body: body
+        body: body,
+        sound: 'default'
       },
       data: {
         ...data,
-        click_action: 'FLUTTER_NOTIFICATION_CLICK'
+        click_action: 'fcm.action.OPEN',
+        title: title,  // Required for Android foreground notifications
+        body: body,    // Required for Android foreground notifications
+        type: data.type || 'default'
+      },
+      android: {
+        priority: 'high',
+        notification: {
+          channelId: 'default',
+          sound: 'default',
+          priority: 'high',
+          visibility: 'public'
+        }
+      },
+      apns: {
+        payload: {
+          aps: {
+            alert: {
+              title: title,
+              body: body
+            },
+            sound: 'default',
+            badge: 1,
+            'content-available': 1,
+            'mutable-content': 1
+          },
+          notificationType: data.type || 'default'
+        },
+        headers: {
+          'apns-priority': '10',
+          'apns-push-type': 'alert'
+        }
       }
     };
 
