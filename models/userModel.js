@@ -67,7 +67,7 @@ const UserSchema = new mongoose.Schema(
     comments: {
       type: String
     },
-    expoNotificationToken: {
+    fcmToken: {
       type: String
     },
     installedVersion: {

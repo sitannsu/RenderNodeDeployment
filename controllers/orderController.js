@@ -1,7 +1,7 @@
 const Order = require("../models/orderModel");
 const { clients } = require("../utils/otpUtils");
 const triggerMail = require("../config/nodemailerConfig");
-const { Expo } = require("expo-server-sdk");
+const { sendFCMNotification } = require("../utils/notifications");
 const User = require("../models/userModel");
 exports.createOrder = async (req, res) => {
   try {
@@ -268,79 +268,22 @@ exports.updateOrder = async (req, res) => {
           let receiverId = order.user.userId;
           console.log(receiverId);
           const user = await User.find({ userId: Number(receiverId) });
-          let somePushTokens = [user[0].expoNotificationToken];
-          console.log(somePushTokens);
-          let accessToken = "i6cubWZs0I3nUTJpoo_azcBWPS_0pBLyLnzZz6OF";
-          let expo = new Expo({
-            accessToken: accessToken,
-            useFcmV1: true
-          });
-
-          let messages = [];
-          for (let pushToken of somePushTokens) {
-            if (!Expo.isExpoPushToken(pushToken)) {
-              console.error(
-                `Push token ${pushToken} is not a valid Expo push token`
+          const fcmToken = user[0].fcmToken;
+          
+          if (fcmToken) {
+            try {
+              await sendFCMNotification(
+                fcmToken,
+                'Order Status Update',
+                message,
+                { type: 'order_update', orderId: order._id.toString() }
               );
-              continue;
+            } catch (error) {
+              console.error('Error sending FCM notification:', error);
             }
-            messages.push({
-              to: pushToken,
-              sound: "default",
-              body: message,
-              data: { withSome: "data" }
-            });
+          } else {
+            console.log('No FCM token found for user:', receiverId);
           }
-          let chunks = expo.chunkPushNotifications(messages);
-          let tickets = [];
-          (async () => {
-            for (let chunk of chunks) {
-              try {
-                let ticketChunk = await expo.sendPushNotificationsAsync(chunk);
-                console.log(ticketChunk);
-                tickets.push(...ticketChunk);
-              } catch (error) {
-                console.error(error);
-              }
-            }
-          })();
-          let receiptIds = [];
-          for (let ticket of tickets) {
-            if (ticket.status === "ok") {
-              receiptIds.push(ticket.id);
-            }
-          }
-
-          let receiptIdChunks =
-            expo.chunkPushNotificationReceiptIds(receiptIds);
-          (async () => {
-            for (let chunk of receiptIdChunks) {
-              try {
-                let receipts = await expo.getPushNotificationReceiptsAsync(
-                  chunk
-                );
-                console.log(receipts);
-                for (let receiptId in receipts) {
-                  let { status, message, details } = receipts[receiptId];
-                  console.log(`Status is ${status}`);
-                  console.log(`Message is ${message}`);
-                  console.log(`Details is ${details}`);
-                  if (status === "ok") {
-                    continue;
-                  } else if (status === "error") {
-                    console.error(
-                      `There was an error sending a notification: ${message}`
-                    );
-                    if (details && details.error) {
-                      console.error(`The error code is ${details.error}`);
-                    }
-                  }
-                }
-              } catch (error) {
-                console.error(error);
-              }
-            }
-          })();
           //CODE FOR NOTIFICATION ENDS
         }
       }
