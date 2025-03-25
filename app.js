@@ -8,6 +8,9 @@ const { Server } = require("socket.io");
 // Initialize Express app
 const app = express();
 
+// Import routes
+const testRoutes = require('./routes/testRoutes');
+
 // Create HTTP server
 const server = http.createServer(app);
 
@@ -25,6 +28,9 @@ app.use(cors({ origin: "*", credentials: true }));
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(cookieParser());
+
+// Routes
+app.use('/api/test', testRoutes);
 app.use(function (req, res, next) {
   //res.header("Access-Control-Allow-Origin", "https://dgp-website.onrender.com");
   res.header("Access-Control-Allow-Origin", "*");
