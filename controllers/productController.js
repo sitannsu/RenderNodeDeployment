@@ -1,5 +1,8 @@
+const { Expo } = require("expo-server-sdk");
 const Product = require("../models/productModel");
 const User = require("../models/userModel");
+const socketManager = require('../utils/socketManager');
+
 exports.createProduct = async (req, res) => {
   try {
     //console.log(req.body);
@@ -18,32 +21,24 @@ exports.createProduct = async (req, res) => {
 exports.getAllProducts = async (req, res) => {
   try {
     const user = await User.find({ userId: req.user.userId });
-    if (user[0].installedVersion !== "1.0.2") {
-      // res.status(400).json({
-      //   success: false,
-      //   message:
-      //     "We have released a new and improved version. To continue using, please update the app for a better user experience."
-      // });
-      // res.writeHead(302, {
-      //   Location: "https://itunes.apple.com/in/lookup?bundleId=com.durgapur.dgp"
-      // });
-      // response.end();
-      res.redirect(
-        "https://itunes.apple.com/in/lookup?bundleId=com.durgapur.dgp"
-      );
-      // throw new Error(
-      //   "We have released a new and improved version. To continue using, please update the app for a better user experience."
-      // );
-    } else {
-      const products = await Product.find().sort({ createdAt: -1 });
-      if (!products) {
-        res.status(400).json({ success: false, message: "Products Not found" });
-      } else {
-        res.status(200).json({ success: true, products });
-      }
+    
+    const products = await Product.find().sort({ createdAt: -1 });
+    if (!products) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Products Not found" 
+      });
     }
+    
+    return res.status(200).json({ 
+      success: true, 
+      products: products 
+    });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
   }
 };
 exports.getSingleProduct = async (req, res) => {
@@ -59,56 +54,162 @@ exports.getSingleProduct = async (req, res) => {
   }
 };
 exports.updateProduct = async (req, res) => {
-  // var today = new Date();
-  // var myToday = new Date(
-  //   today.getFullYear(),
-  //   today.getMonth(),
-  //   today.getDate(),
-  //   1,
-  //   59,
-  //   0
-  // );
   try {
     let product = await Product.findById(req.params.id);
     if (!product) {
-      res.status(400).json({ success: false, message: "Product Not found" });
-    } else {
-      // let finalUpdate = req.body;
-      let newIncOrDec = product.IncOrDec;
-      // let yesterdayClosing = product.yesterdayClosing;
-      // if (new Date(product.modifiedAt) < myToday) {
-      //   yesterdayClosing = product.price; //Putting data here as price can be updated many times in one day
-      // }
-      // if (product.yesterdayClosing[0] > req.body.price[0]) {
-      //   newIncOrDec[0] = "Dec";
-      // }
-      // if (product.yesterdayClosing[1] > req.body.price[1]) {
-      //   newIncOrDec[1] = "Dec";
-      // }
-      if (product.price[0] > req.body.price[0]) {
-        newIncOrDec[0] = "Dec";
-      } else if (product.price[0] < req.body.price[0]) {
-        newIncOrDec[0] = "Inc";
-      }
-      if (product.price[1] > req.body.price[1]) {
-        newIncOrDec[1] = "Dec";
-      } else if (product.price[1] < req.body.price[1]) {
-        newIncOrDec[1] = "Inc";
-      }
-      finalUpdate = {
-        ...req.body,
-        IncOrDec: newIncOrDec
-      };
-      //console.log(finalUpdate);
-      product = await Product.findByIdAndUpdate(req.params.id, finalUpdate, {
-        new: true,
-        runValidators: true,
-        useFindAndModify: false
+      return res.status(404).json({
+        success: false,
+        message: "Product not found"
       });
-      res.status(200).json({ success: true, product });
     }
+
+    console.log("Updating product:", product.name);
+    console.log("Old price:", product.price);
+    console.log("New price:", req.body.price);
+
+    if (!req.body.price || !Array.isArray(req.body.price) || req.body.price.length !== 2) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid price format. Expected array with 2 values"
+      });
+    }
+
+    let newIncOrDec = [...product.IncOrDec]; 
+    if (product.price[0] > req.body.price[0]) {
+      newIncOrDec[0] = "Dec";
+    } else if (product.price[0] < req.body.price[0]) {
+      newIncOrDec[0] = "Inc";
+    }
+    if (product.price[1] > req.body.price[1]) {
+      newIncOrDec[1] = "Dec";
+    } else if (product.price[1] < req.body.price[1]) {
+      newIncOrDec[1] = "Inc";
+    }
+      if (product.saleOpen == "No" && req.body.saleOpen == "Yes") {
+        const saleOpenCount = await Product.find({
+          saleOpen: "Yes"
+        }).countDocuments();
+        if (saleOpenCount == 5) {
+          //CODE FOR NOTIFICATION STARTS
+          const user = await User.find({
+            expoNotificationToken: { $exists: true }
+          });
+          let somePushTokens = [];
+          user.forEach(user => {
+            somePushTokens.push(user.expoNotificationToken);
+          });
+          console.log(somePushTokens);
+          let accessToken = "i6cubWZs0I3nUTJpoo_azcBWPS_0pBLyLnzZz6OF";
+          let expo = new Expo({
+            accessToken: accessToken,
+            useFcmV1: true
+          });
+
+          let messages = [];
+          let message = `Hi, please check the updated price and place your bid soon`;
+          for (let pushToken of somePushTokens) {
+            if (!Expo.isExpoPushToken(pushToken)) {
+              console.error(
+                `Push token ${pushToken} is not a valid Expo push token`
+              );
+              continue;
+            }
+            messages.push({
+              to: pushToken,
+              sound: "default",
+              body: message,
+              data: { withSome: "data" }
+            });
+          }
+          let chunks = expo.chunkPushNotifications(messages);
+          let tickets = [];
+          (async () => {
+            for (let chunk of chunks) {
+              try {
+                let ticketChunk = await expo.sendPushNotificationsAsync(chunk);
+                console.log(ticketChunk);
+                tickets.push(...ticketChunk);
+              } catch (error) {
+                console.error(error);
+              }
+            }
+          })();
+          let receiptIds = [];
+          for (let ticket of tickets) {
+            if (ticket.status === "ok") {
+              receiptIds.push(ticket.id);
+            }
+          }
+
+          let receiptIdChunks =
+            expo.chunkPushNotificationReceiptIds(receiptIds);
+          (async () => {
+            for (let chunk of receiptIdChunks) {
+              try {
+                let receipts = await expo.getPushNotificationReceiptsAsync(
+                  chunk
+                );
+                console.log(receipts);
+                for (let receiptId in receipts) {
+                  let { status, message, details } = receipts[receiptId];
+                  console.log(`Status is ${status}`);
+                  console.log(`Message is ${message}`);
+                  console.log(`Details is ${details}`);
+                  if (status === "ok") {
+                    continue;
+                  } else if (status === "error") {
+                    console.error(
+                      `There was an error sending a notification: ${message}`
+                    );
+                    if (details && details.error) {
+                      console.error(`The error code is ${details.error}`);
+                    }
+                  }
+                }
+              } catch (error) {
+                console.error(error);
+              }
+            }
+          })();
+        }
+      }
+
+
+    const updatedProduct = await Product.findByIdAndUpdate(
+      req.params.id,
+      { 
+        ...req.body, 
+        IncOrDec: newIncOrDec 
+      },
+      {
+        new: true,
+        runValidators: true
+      }
+    );
+
+    console.log("Emitting price update for:", updatedProduct.name);
+    const io = socketManager.getIO();
+    
+    // Broadcast to all clients
+    io.emit("productPriceUpdate", {
+      productId: updatedProduct._id,
+      name: updatedProduct.name,
+      price: updatedProduct.price,
+      category: updatedProduct.category,
+      saleOpen: updatedProduct.saleOpen,
+      IncOrDec: updatedProduct.IncOrDec
+    });
+
+    res.status(200).json({
+      success: true,
+      product: updatedProduct
+    });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error("Error updating product:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
   }
 };
 exports.deleteProduct = async (req, res) => {
@@ -124,5 +225,23 @@ exports.deleteProduct = async (req, res) => {
     }
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
+  }
+};
+exports.getProductIds = async (req, res) => {
+  try {
+    const products = await Product.find().select('_id name price');
+    res.status(200).json({
+      success: true,
+      products: products.map(p => ({
+        id: p._id,
+        name: p.name,
+        currentPrice: p.price
+      }))
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
   }
 };

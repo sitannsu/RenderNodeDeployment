@@ -9,8 +9,8 @@ exports.createOrder = async (req, res) => {
     if (req.user.userRole == "user") {
       order = await Order.create({ ...req.body, user: req?.user });
       let intervalCount = 1;
-      let autoDeclineDuration = 10; //10 minutes
-      let increaseTimerDuration = 10; //10 minutes
+      let autoDeclineDuration = 30; //30 minutes
+      let increaseTimerDuration = 30; //30 minutes
       let intervalID = setInterval(async () => {
         let recentOrder = await Order.findById(order._id);
         if (recentOrder?.status == "Bid pending") {
