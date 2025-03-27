@@ -57,13 +57,16 @@ exports.sendOtp = async (req, res) => {
 
     const verificationCode = generateOtp();
 
-    const message = {
-      body: `Your verification code is ${verificationCode}`,
-      to: phoneNumber.startsWith("+91") ? phoneNumber : "+91" + phoneNumber,
-      from: process.env.TWILIO_PHONE_NUMBER
-    };
+    // Commented out Twilio message sending for testing
+    // const message = {
+    //   body: `Your verification code is ${verificationCode}`,
+    //   to: phoneNumber.startsWith("+91") ? phoneNumber : "+91" + phoneNumber,
+    //   from: process.env.TWILIO_PHONE_NUMBER
+    // };
+    // await client().messages.create(message);
 
-    await client().messages.create(message);
+    // Log OTP for testing
+    console.log(`OTP for ${phoneNumber}: ${verificationCode}`);
 
     res.cookie("otp" + phoneNumber, verificationCode, {
       httpOnly: true,
