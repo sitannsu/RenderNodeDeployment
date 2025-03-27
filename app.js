@@ -13,6 +13,7 @@ const app = express();
 const testRoutes = require('./routes/testRoutes');
 const versionRoute = require('./routes/versionRoute');
 const authRoutes = require('./routes/authRoutes');
+const productRoutes = require('./routes/productRoute');
 
 // Create HTTP server
 const server = http.createServer(app);
@@ -38,6 +39,7 @@ app.use(cookieParser());
 app.use('/api/test', testRoutes);
 app.use('/api/version', versionRoute);
 app.use('/api/auth', authRoutes);
+app.use('/api/product', productRoutes);
 app.use(function (req, res, next) {
   //res.header("Access-Control-Allow-Origin", "https://dgp-website.onrender.com");
   res.header("Access-Control-Allow-Origin", "*");
