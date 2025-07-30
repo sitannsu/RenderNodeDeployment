@@ -27,6 +27,7 @@
     "nodemailer": "^6.9.15",
     "nodemon": "^3.1.4",
     "socket.io": "^4.7.5",
-    "twilio": "^4.19.0"
+    "twilio": "^4.19.0",
+    "validator": "^13.11.0"
   }
 }
