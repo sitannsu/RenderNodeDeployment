@@ -150,4 +150,79 @@ router.get('/stats/:id', auth, async (req, res) => {
   }
 });
 
+// Register new doctor
+router.post('/register', async (req, res) => {
+  try {
+    const {
+      firstName,
+      middleName,
+      lastName,
+      gender,
+      dateOfBirth,
+      contactNumber1,
+      contactNumber2,
+      showContactDetails,
+      address,
+      email,
+      password,
+      medicalLicenseNumber,
+      medicalDegrees,
+      specialization,
+      hospitals,
+      clinicAddress,
+      practiceStartDate,
+      treatedDiseases,
+      documents,
+      communityDetails,
+      communicationPreferences
+    } = req.body;
+
+    // Check if email already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: 'Email already registered' });
+    }
+
+    // Create new doctor user
+    const doctor = new User({
+      firstName,
+      middleName,
+      lastName,
+      fullName: `Dr. ${firstName}${middleName ? ' ' + middleName : ''} ${lastName}`,
+      gender,
+      dateOfBirth,
+      contactNumber1,
+      contactNumber2,
+      showContactDetails,
+      address,
+      email,
+      password,
+      role: 'doctor',
+      medicalLicenseNumber,
+      medicalDegrees,
+      specialization,
+      hospitals,
+      clinicAddress,
+      practiceStartDate,
+      treatedDiseases,
+      documents,
+      communityDetails,
+      communicationPreferences,
+      verificationStatus: 'pending',
+      profileCompletion: 100 // Calculate based on filled fields
+    });
+
+    await doctor.save();
+
+    // Return response without password
+    const doctorResponse = doctor.toObject();
+    delete doctorResponse.password;
+
+    res.status(201).json(doctorResponse);
+  } catch (error) {
+    console.error('Doctor registration error:', error);
+    res.status(400).json({ message: error.message });
+  }
+});
+
 module.exports = router;
