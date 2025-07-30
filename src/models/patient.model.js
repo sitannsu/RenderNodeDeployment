@@ -55,8 +55,5 @@ const patientSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Index for phone number searches
-patientSchema.index({ phoneNumber: 1 });
-
 const Patient = mongoose.model('Patient', patientSchema);
 module.exports = Patient;

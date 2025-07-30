@@ -11,6 +11,3 @@ connectDatabase();
 
 //CONNECT TO CLOUDINARY
 cloudinaryConfig();
-
-// START SERVER
-app.init();
