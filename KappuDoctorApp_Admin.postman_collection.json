@@ -1,0 +1,261 @@
+{
+  "info": {
+    "_postman_id": "admin-collection",
+    "name": "KappuDoctorApp Admin APIs",
+    "description": "Admin APIs for the Kappu Doctor App",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://192.168.1.122:5005"
+    },
+    {
+      "key": "admin_token",
+      "value": "your_admin_token_here"
+    }
+  ],
+  "item": [
+    {
+      "name": "Admin Authentication",
+      "item": [
+        {
+          "name": "Admin Registration",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Admin User\",\n  \"email\": \"admin@example.com\",\n  \"password\": \"Admin@123\",\n  \"role\": \"admin\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Admin Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"Admin@123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard Statistics",
+      "item": [
+        {
+          "name": "Get Admin Statistics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/statistics",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "statistics"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Occupation Management",
+      "item": [
+        {
+          "name": "Add Occupation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Cardiologist\",\n  \"description\": \"Heart specialist\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/occupations",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "occupations"]
+            }
+          }
+        },
+        {
+          "name": "List Occupations",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/occupations",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "occupations"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Feature Management",
+      "item": [
+        {
+          "name": "Add Feature",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Video Consultation\",\n  \"description\": \"Enable video calls with patients\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/features",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "features"]
+            }
+          }
+        },
+        {
+          "name": "List Features",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/features",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "features"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Advertisement Management",
+      "item": [
+        {
+          "name": "Add Advertisement",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"New Feature Alert\",\n  \"description\": \"Try our new video consultation\",\n  \"imageUrl\": \"https://example.com/ad-image.jpg\",\n  \"targetUrl\": \"https://example.com/video-consultation\",\n  \"startDate\": \"2025-08-01T00:00:00Z\",\n  \"endDate\": \"2025-08-31T23:59:59Z\",\n  \"placement\": \"home\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/advertisements",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "advertisements"]
+            }
+          }
+        },
+        {
+          "name": "List Advertisements",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/advertisements",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "advertisements"]
+            }
+          }
+        },
+        {
+          "name": "Update Advertisement Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"active\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/advertisements/:id/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "advertisements", ":id", "status"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "advertisement_id_here"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

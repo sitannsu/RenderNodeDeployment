@@ -1,0 +1,115 @@
+{
+  "info": {
+    "name": "NMC Doctor Search API",
+    "description": "Collection for searching doctors in NMC database",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Complete Doctor Search",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/search-doctor?name={{name}}&registrationNo={{registrationNo}}&smcId={{smcId}}&year={{year}}",
+          "host": ["{{base_url}}"],
+          "path": ["api", "search-doctor"],
+          "query": [
+            {
+              "key": "name",
+              "value": "{{name}}",
+              "description": "Doctor's name to search for (optional)"
+            },
+            {
+              "key": "registrationNo",
+              "value": "{{registrationNo}}",
+              "description": "Doctor's registration number (optional)"
+            },
+            {
+              "key": "smcId",
+              "value": "{{smcId}}",
+              "description": "State Medical Council ID (optional)"
+            },
+            {
+              "key": "year",
+              "value": "{{year}}",
+              "description": "Registration year (optional)"
+            }
+          ]
+        },
+        "description": "Search for doctors in the NMC database using any combination of parameters"
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "name",
+      "value": "",
+      "type": "string",
+      "description": "Doctor's name to search for"
+    },
+    {
+      "key": "registrationNo",
+      "value": "",
+      "type": "string",
+      "description": "Doctor's registration number"
+    },
+    {
+      "key": "smcId",
+      "value": "",
+      "type": "string",
+      "description": "State Medical Council ID",
+      "options": [
+        { "key": "Andhra Pradesh Medical Council", "value": "1" },
+        { "key": "Arunachal Pradesh Medical Council", "value": "2" },
+        { "key": "Assam Medical Council", "value": "3" },
+        { "key": "Bihar Medical Council", "value": "4" },
+        { "key": "Chhattisgarh Medical Council", "value": "5" },
+        { "key": "Delhi Medical Council", "value": "6" },
+        { "key": "Goa Medical Council", "value": "7" },
+        { "key": "Gujarat Medical Council", "value": "8" },
+        { "key": "Haryana Medical Council", "value": "9" },
+        { "key": "Himachal Pradesh Medical Council", "value": "10" },
+        { "key": "Jammu & Kashmir Medical Council", "value": "11" },
+        { "key": "Jharkhand Medical Council", "value": "12" },
+        { "key": "Karnataka Medical Council", "value": "13" },
+        { "key": "Kerala Medical Council", "value": "14" },
+        { "key": "Madhya Pradesh Medical Council", "value": "15" },
+        { "key": "Maharashtra Medical Council", "value": "16" },
+        { "key": "Manipur Medical Council", "value": "17" },
+        { "key": "Meghalaya Medical Council", "value": "18" },
+        { "key": "Mizoram Medical Council", "value": "19" },
+        { "key": "Nagaland Medical Council", "value": "20" },
+        { "key": "Odisha Medical Council", "value": "21" },
+        { "key": "Punjab Medical Council", "value": "22" },
+        { "key": "Rajasthan Medical Council", "value": "23" },
+        { "key": "Sikkim Medical Council", "value": "24" },
+        { "key": "Tamil Nadu Medical Council", "value": "25" },
+        { "key": "Telangana State Medical Council", "value": "26" },
+        { "key": "Tripura Medical Council", "value": "27" },
+        { "key": "Uttar Pradesh Medical Council", "value": "28" },
+        { "key": "Uttarakhand Medical Council", "value": "29" },
+        { "key": "West Bengal Medical Council", "value": "30" }
+      ]
+    },
+    {
+      "key": "year",
+      "value": "",
+      "type": "string",
+      "description": "Registration year",
+      "options": [
+        { "key": "2025", "value": "2025" },
+        { "key": "2024", "value": "2024" },
+        { "key": "2023", "value": "2023" },
+        { "key": "2022", "value": "2022" },
+        { "key": "2021", "value": "2021" },
+        { "key": "2020", "value": "2020" },
+        { "key": "2019", "value": "2019" },
+        { "key": "2018", "value": "2018" },
+        { "key": "2017", "value": "2017" },
+        { "key": "2016", "value": "2016" },
+        { "key": "2015", "value": "2015" }
+      ]
+    }
+  ]
+}

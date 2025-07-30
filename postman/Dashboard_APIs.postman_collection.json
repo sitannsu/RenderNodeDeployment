@@ -1,0 +1,226 @@
+{
+	"info": {
+		"_postman_id": "dashboard-apis-collection",
+		"name": "Dashboard APIs",
+		"description": "Collection for testing Dashboard APIs endpoints",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Dashboard Statistics",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/dashboard/stats",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"dashboard",
+						"stats"
+					]
+				},
+				"description": "Get dashboard statistics including total doctors, monthly referrals, pending inquiries, and doctor searches with trends"
+			},
+			"response": []
+		},
+		{
+			"name": "Dashboard Activity",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/dashboard/activity?limit=5",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"dashboard",
+						"activity"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "5",
+							"description": "Number of activities to return (default: 5, max: 50)"
+						}
+					]
+				},
+				"description": "Get recent activities including doctor registrations, referrals, inquiries, and searches"
+			},
+			"response": []
+		},
+		{
+			"name": "Dashboard Activity - Custom Limit",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/dashboard/activity?limit=10",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"dashboard",
+						"activity"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "10",
+							"description": "Number of activities to return (default: 5, max: 50)"
+						}
+					]
+				},
+				"description": "Get recent activities with custom limit"
+			},
+			"response": []
+		},
+		{
+			"name": "Referral Trends - Default 30 Days",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/dashboard/referral-trends",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"dashboard",
+						"referral-trends"
+					]
+				},
+				"description": "Get daily referral counts for the last 30 days"
+			},
+			"response": []
+		},
+		{
+			"name": "Referral Trends - Custom Days",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/dashboard/referral-trends?days=7",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"dashboard",
+						"referral-trends"
+					],
+					"query": [
+						{
+							"key": "days",
+							"value": "7",
+							"description": "Number of days to analyze (default: 30, max: 365)"
+						}
+					]
+				},
+				"description": "Get daily referral counts for the last 7 days"
+			},
+			"response": []
+		},
+		{
+			"name": "Referral Trends - 90 Days",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/dashboard/referral-trends?days=90",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"dashboard",
+						"referral-trends"
+					],
+					"query": [
+						{
+							"key": "days",
+							"value": "90",
+							"description": "Number of days to analyze (default: 30, max: 365)"
+						}
+					]
+				},
+				"description": "Get daily referral counts for the last 90 days"
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "admin_token",
+			"value": "your_admin_jwt_token_here",
+			"type": "string"
+		}
+	]
+} 

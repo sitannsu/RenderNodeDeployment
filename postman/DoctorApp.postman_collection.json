@@ -1,0 +1,833 @@
+{
+  "info": {
+    "name": "Doctor App API",
+    "description": "API collection for Doctor App backend services",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Doctor Authentication",
+      "item": [
+        {
+          "name": "Register Doctor",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "register"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"fullName\": \"Dr. John Doe\",\n    \"email\": \"john.doe@example.com\",\n    \"password\": \"securepassword\",\n    \"specialization\": \"Cardiology\",\n    \"hospitalName\": \"City Hospital\",\n    \"phoneNumber\": \"+1234567890\",\n    \"address\": \"123 Medical Street\",\n    \"registrationNumber\": \"MED123456\",\n    \"yearsOfExperience\": 10\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Login Doctor",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"john.doe@example.com\",\n    \"password\": \"securepassword\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Get Doctor Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/profile",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Update Doctor Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/profile",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "profile"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"fullName\": \"Dr. John M. Doe\",\n    \"specialization\": \"Cardiology\",\n    \"hospitalName\": \"City General Hospital\",\n    \"phoneNumber\": \"+1234567890\",\n    \"address\": \"123 Medical Street\",\n    \"profileImage\": \"profile-image-url\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Validate Registration Number",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/validate-registration",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "validate-registration"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"registrationNumber\": \"MED123456\",\n    \"fullName\": \"Dr. John Doe\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Doctor Management",
+      "item": [
+        {
+          "name": "Get All Doctors",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/doctors",
+              "host": ["{{base_url}}"],
+              "path": ["doctors"]
+            }
+          }
+        },
+        {
+          "name": "Search Doctors",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/doctors/search?query=cardio&specialization=Cardiology&page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["doctors", "search"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "cardio"
+                },
+                {
+                  "key": "specialization",
+                  "value": "Cardiology"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Doctor Statistics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/doctors/stats/{{doctor_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["doctors", "stats", "{{doctor_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Messages",
+      "item": [
+        {
+          "name": "Send Message",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/messages",
+              "host": ["{{base_url}}"],
+              "path": ["messages"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"recipient\": \"recipient_doctor_id\",\n    \"content\": \"Message content here\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Get Messages",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/messages?type=received",
+              "host": ["{{base_url}}"],
+              "path": ["messages"],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "received"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Conversation",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/messages/conversation/{{doctor_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["messages", "conversation", "{{doctor_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Mark Message as Read",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/messages/{{message_id}}/read",
+              "host": ["{{base_url}}"],
+              "path": ["messages", "{{message_id}}", "read"]
+            }
+          }
+        },
+        {
+          "name": "Get Unread Count",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/messages/unread/count",
+              "host": ["{{base_url}}"],
+              "path": ["messages", "unread", "count"]
+            }
+          }
+        },
+        {
+          "name": "Delete Message",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/messages/{{message_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["messages", "{{message_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "Get All Notifications",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/notifications?page=1&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["notifications"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Unread Count",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/notifications/unread/count",
+              "host": ["{{base_url}}"],
+              "path": ["notifications", "unread", "count"]
+            }
+          }
+        },
+        {
+          "name": "Mark as Read",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/notifications/{{notification_id}}/read",
+              "host": ["{{base_url}}"],
+              "path": ["notifications", "{{notification_id}}", "read"]
+            }
+          }
+        },
+        {
+          "name": "Mark All as Read",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/notifications/read-all",
+              "host": ["{{base_url}}"],
+              "path": ["notifications", "read-all"]
+            }
+          }
+        },
+        {
+          "name": "Update FCM Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/notifications/fcm-token",
+              "host": ["{{base_url}}"],
+              "path": ["notifications", "fcm-token"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"fcmToken\": \"your-fcm-token-here\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Patient Authentication",
+      "item": [
+        {
+          "name": "Request OTP",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/patient/auth/request-otp",
+              "host": ["{{base_url}}"],
+              "path": ["patient", "auth", "request-otp"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"phoneNumber\": \"+1234567890\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Verify OTP",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/patient/auth/verify-otp",
+              "host": ["{{base_url}}"],
+              "path": ["patient", "auth", "verify-otp"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"phoneNumber\": \"+1234567890\",\n    \"otp\": \"123456\",\n    \"name\": \"John Patient\",\n    \"email\": \"john.patient@example.com\",\n    \"age\": 30,\n    \"gender\": \"male\",\n    \"address\": \"456 Patient Street\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Get Patient Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patient_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/patient/auth/profile",
+              "host": ["{{base_url}}"],
+              "path": ["patient", "auth", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Update Patient Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patient_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/patient/auth/profile",
+              "host": ["{{base_url}}"],
+              "path": ["patient", "auth", "profile"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"John Updated Patient\",\n    \"email\": \"john.updated@example.com\",\n    \"age\": 31,\n    \"gender\": \"male\",\n    \"address\": \"456 Updated Street\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Patient Doctor Management",
+      "item": [
+        {
+          "name": "Search Doctors",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/patient/doctors/search?query=cardio&specialization=Cardiology&location=City&hospital=General&page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["patient", "doctors", "search"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "cardio"
+                },
+                {
+                  "key": "specialization",
+                  "value": "Cardiology"
+                },
+                {
+                  "key": "location",
+                  "value": "City"
+                },
+                {
+                  "key": "hospital",
+                  "value": "General"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Doctor Details",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/patient/doctors/{{doctor_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["patient", "doctors", "{{doctor_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Patient Queries",
+      "item": [
+        {
+          "name": "Create Query",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patient_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/patient/queries",
+              "host": ["{{base_url}}"],
+              "path": ["patient", "queries"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"doctorId\": \"doctor_id\",\n    \"symptoms\": \"Fever and headache\",\n    \"duration\": \"3 days\",\n    \"previousTreatments\": \"Took paracetamol\",\n    \"attachments\": [\"url1\", \"url2\"],\n    \"preferredTime\": \"2025-07-24T10:00:00Z\",\n    \"consultationType\": \"video\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Get Patient Queries",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patient_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/patient/queries?status=pending&page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["patient", "queries"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "pending"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Query Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patient_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/patient/queries/{{query_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["patient", "queries", "{{query_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Query",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patient_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/patient/queries/{{query_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["patient", "queries", "{{query_id}}"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"attachments\": [\"url1\", \"url2\", \"url3\"],\n    \"preferredTime\": \"2025-07-24T11:00:00Z\",\n    \"consultationType\": \"in-person\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Referrals",
+      "item": [
+        {
+          "name": "Create Referral",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/referrals",
+              "host": ["{{base_url}}"],
+              "path": ["referrals"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"referredToDoctor\": \"doctor_id\",\n    \"patientName\": \"John Patient\",\n    \"reason\": \"Specialized consultation needed\",\n    \"notes\": \"Patient history and current condition\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Get Referrals",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/referrals?status=pending&type=received",
+              "host": ["{{base_url}}"],
+              "path": ["referrals"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "pending"
+                },
+                {
+                  "key": "type",
+                  "value": "received"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Referral Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/referrals/{{referral_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["referrals", "{{referral_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Referral Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/referrals/{{referral_id}}/status",
+              "host": ["{{base_url}}"],
+              "path": ["referrals", "{{referral_id}}", "status"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"status\": \"accepted\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Add Referral Notes",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/referrals/{{referral_id}}/notes",
+              "host": ["{{base_url}}"],
+              "path": ["referrals", "{{referral_id}}", "notes"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"notes\": \"Updated patient condition and treatment plan\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Get Referral Statistics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/referrals/stats/summary",
+              "host": ["{{base_url}}"],
+              "path": ["referrals", "stats", "summary"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "NMC Integration",
+      "item": [
+        {
+          "name": "Search Doctor in NMC Database",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/search-doctor?name=john&registrationNo=12345",
+              "host": ["{{base_url}}"],
+              "path": ["api", "search-doctor"],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "john",
+                  "description": "Doctor's name to search for (optional)"
+                },
+                {
+                  "key": "registrationNo",
+                  "value": "12345",
+                  "description": "Doctor's registration number (optional)"
+                }
+              ]
+            },
+            "description": "Search for doctors in the NMC (National Medical Council) database by name or registration number."
+          }
+        }
+      ]
+    }
+  ]
+}
