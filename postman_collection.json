@@ -1,0 +1,362 @@
+{
+  "info": {
+    "name": "Kappu Doctors API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication APIs",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "url": "https://rendernodedeployment.onrender.com/api/auth/login",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"doctor@example.com\",\n  \"password\": \"password123\",\n  \"userType\": \"doctor\"\n}"
+            }
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "url": "https://rendernodedeployment.onrender.com/api/auth/login",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"doctor@example.com\",\n  \"password\": \"password123\",\n  \"userType\": \"doctor\"\n}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"user\": {\n    \"id\": \"12345\",\n    \"email\": \"doctor@example.com\",\n    \"fullName\": \"Dr. John Doe\",\n    \"userType\": \"doctor\",\n    \"specialization\": \"Cardiology\"\n  }\n}"
+            },
+            {
+              "name": "Error Response - Invalid Credentials",
+              "originalRequest": {
+                "method": "POST",
+                "url": "https://rendernodedeployment.onrender.com/api/auth/login"
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Invalid email or password\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Send OTP",
+          "request": {
+            "method": "POST",
+            "url": "https://rendernodedeployment.onrender.com/api/auth/send-otp",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mobile\": \"+911234567890\"\n}"
+            }
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "url": "https://rendernodedeployment.onrender.com/api/auth/send-otp"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"OTP sent successfully\",\n  \"otpId\": \"otp_12345\",\n  \"expiresIn\": 300\n}"
+            }
+          ]
+        },
+        {
+          "name": "Verify OTP",
+          "request": {
+            "method": "POST",
+            "url": "https://rendernodedeployment.onrender.com/api/auth/verify-otp",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mobile\": \"+911234567890\",\n  \"otp\": \"123456\"\n}"
+            }
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"user\": {\n    \"id\": \"12345\",\n    \"mobile\": \"+911234567890\",\n    \"userType\": \"patient\"\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Doctor APIs",
+      "item": [
+        {
+          "name": "Register Doctor",
+          "request": {
+            "method": "POST",
+            "url": "https://rendernodedeployment.onrender.com/api/doctors/register",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"John\",\n  \"middleName\": \"\",\n  \"lastName\": \"Doe\",\n  \"gender\": \"male\",\n  \"dateOfBirth\": \"1980-01-01\",\n  \"contactNumber1\": \"+911234567890\",\n  \"contactNumber2\": \"+911234567891\",\n  \"showContactDetails\": true,\n  \"address\": {\n    \"city\": \"Mumbai\",\n    \"state\": \"Maharashtra\",\n    \"country\": \"India\"\n  },\n  \"email\": \"doctor@example.com\",\n  \"medicalLicenseNumber\": \"MCI123456\",\n  \"medicalDegrees\": [\"MBBS\", \"MD\"],\n  \"specialization\": \"Cardiology\",\n  \"hospitals\": [\n    {\n      \"name\": \"City Hospital\",\n      \"address\": \"123 Main St\",\n      \"city\": \"Mumbai\",\n      \"state\": \"Maharashtra\",\n      \"country\": \"India\"\n    }\n  ],\n  \"clinicAddress\": {\n    \"address\": \"456 Clinic St\",\n    \"city\": \"Mumbai\",\n    \"state\": \"Maharashtra\",\n    \"country\": \"India\"\n  },\n  \"practiceStartDate\": \"2010-01-01\",\n  \"treatedDiseases\": [\"Heart Disease\", \"Hypertension\"],\n  \"documents\": {\n    \"medicalCertificates\": [\"url1\"],\n    \"casteCertificate\": \"url2\",\n    \"identificationProof\": \"url3\"\n  },\n  \"communityDetails\": {\n    \"kapuAffiliation\": true,\n    \"communityReferrals\": [\"ref1\", \"ref2\"]\n  },\n  \"communicationPreferences\": {\n    \"notificationPreference\": true,\n    \"emailCommunication\": true\n  }\n}"
+            }
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"id\": \"doctor_12345\",\n  \"fullName\": \"Dr. John Doe\",\n  \"email\": \"doctor@example.com\",\n  \"specialization\": \"Cardiology\",\n  \"profileCompletion\": 100,\n  \"verificationStatus\": \"pending\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Doctor Profile",
+          "request": {
+            "method": "GET",
+            "url": "https://rendernodedeployment.onrender.com/api/doctors/:id",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"id\": \"doctor_12345\",\n  \"firstName\": \"John\",\n  \"middleName\": \"\",\n  \"lastName\": \"Doe\",\n  \"fullName\": \"Dr. John Doe\",\n  \"gender\": \"male\",\n  \"dateOfBirth\": \"1980-01-01\",\n  \"contactNumber1\": \"+911234567890\",\n  \"contactNumber2\": \"+911234567891\",\n  \"showContactDetails\": true,\n  \"address\": {\n    \"city\": \"Mumbai\",\n    \"state\": \"Maharashtra\",\n    \"country\": \"India\"\n  },\n  \"email\": \"doctor@example.com\",\n  \"medicalLicenseNumber\": \"MCI123456\",\n  \"medicalDegrees\": [\"MBBS\", \"MD\"],\n  \"specialization\": \"Cardiology\",\n  \"hospitals\": [\n    {\n      \"name\": \"City Hospital\",\n      \"address\": \"123 Main St\",\n      \"city\": \"Mumbai\",\n      \"state\": \"Maharashtra\",\n      \"country\": \"India\"\n    }\n  ],\n  \"clinicAddress\": {\n    \"address\": \"456 Clinic St\",\n    \"city\": \"Mumbai\",\n    \"state\": \"Maharashtra\",\n    \"country\": \"India\"\n  },\n  \"practiceStartDate\": \"2010-01-01\",\n  \"experience\": 13,\n  \"treatedDiseases\": [\"Heart Disease\", \"Hypertension\"],\n  \"documents\": {\n    \"medicalCertificates\": [\"url1\"],\n    \"casteCertificate\": \"url2\",\n    \"identificationProof\": \"url3\"\n  },\n  \"communityDetails\": {\n    \"kapuAffiliation\": true,\n    \"communityReferrals\": [\"ref1\", \"ref2\"]\n  },\n  \"communicationPreferences\": {\n    \"notificationPreference\": true,\n    \"emailCommunication\": true\n  },\n  \"profileCompletion\": 100,\n  \"verificationStatus\": \"verified\",\n  \"stats\": {\n    \"totalReferrals\": 25,\n    \"acceptedReferrals\": 20,\n    \"searchCount\": 150\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Doctor Dashboard",
+          "request": {
+            "method": "GET",
+            "url": "https://rendernodedeployment.onrender.com/api/doctors/:id/dashboard",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"referrals\": {\n    \"sent\": 15,\n    \"received\": 10,\n    \"pending\": 5,\n    \"accepted\": 8,\n    \"rejected\": 2\n  },\n  \"notifications\": {\n    \"unread\": 3,\n    \"referrals\": 2,\n    \"messages\": 1\n  },\n  \"searchStats\": {\n    \"totalSearches\": 150,\n    \"lastWeek\": 25,\n    \"lastMonth\": 75\n  },\n  \"messages\": {\n    \"unread\": 2,\n    \"total\": 45\n  },\n  \"recentActivity\": [\n    {\n      \"type\": \"referral_received\",\n      \"from\": \"Dr. Jane Smith\",\n      \"patientName\": \"Patient X\",\n      \"timestamp\": \"2025-07-30T08:30:00Z\"\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Referral APIs",
+      "item": [
+        {
+          "name": "Send Referral",
+          "request": {
+            "method": "POST",
+            "url": "https://rendernodedeployment.onrender.com/api/referrals/send",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patientName\": \"Patient Name\",\n  \"referredToDoctor\": \"doctor_id\",\n  \"notes\": \"Referral notes\",\n  \"diagnosis\": \"Initial diagnosis\",\n  \"treatmentSummary\": \"Treatment provided so far\"\n}"
+            }
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"id\": \"referral_12345\",\n  \"patientName\": \"Patient Name\",\n  \"referringDoctor\": {\n    \"id\": \"doctor_12345\",\n    \"name\": \"Dr. John Doe\",\n    \"specialization\": \"Cardiology\"\n  },\n  \"referredToDoctor\": {\n    \"id\": \"doctor_67890\",\n    \"name\": \"Dr. Jane Smith\",\n    \"specialization\": \"Neurology\"\n  },\n  \"status\": \"pending\",\n  \"createdAt\": \"2025-07-30T08:30:00Z\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Doctor Referrals",
+          "request": {
+            "method": "GET",
+            "url": "https://rendernodedeployment.onrender.com/api/referrals/doctor/:doctorId",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"sent\": [\n    {\n      \"id\": \"referral_12345\",\n      \"patientName\": \"Patient A\",\n      \"referredToDoctor\": {\n        \"id\": \"doctor_67890\",\n        \"name\": \"Dr. Jane Smith\",\n        \"specialization\": \"Neurology\"\n      },\n      \"status\": \"accepted\",\n      \"createdAt\": \"2025-07-30T08:30:00Z\"\n    }\n  ],\n  \"received\": [\n    {\n      \"id\": \"referral_67890\",\n      \"patientName\": \"Patient B\",\n      \"referringDoctor\": {\n        \"id\": \"doctor_13579\",\n        \"name\": \"Dr. Bob Wilson\",\n        \"specialization\": \"Cardiology\"\n      },\n      \"status\": \"pending\",\n      \"createdAt\": \"2025-07-30T09:15:00Z\"\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Patient APIs",
+      "item": [
+        {
+          "name": "Register Patient",
+          "request": {
+            "method": "POST",
+            "url": "https://rendernodedeployment.onrender.com/api/patients/register",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Patient Name\",\n  \"email\": \"patient@example.com\",\n  \"contactNumber\": \"+911234567890\"\n}"
+            }
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"id\": \"patient_12345\",\n  \"name\": \"Patient Name\",\n  \"email\": \"patient@example.com\",\n  \"contactNumber\": \"+911234567890\",\n  \"createdAt\": \"2025-07-30T08:30:00Z\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Send SMS to Doctor",
+          "request": {
+            "method": "POST",
+            "url": "https://rendernodedeployment.onrender.com/api/patients/send-sms",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"doctorId\": \"doctor_id\",\n  \"message\": \"Message content\"\n}"
+            }
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"id\": \"message_12345\",\n  \"status\": \"sent\",\n  \"doctor\": {\n    \"id\": \"doctor_id\",\n    \"name\": \"Dr. John Doe\"\n  },\n  \"createdAt\": \"2025-07-30T08:30:00Z\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Admin APIs",
+      "item": [
+        {
+          "name": "Admin Login",
+          "request": {
+            "method": "POST",
+            "url": "https://rendernodedeployment.onrender.com/api/admin/login",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"password123\"\n}"
+            }
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"user\": {\n    \"id\": \"admin_12345\",\n    \"email\": \"admin@example.com\",\n    \"role\": \"admin\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Dashboard Stats",
+          "request": {
+            "method": "GET",
+            "url": "https://rendernodedeployment.onrender.com/api/admin/dashboard",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ]
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"doctors\": {\n    \"total\": 150,\n    \"verified\": 120,\n    \"pending\": 30,\n    \"lastWeek\": 15\n  },\n  \"referrals\": {\n    \"total\": 500,\n    \"lastWeek\": 75,\n    \"byStatus\": {\n      \"pending\": 50,\n      \"accepted\": 400,\n      \"rejected\": 50\n    }\n  },\n  \"messages\": {\n    \"total\": 1000,\n    \"lastWeek\": 200\n  },\n  \"patientSearches\": {\n    \"total\": 5000,\n    \"lastWeek\": 750\n  }\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "token",
+      "value": "YOUR_JWT_TOKEN"
+    }
+  ]
+}
