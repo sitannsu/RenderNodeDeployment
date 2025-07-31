@@ -10,5 +10,4 @@ environments/.dev.env
 environments/dev.env
 environments/*.env
 
-# AWS credentials
-config/s3.config.js
+
