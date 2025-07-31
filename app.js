@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ path: './environments/dev.env' });
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -16,6 +16,16 @@ const patientQueryRoutes = require('./src/routes/patient.query.routes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Debug: Log environment variables (remove in production)
+console.log('🔧 Environment Debug:', {
+  port: process.env.PORT,
+  mongoUri: process.env.MONGODB_URI ? 'Set' : 'Not set',
+  awsAccessKey: process.env.AWS_ACCESS_KEY_ID ? 'Set' : 'Not set',
+  awsSecretKey: process.env.AWS_SECRET_ACCESS_KEY ? 'Set' : 'Not set',
+  awsRegion: process.env.AWS_REGION,
+  s3Bucket: process.env.S3_BUCKET
+});
 
 // Middleware
 app.use(cors());
