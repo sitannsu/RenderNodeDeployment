@@ -3,3 +3,12 @@ config.env
 /environmentsfirebase/serviceAccountKeys.json
 firebase/serviceAccountKeys.json
 firebase/serviceAccountKeys.json
+
+# Environment files with secrets
+.env
+environments/.dev.env
+environments/dev.env
+environments/*.env
+
+# AWS credentials
+config/s3.config.js
