@@ -1,6 +1,7 @@
 const express = require('express');
 const Referral = require('../models/referral.model');
 const auth = require('../middleware/auth');
+const notificationService = require('../services/notification.service');
 const router = express.Router();
 
 // Create a new referral
@@ -14,6 +15,24 @@ router.post('/', auth, async (req, res) => {
     
     // Populate doctor information
     await referral.populate('referringDoctor referredToDoctor', 'fullName specialization hospitalName');
+    
+    // Send notification to the referred doctor
+    if (referral.referredToDoctor) {
+      const referralData = {
+        referralId: referral._id.toString(),
+        referringDoctorId: req.user._id.toString(),
+        referringDoctorName: req.user.fullName,
+        patientName: referral.patientName,
+        reason: referral.reason
+      };
+
+      const notificationResult = await notificationService.sendReferralNotification(
+        referral.referredToDoctor._id.toString(),
+        referralData
+      );
+
+      console.log('📱 Referral notification result:', notificationResult);
+    }
     
     res.status(201).json(referral);
   } catch (error) {
@@ -94,6 +113,23 @@ router.patch('/:id/status', auth, async (req, res) => {
     referral.status = status;
     await referral.save();
     await referral.populate('referringDoctor referredToDoctor', 'fullName specialization hospitalName');
+
+    // Send notification to the referring doctor about status update
+    if (referral.referringDoctor && referral.referringDoctor._id.toString() !== req.user._id.toString()) {
+      const statusData = {
+        referralId: referral._id.toString(),
+        status: status,
+        patientName: referral.patientName,
+        updatedBy: req.user.fullName
+      };
+
+      const notificationResult = await notificationService.sendReferralStatusNotification(
+        referral.referringDoctor._id.toString(),
+        statusData
+      );
+
+      console.log('📱 Status update notification result:', notificationResult);
+    }
 
     res.json(referral);
   } catch (error) {

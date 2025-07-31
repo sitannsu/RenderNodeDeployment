@@ -1,0 +1,64 @@
+{
+  "info": {
+    "name": "Doctor Registration Test",
+    "description": "Test collection for doctor registration API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5005/api",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Register Doctor - Complete Profile",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"firstName\": \"John\",\n  \"middleName\": \"\",\n  \"lastName\": \"Doe\",\n  \"gender\": \"male\",\n  \"dateOfBirth\": \"1980-01-01\",\n  \"contactNumber1\": \"+911234567890\",\n  \"contactNumber2\": \"+911234567891\",\n  \"showContactDetails\": true,\n  \"address\": {\n    \"city\": \"Mumbai\",\n    \"state\": \"Maharashtra\",\n    \"country\": \"India\"\n  },\n  \"email\": \"ram@example.com\",\n  \"medicalLicenseNumber\": \"MCI123456\",\n  \"medicalDegrees\": [\"MBBS\", \"MD\"],\n  \"specialization\": \"Cardiology\",\n  \"hospitals\": [\n    {\n      \"name\": \"City Hospital\",\n      \"address\": \"123 Main St\",\n      \"city\": \"Mumbai\",\n      \"state\": \"Maharashtra\",\n      \"country\": \"India\"\n    }\n  ],\n  \"clinicAddress\": {\n    \"address\": \"456 Clinic St\",\n    \"city\": \"Mumbai\",\n    \"state\": \"Maharashtra\",\n    \"country\": \"India\"\n  },\n  \"practiceStartDate\": \"2010-01-01\",\n  \"treatedDiseases\": [\"Heart Disease\", \"Hypertension\"],\n  \"documents\": {\n    \"medicalCertificates\": [\"url1\"],\n    \"casteCertificate\": \"url2\",\n    \"identificationProof\": \"url3\"\n  },\n  \"communityDetails\": {\n    \"kapuAffiliation\": true,\n    \"communityReferrals\": [\"ref1\", \"ref2\"]\n  },\n  \"communicationPreferences\": {\n    \"notificationPreference\": true,\n    \"emailCommunication\": true\n  }\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/doctors/register",
+          "host": ["{{base_url}}"],
+          "path": ["doctors", "register"]
+        },
+        "description": "Register a new doctor with complete profile information"
+      },
+      "response": []
+    },
+    {
+      "name": "Register Doctor - Minimal Profile",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Smith\",\n  \"gender\": \"female\",\n  \"dateOfBirth\": \"1985-05-15\",\n  \"contactNumber1\": \"+911234567892\",\n  \"email\": \"jane.smith@example.com\",\n  \"medicalLicenseNumber\": \"MCI789012\",\n  \"medicalDegrees\": [\"MBBS\"],\n  \"specialization\": \"General Medicine\",\n  \"hospitals\": [\n    {\n      \"name\": \"General Hospital\",\n      \"address\": \"456 Health Ave\",\n      \"city\": \"Delhi\",\n      \"state\": \"Delhi\",\n      \"country\": \"India\"\n    }\n  ],\n  \"practiceStartDate\": \"2015-06-01\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/doctors/register",
+          "host": ["{{base_url}}"],
+          "path": ["doctors", "register"]
+        },
+        "description": "Register a new doctor with minimal required information"
+      },
+      "response": []
+    }
+  ]
+} 

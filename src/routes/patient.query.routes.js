@@ -2,6 +2,7 @@ const express = require('express');
 const PatientQuery = require('../models/patient.query.model');
 const { patientAuth } = require('./patient.auth.routes');
 const User = require('../models/user.model');
+const notificationService = require('../services/notification.service');
 const router = express.Router();
 
 // Advanced doctor search with filters
@@ -91,6 +92,21 @@ router.post('/queries', patientAuth, async (req, res) => {
 
     // Populate doctor details in response
     await query.populate('doctor', 'fullName specialization hospitalName');
+
+    // Send notification to the doctor about the new query
+    const queryData = {
+      queryId: query._id.toString(),
+      patientId: req.patient._id.toString(),
+      patientName: req.patient.fullName,
+      query: query.symptoms
+    };
+
+    const notificationResult = await notificationService.sendPatientQueryNotification(
+      doctorId,
+      queryData
+    );
+
+    console.log('📱 Patient query notification result:', notificationResult);
 
     res.status(201).json(query);
   } catch (error) {

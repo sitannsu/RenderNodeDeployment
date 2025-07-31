@@ -1,0 +1,1147 @@
+{
+  "info": {
+    "name": "Complete API Collection 4",
+    "description": "Complete collection for Doctor, Patient, Admin, Referral, and Dashboard APIs",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5005/api",
+      "type": "string"
+    },
+    {
+      "key": "doctor_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "patient_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "admin_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Doctor APIs",
+      "item": [
+        {
+          "name": "Register Doctor (With Password)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"John\",\n  \"middleName\": \"\",\n  \"lastName\": \"Doe\",\n  \"gender\": \"male\",\n  \"dateOfBirth\": \"1980-01-01\",\n  \"contactNumber1\": \"+911234567890\",\n  \"contactNumber2\": \"+911234567891\",\n  \"showContactDetails\": true,\n  \"address\": {\n    \"city\": \"Mumbai\",\n    \"state\": \"Maharashtra\",\n    \"country\": \"India\"\n  },\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"securePassword123\",\n  \"medicalLicenseNumber\": \"MCI123456\",\n  \"medicalDegrees\": [\"MBBS\", \"MD\"],\n  \"specialization\": \"Cardiology\",\n  \"hospitals\": [\n    {\n      \"name\": \"City Hospital\",\n      \"address\": \"123 Main St\",\n      \"city\": \"Mumbai\",\n      \"state\": \"Maharashtra\",\n      \"country\": \"India\"\n    }\n  ],\n  \"clinicAddress\": {\n    \"address\": \"456 Clinic St\",\n    \"city\": \"Mumbai\",\n    \"state\": \"Maharashtra\",\n    \"country\": \"India\"\n  },\n  \"practiceStartDate\": \"2010-01-01\",\n  \"treatedDiseases\": [\"Heart Disease\", \"Hypertension\"],\n  \"documents\": {\n    \"medicalCertificates\": [\"url1\"],\n    \"casteCertificate\": \"url2\",\n    \"identificationProof\": \"url3\"\n  },\n  \"communityDetails\": {\n    \"kapuAffiliation\": true,\n    \"communityReferrals\": [\"ref1\", \"ref2\"]\n  },\n  \"communicationPreferences\": {\n    \"notificationPreference\": true,\n    \"emailCommunication\": true\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/doctor/register",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "doctor", "register"]
+            },
+            "description": "Register a new doctor with password"
+          },
+          "response": []
+        },
+        {
+          "name": "Register Doctor (Without Password)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Jane\",\n  \"middleName\": \"\",\n  \"lastName\": \"Smith\",\n  \"gender\": \"female\",\n  \"dateOfBirth\": \"1985-05-15\",\n  \"contactNumber1\": \"+911234567892\",\n  \"contactNumber2\": \"+911234567893\",\n  \"showContactDetails\": true,\n  \"address\": {\n    \"city\": \"Delhi\",\n    \"state\": \"Delhi\",\n    \"country\": \"India\"\n  },\n  \"email\": \"jane.smith@example.com\",\n  \"medicalLicenseNumber\": \"MCI789012\",\n  \"medicalDegrees\": [\"MBBS\"],\n  \"specialization\": \"General Medicine\",\n  \"hospitals\": [\n    {\n      \"name\": \"General Hospital\",\n      \"address\": \"456 Health Ave\",\n      \"city\": \"Delhi\",\n      \"state\": \"Delhi\",\n      \"country\": \"India\"\n    }\n  ],\n  \"clinicAddress\": {\n    \"address\": \"789 Clinic St\",\n    \"city\": \"Delhi\",\n    \"state\": \"Delhi\",\n    \"country\": \"India\"\n  },\n  \"practiceStartDate\": \"2015-06-01\",\n  \"treatedDiseases\": [\"Fever\", \"Cough\", \"Common Cold\"],\n  \"documents\": {\n    \"medicalCertificates\": [\"url3\"],\n    \"casteCertificate\": \"url4\",\n    \"identificationProof\": \"url5\"\n  },\n  \"communityDetails\": {\n    \"kapuAffiliation\": false,\n    \"communityReferrals\": []\n  },\n  \"communicationPreferences\": {\n    \"notificationPreference\": true,\n    \"emailCommunication\": true\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/doctor/register",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "doctor", "register"]
+            },
+            "description": "Register a new doctor without password (will use default password)"
+          },
+          "response": []
+        },
+        {
+          "name": "Doctor Login (Passwordless)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"fcmToken\": \"fcm_token_here\",\n  \"deviceType\": \"android\",\n  \"appVersion\": \"1.0.0\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/doctor/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "doctor", "login"]
+            },
+            "description": "Login for doctors (passwordless) with FCM token"
+          },
+          "response": []
+        },
+        {
+          "name": "Doctor Login (With Password)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"securePassword123\",\n  \"fcmToken\": \"fcm_token_here\",\n  \"deviceType\": \"android\",\n  \"appVersion\": \"1.0.0\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Universal login with password and FCM token"
+          },
+          "response": []
+        },
+        {
+          "name": "Set Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"securePassword123\",\n  \"confirmPassword\": \"securePassword123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/set-password",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "set-password"]
+            },
+            "description": "Set password for user"
+          },
+          "response": []
+        },
+        {
+          "name": "Update FCM Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fcmToken\": \"new_fcm_token_here\",\n  \"deviceType\": \"android\",\n  \"appVersion\": \"1.0.0\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/update-fcm-token",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "update-fcm-token"]
+            },
+            "description": "Update FCM token for push notifications"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Doctor Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/profile",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "profile"]
+            },
+            "description": "Get current user profile"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Doctor Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"specialization\": \"Cardiology\",\n  \"hospitalName1\": \"Updated Hospital\",\n  \"treatedDiseases\": [\"Heart Disease\", \"Hypertension\", \"Diabetes\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/profile",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "profile"]
+            },
+            "description": "Update user profile"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Patient APIs",
+      "item": [
+        {
+          "name": "Register Patient",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Smith\",\n  \"middleName\": \"\",\n  \"gender\": \"female\",\n  \"dateOfBirth\": \"1990-05-15\",\n  \"contactNumber\": \"+911234567892\",\n  \"email\": \"jane.smith@example.com\",\n  \"address\": {\n    \"city\": \"Delhi\",\n    \"state\": \"Delhi\",\n    \"country\": \"India\"\n  },\n  \"allowContactVisibility\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/patient/register",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "patient", "register"]
+            },
+            "description": "Register a new patient"
+          },
+          "response": []
+        },
+        {
+          "name": "Patient Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"jane.smith@example.com\",\n  \"password\": \"securePassword123\",\n  \"fcmToken\": \"fcm_token_here\",\n  \"deviceType\": \"android\",\n  \"appVersion\": \"1.0.0\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/patient/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "patient", "login"]
+            },
+            "description": "Login for patients with FCM token"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Patient Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patient_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/profile",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "profile"]
+            },
+            "description": "Get current patient profile"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Patient Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patient_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Smith\",\n  \"contactNumber1\": \"+911234567893\",\n  \"homeAddress\": {\n    \"city\": \"Mumbai\",\n    \"state\": \"Maharashtra\",\n    \"country\": \"India\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/profile",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "profile"]
+            },
+            "description": "Update patient profile"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Admin APIs",
+      "item": [
+        {
+          "name": "Admin Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"adminPassword123\",\n  \"fcmToken\": \"fcm_token_here\",\n  \"deviceType\": \"android\",\n  \"appVersion\": \"1.0.0\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/admin/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "admin", "login"]
+            },
+            "description": "Login for administrators with FCM token"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Admin Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/profile",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "profile"]
+            },
+            "description": "Get current admin profile"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Referral APIs",
+      "item": [
+        {
+          "name": "Create Referral",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"referredDoctor\": \"doctor_id_here\",\n  \"patientName\": \"John Smith\",\n  \"patientPhone\": \"+911234567890\",\n  \"reason\": \"Cardiac consultation required\",\n  \"notes\": \"Patient has chest pain and shortness of breath\",\n  \"medicalHistory\": \"Hypertension for 5 years, diabetes for 2 years\",\n  \"attachments\": [\"url1\", \"url2\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/referrals",
+              "host": ["{{base_url}}"],
+              "path": ["referrals"]
+            },
+            "description": "Create a new referral"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Referrals",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/referrals",
+              "host": ["{{base_url}}"],
+              "path": ["referrals"]
+            },
+            "description": "Get all referrals for the logged-in doctor"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Sent Referrals",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/referrals?type=sent",
+              "host": ["{{base_url}}"],
+              "path": ["referrals"],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "sent"
+                }
+              ]
+            },
+            "description": "Get referrals sent by the logged-in doctor"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Received Referrals",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/referrals?type=received",
+              "host": ["{{base_url}}"],
+              "path": ["referrals"],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "received"
+                }
+              ]
+            },
+            "description": "Get referrals received by the logged-in doctor"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Referrals by Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/referrals?status=pending",
+              "host": ["{{base_url}}"],
+              "path": ["referrals"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "pending"
+                }
+              ]
+            },
+            "description": "Get referrals by status (pending, accepted, rejected, completed)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Specific Referral",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/referrals/referral_id_here",
+              "host": ["{{base_url}}"],
+              "path": ["referrals", "referral_id_here"]
+            },
+            "description": "Get a specific referral by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Referral Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"accepted\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/referrals/referral_id_here/status",
+              "host": ["{{base_url}}"],
+              "path": ["referrals", "referral_id_here", "status"]
+            },
+            "description": "Update referral status (pending, accepted, rejected, completed)"
+          },
+          "response": []
+        },
+        {
+          "name": "Add Notes to Referral",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notes\": \"Patient responded well to treatment. Follow-up scheduled.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/referrals/referral_id_here/notes",
+              "host": ["{{base_url}}"],
+              "path": ["referrals", "referral_id_here", "notes"]
+            },
+            "description": "Add or update notes for a referral"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Referral Statistics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/referrals/stats/summary",
+              "host": ["{{base_url}}"],
+              "path": ["referrals", "stats", "summary"]
+            },
+            "description": "Get referral statistics for the logged-in doctor"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Dashboard APIs",
+      "item": [
+        {
+          "name": "Get Dashboard Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/dashboard/stats",
+              "host": ["{{base_url}}"],
+              "path": ["dashboard", "stats"]
+            },
+            "description": "Get dashboard statistics (Admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Dashboard Activity",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/dashboard/activity?limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["dashboard", "activity"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Get recent dashboard activities (Admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Referral Trends",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/dashboard/referral-trends?days=30",
+              "host": ["{{base_url}}"],
+              "path": ["dashboard", "referral-trends"],
+              "query": [
+                {
+                  "key": "days",
+                  "value": "30"
+                }
+              ]
+            },
+            "description": "Get daily referral trends (Admin only)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Universal APIs",
+      "item": [
+        {
+          "name": "Universal Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\",\n  \"fcmToken\": \"fcm_token_here\",\n  \"deviceType\": \"android\",\n  \"appVersion\": \"1.0.0\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Universal login for all user types with FCM token"
+          },
+          "response": []
+        },
+        {
+          "name": "Validate Doctor Registration",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"registrationNo\": \"MCI123456\",\n  \"name\": \"Dr. John Doe\",\n  \"year\": 2020\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/validate-registration",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "validate-registration"]
+            },
+            "description": "Validate doctor registration number"
+          },
+          "response": []
+        },
+        {
+          "name": "Update FCM Token (Universal)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fcmToken\": \"new_fcm_token_here\",\n  \"deviceType\": \"android\",\n  \"appVersion\": \"1.0.0\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/update-fcm-token",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "update-fcm-token"]
+            },
+            "description": "Update FCM token for any user type"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Notification APIs",
+      "item": [
+        {
+          "name": "Send Test Notification",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Test Notification\",\n  \"body\": \"This is a test notification\",\n  \"data\": {\n    \"type\": \"test\",\n    \"customData\": \"value\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/notifications/test/user_id_here",
+              "host": ["{{base_url}}"],
+              "path": ["notifications", "test", "user_id_here"]
+            },
+            "description": "Send test notification to a specific user"
+          },
+          "response": []
+        },
+        {
+          "name": "Broadcast to All Doctors",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"System Announcement\",\n  \"body\": \"Important system update for all doctors\",\n  \"data\": {\n    \"type\": \"announcement\",\n    \"priority\": \"high\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/notifications/broadcast/doctors",
+              "host": ["{{base_url}}"],
+              "path": ["notifications", "broadcast", "doctors"]
+            },
+            "description": "Send notification to all doctors (Admin only)"
+          },
+          "response": []
+        },
+        {
+          "name": "Validate FCM Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fcmToken\": \"fcm_token_here\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/notifications/validate-token",
+              "host": ["{{base_url}}"],
+              "path": ["notifications", "validate-token"]
+            },
+            "description": "Validate FCM token"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Notification Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/notifications/status",
+              "host": ["{{base_url}}"],
+              "path": ["notifications", "status"]
+            },
+            "description": "Get user's notification status and FCM token info"
+          },
+          "response": []
+        },
+        {
+          "name": "Get User Notifications",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/notifications?page=1&limit=20&read=false",
+              "host": ["{{base_url}}"],
+              "path": ["notifications"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "read",
+                  "value": "false"
+                }
+              ]
+            },
+            "description": "Get user's notifications with pagination and filters"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Unread Count",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/notifications/unread/count",
+              "host": ["{{base_url}}"],
+              "path": ["notifications", "unread", "count"]
+            },
+            "description": "Get count of unread notifications"
+          },
+          "response": []
+        },
+        {
+          "name": "Mark Notification as Read",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/notifications/notification_id_here/read",
+              "host": ["{{base_url}}"],
+              "path": ["notifications", "notification_id_here", "read"]
+            },
+            "description": "Mark a specific notification as read"
+          },
+          "response": []
+        },
+        {
+          "name": "Mark All Notifications as Read",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/notifications/read-all",
+              "host": ["{{base_url}}"],
+              "path": ["notifications", "read-all"]
+            },
+            "description": "Mark all notifications as read"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Notification",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/notifications/notification_id_here",
+              "host": ["{{base_url}}"],
+              "path": ["notifications", "notification_id_here"]
+            },
+            "description": "Delete a specific notification"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete All Read Notifications",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/notifications/read/all",
+              "host": ["{{base_url}}"],
+              "path": ["notifications", "read", "all"]
+            },
+            "description": "Delete all read notifications"
+          },
+          "response": []
+        }
+      ]
+    },
+        {
+      "name": "Upload APIs",
+      "item": [
+        {
+          "name": "Upload Single File",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "folder",
+                  "value": "documents",
+                  "type": "text",
+                  "description": "Optional: documents, medical-certificates, profile-pictures, referral-attachments"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/upload/file",
+              "host": ["{{base_url}}"],
+              "path": ["upload", "file"]
+            },
+            "description": "Upload a single file to S3 with optional folder parameter"
+          },
+          "response": []
+        },
+        {
+          "name": "Upload Multiple Files",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "files",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "files",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "folder",
+                  "value": "documents",
+                  "type": "text",
+                  "description": "Optional: documents, medical-certificates, profile-pictures, referral-attachments"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/upload/files",
+              "host": ["{{base_url}}"],
+              "path": ["upload", "files"]
+            },
+            "description": "Upload multiple files to S3 (max 10 files) with optional folder parameter"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete File from S3",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/upload/file/documents/1705123456789-abc123.pdf",
+              "host": ["{{base_url}}"],
+              "path": ["upload", "file", "documents/1705123456789-abc123.pdf"]
+            },
+            "description": "Delete a file from S3"
+          },
+          "response": []
+        },
+        {
+          "name": "Get File Info",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/upload/file/documents/1705123456789-abc123.pdf/info",
+              "host": ["{{base_url}}"],
+              "path": ["upload", "file", "documents/1705123456789-abc123.pdf", "info"]
+            },
+            "description": "Get information about a file in S3"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+} 

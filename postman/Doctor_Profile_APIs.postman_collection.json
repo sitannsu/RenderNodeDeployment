@@ -1,0 +1,220 @@
+{
+  "info": {
+    "name": "Doctor Profile APIs",
+    "description": "Collection for testing Doctor Profile APIs with percentage completion",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000/api",
+      "type": "string"
+    },
+    {
+      "key": "doctor_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Get Doctor Profile",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{doctor_token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/doctors/profile",
+          "host": ["{{base_url}}"],
+          "path": ["doctors", "profile"]
+        },
+        "description": "Get doctor profile with percentage completion analysis"
+      },
+      "response": []
+    },
+    {
+      "name": "Update Doctor Profile - Basic Info",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{doctor_token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"middleName\": \"Michael\",\n  \"gender\": \"Male\",\n  \"dateOfBirth\": \"1985-05-15\",\n  \"contactNumber1\": \"+1234567890\",\n  \"contactNumber2\": \"+1234567891\",\n  \"showContactDetails\": true,\n  \"homeAddress\": {\n    \"street\": \"123 Medical Street\",\n    \"city\": \"New York\",\n    \"state\": \"NY\",\n    \"country\": \"USA\",\n    \"pincode\": \"10001\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/doctors/profile",
+          "host": ["{{base_url}}"],
+          "path": ["doctors", "profile"]
+        },
+        "description": "Update basic doctor information"
+      },
+      "response": []
+    },
+    {
+      "name": "Update Doctor Profile - Professional Info",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{doctor_token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"medicalLicenseNumber\": \"MD123456\",\n  \"medicalDegrees\": \"MBBS, MD\",\n  \"specialization\": \"Cardiology\",\n  \"hospitalName1\": \"City General Hospital\",\n  \"hospitalAddress1\": {\n    \"street\": \"456 Hospital Ave\",\n    \"city\": \"New York\",\n    \"state\": \"NY\",\n    \"country\": \"USA\"\n  },\n  \"practiceStartDate\": \"2010-06-01\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/doctors/profile",
+          "host": ["{{base_url}}"],
+          "path": ["doctors", "profile"]
+        },
+        "description": "Update professional information"
+      },
+      "response": []
+    },
+    {
+      "name": "Update Doctor Profile - Additional Hospitals",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{doctor_token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"hospitalName2\": \"Community Medical Center\",\n  \"hospitalAddress2\": {\n    \"street\": \"789 Health Blvd\",\n    \"city\": \"Brooklyn\",\n    \"state\": \"NY\",\n    \"country\": \"USA\"\n  },\n  \"clinicAddress\": {\n    \"street\": \"321 Clinic Road\",\n    \"city\": \"Manhattan\",\n    \"state\": \"NY\",\n    \"country\": \"USA\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/doctors/profile",
+          "host": ["{{base_url}}"],
+          "path": ["doctors", "profile"]
+        },
+        "description": "Update additional hospital and clinic information"
+      },
+      "response": []
+    },
+    {
+      "name": "Update Doctor Profile - Experience & Documents",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{doctor_token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"treatedDiseases\": \"Heart disease, Hypertension, Diabetes\",\n  \"documents\": {\n    \"medicalCertificates\": [\"cert1.pdf\", \"cert2.pdf\"],\n    \"casteCertificate\": \"caste_cert.pdf\",\n    \"identificationProof\": \"id_proof.pdf\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/doctors/profile",
+          "host": ["{{base_url}}"],
+          "path": ["doctors", "profile"]
+        },
+        "description": "Update experience and documents"
+      },
+      "response": []
+    },
+    {
+      "name": "Update Doctor Profile - Community & Communication",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{doctor_token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"communityDetails\": {\n    \"kapuCommunityAffiliation\": true,\n    \"communityReferrals\": [\n      {\n        \"name\": \"Jane Smith\",\n        \"relationship\": \"Colleague\",\n        \"contactNumber\": \"+1234567892\"\n      }\n    ]\n  },\n  \"communicationPreferences\": {\n    \"notificationPreference\": true,\n    \"emailCommunication\": true\n  }\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/doctors/profile",
+          "host": ["{{base_url}}"],
+          "path": ["doctors", "profile"]
+        },
+        "description": "Update community details and communication preferences"
+      },
+      "response": []
+    },
+    {
+      "name": "Update Doctor Profile - Complete Profile",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{doctor_token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"middleName\": \"Michael\",\n  \"gender\": \"Male\",\n  \"dateOfBirth\": \"1985-05-15\",\n  \"contactNumber1\": \"+1234567890\",\n  \"contactNumber2\": \"+1234567891\",\n  \"showContactDetails\": true,\n  \"homeAddress\": {\n    \"street\": \"123 Medical Street\",\n    \"city\": \"New York\",\n    \"state\": \"NY\",\n    \"country\": \"USA\",\n    \"pincode\": \"10001\"\n  },\n  \"medicalLicenseNumber\": \"MD123456\",\n  \"medicalDegrees\": \"MBBS, MD\",\n  \"specialization\": \"Cardiology\",\n  \"hospitalName1\": \"City General Hospital\",\n  \"hospitalAddress1\": {\n    \"street\": \"456 Hospital Ave\",\n    \"city\": \"New York\",\n    \"state\": \"NY\",\n    \"country\": \"USA\"\n  },\n  \"hospitalName2\": \"Community Medical Center\",\n  \"hospitalAddress2\": {\n    \"street\": \"789 Health Blvd\",\n    \"city\": \"Brooklyn\",\n    \"state\": \"NY\",\n    \"country\": \"USA\"\n  },\n  \"clinicAddress\": {\n    \"street\": \"321 Clinic Road\",\n    \"city\": \"Manhattan\",\n    \"state\": \"NY\",\n    \"country\": \"USA\"\n  },\n  \"practiceStartDate\": \"2010-06-01\",\n  \"treatedDiseases\": \"Heart disease, Hypertension, Diabetes\",\n  \"documents\": {\n    \"medicalCertificates\": [\"cert1.pdf\", \"cert2.pdf\"],\n    \"casteCertificate\": \"caste_cert.pdf\",\n    \"identificationProof\": \"id_proof.pdf\"\n  },\n  \"communityDetails\": {\n    \"kapuCommunityAffiliation\": true,\n    \"communityReferrals\": [\n      {\n        \"name\": \"Jane Smith\",\n        \"relationship\": \"Colleague\",\n        \"contactNumber\": \"+1234567892\"\n      }\n    ]\n  },\n  \"communicationPreferences\": {\n    \"notificationPreference\": true,\n    \"emailCommunication\": true\n  }\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/doctors/profile",
+          "host": ["{{base_url}}"],
+          "path": ["doctors", "profile"]
+        },
+        "description": "Update complete doctor profile with all fields"
+      },
+      "response": []
+    }
+  ]
+} 

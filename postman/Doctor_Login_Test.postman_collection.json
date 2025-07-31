@@ -1,0 +1,171 @@
+{
+  "info": {
+    "name": "Doctor Login Test",
+    "description": "Test collection for doctor login APIs",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5005/api",
+      "type": "string"
+    },
+    {
+      "key": "doctor_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Register Doctor (No Password)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"gender\": \"male\",\n  \"dateOfBirth\": \"1980-01-01\",\n  \"contactNumber1\": \"+911234567890\",\n  \"email\": \"john.doe@example.com\",\n  \"medicalLicenseNumber\": \"MCI123456\",\n  \"medicalDegrees\": [\"MBBS\", \"MD\"],\n  \"specialization\": \"Cardiology\",\n  \"hospitals\": [\n    {\n      \"name\": \"City Hospital\",\n      \"address\": \"123 Main St\",\n      \"city\": \"Mumbai\",\n      \"state\": \"Maharashtra\",\n      \"country\": \"India\"\n    }\n  ],\n  \"practiceStartDate\": \"2010-01-01\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/doctors/register",
+          "host": ["{{base_url}}"],
+          "path": ["doctors", "register"]
+        },
+        "description": "Register a doctor without password"
+      },
+      "response": []
+    },
+    {
+      "name": "Login with Email Only",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"john.doe@example.com\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/auth/login",
+          "host": ["{{base_url}}"],
+          "path": ["auth", "login"]
+        },
+        "description": "Login with just email (for users without password)"
+      },
+      "response": []
+    },
+    {
+      "name": "Doctor Login (Passwordless)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"john.doe@example.com\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/auth/doctor-login",
+          "host": ["{{base_url}}"],
+          "path": ["auth", "doctor-login"]
+        },
+        "description": "Passwordless login specifically for doctors"
+      },
+      "response": []
+    },
+    {
+      "name": "Set Password",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{doctor_token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"password\": \"securePassword123\",\n  \"confirmPassword\": \"securePassword123\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/auth/set-password",
+          "host": ["{{base_url}}"],
+          "path": ["auth", "set-password"]
+        },
+        "description": "Set password for user who registered without password"
+      },
+      "response": []
+    },
+    {
+      "name": "Login with Password",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"securePassword123\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/auth/login",
+          "host": ["{{base_url}}"],
+          "path": ["auth", "login"]
+        },
+        "description": "Login with email and password after setting password"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Doctor Profile",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{doctor_token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/doctors/profile",
+          "host": ["{{base_url}}"],
+          "path": ["doctors", "profile"]
+        },
+        "description": "Get doctor profile after login"
+      },
+      "response": []
+    }
+  ]
+} 

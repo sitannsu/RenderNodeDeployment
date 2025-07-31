@@ -28,78 +28,221 @@ const auth = async (req, res, next) => {
   }
 };
 
+// ==================== DOCTOR REGISTRATION ====================
+
 // Register new doctor
-router.post('/register', async (req, res) => {
+router.post('/doctor/register', async (req, res) => {
   try {
-    const { fullName, email, password, role = 'doctor', ...doctorData } = req.body;
-
-    // Check if user already exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({
-        message: 'User already exists with this email'
-      });
-    }
-
-    // Create new user with basic info
-    const user = new User({
-      fullName,
+    const {
+      firstName,
+      middleName,
+      lastName,
+      gender,
+      dateOfBirth,
+      contactNumber1,
+      contactNumber2,
+      showContactDetails,
+      address,
       email,
       password,
-      role
+      medicalLicenseNumber,
+      medicalDegrees,
+      specialization,
+      hospitals,
+      clinicAddress,
+      practiceStartDate,
+      treatedDiseases,
+      documents,
+      communityDetails,
+      communicationPreferences
+    } = req.body;
+
+    // Check if email already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: 'Email already registered' });
+    }
+
+    // Process hospitals array to extract first hospital as primary
+    let hospitalName1 = '';
+    let hospitalAddress1 = {};
+    
+    if (hospitals && hospitals.length > 0) {
+      const primaryHospital = hospitals[0];
+      hospitalName1 = primaryHospital.name || '';
+      hospitalAddress1 = {
+        street: primaryHospital.address || '',
+        city: primaryHospital.city || '',
+        state: primaryHospital.state || '',
+        country: primaryHospital.country || ''
+      };
+    }
+
+    // Process clinic address
+    let processedClinicAddress = {};
+    if (clinicAddress) {
+      processedClinicAddress = {
+        street: clinicAddress.address || '',
+        city: clinicAddress.city || '',
+        state: clinicAddress.state || '',
+        country: clinicAddress.country || ''
+      };
+    }
+
+    // Process community details
+    let processedCommunityDetails = {};
+    if (communityDetails) {
+      processedCommunityDetails = {
+        kapuCommunityAffiliation: communityDetails.kapuAffiliation || false,
+        communityReferrals: []
+      };
+      
+      // Convert community referrals to proper format
+      if (communityDetails.communityReferrals && Array.isArray(communityDetails.communityReferrals)) {
+        processedCommunityDetails.communityReferrals = communityDetails.communityReferrals.map(ref => ({
+          name: typeof ref === 'string' ? ref : ref.name || '',
+          relationship: typeof ref === 'string' ? 'Referral' : ref.relationship || 'Referral',
+          contactNumber: typeof ref === 'string' ? '' : ref.contactNumber || ''
+        }));
+      }
+    }
+
+    // Create new doctor user
+    const doctor = new User({
+      firstName,
+      middleName: middleName || '',
+      lastName,
+      fullName: `Dr. ${firstName}${middleName ? ' ' + middleName : ''} ${lastName}`,
+      gender: gender ? gender.toLowerCase() : 'male',
+      dateOfBirth: new Date(dateOfBirth),
+      contactNumber1,
+      contactNumber2: contactNumber2 || '',
+      showContactDetails: showContactDetails || false,
+      homeAddress: {
+        street: address?.street || '',
+        city: address?.city || '',
+        state: address?.state || '',
+        country: address?.country || '',
+        pincode: address?.pincode || ''
+      },
+      email,
+      password: password || 'defaultPassword123', // Set a default password if not provided
+      role: 'doctor',
+      medicalLicenseNumber,
+      medicalDegrees: Array.isArray(medicalDegrees) ? medicalDegrees : [medicalDegrees],
+      specialization,
+      hospitalName1,
+      hospitalAddress1,
+      clinicAddress: processedClinicAddress,
+      practiceStartDate: new Date(practiceStartDate),
+      treatedDiseases: Array.isArray(treatedDiseases) ? treatedDiseases : [treatedDiseases],
+      documents: {
+        medicalCertificates: documents?.medicalCertificates || [],
+        casteCertificate: documents?.casteCertificate || '',
+        identificationProof: documents?.identificationProof || ''
+      },
+      communityDetails: processedCommunityDetails,
+      communicationPreferences: {
+        notificationPreference: communicationPreferences?.notificationPreference || true,
+        emailCommunication: communicationPreferences?.emailCommunication || true
+      },
+      verificationStatus: 'pending',
+      profileCompletion: 0 // Will be calculated after save
     });
 
-    await user.save();
+    // Calculate profile completion
+    doctor.profileCompletion = doctor.calculateProfileCompletion();
 
-    // If registering as a doctor, create doctor profile
-    if (role === 'doctor') {
-      const doctorProfile = new DoctorProfile({
-        userId: user._id,
-        ...doctorData
-      });
-      await doctorProfile.save();
-    }
-    // If registering as a patient, create patient profile
-    else if (role === 'patient') {
-      const { contactNumber, allowContactVisibility = false } = doctorData;
-      if (!contactNumber) {
-        await user.remove();
-        return res.status(400).json({
-          message: 'Contact number is required for patient registration'
-        });
-      }
-      const patientProfile = new PatientProfile({
-        userId: user._id,
-        contactNumber,
-        allowContactVisibility
-      });
-      await patientProfile.save();
-    }
+    await doctor.save();
 
-    // Generate JWT token
-    const token = jwt.sign(
-      { userId: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: '30d' }
-    );
-
-    // Remove password from response
-    user.password = undefined;
+    // Return response without password
+    const doctorResponse = doctor.toObject();
+    delete doctorResponse.password;
 
     res.status(201).json({
-      message: 'User registered successfully',
-      token,
-      user
+      message: 'Doctor registered successfully',
+      doctor: doctorResponse,
+      profileCompletion: doctor.profileCompletion
     });
   } catch (error) {
+    console.error('Doctor registration error:', error);
     res.status(400).json({ message: error.message });
   }
 });
 
-// Login
+// ==================== PATIENT REGISTRATION ====================
+
+// Register new patient
+router.post('/patient/register', async (req, res) => {
+  try {
+    const {
+      firstName,
+      lastName,
+      middleName,
+      gender,
+      dateOfBirth,
+      contactNumber,
+      email,
+      password,
+      address,
+      allowContactVisibility = false
+    } = req.body;
+
+    // Check if email already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: 'Email already registered' });
+    }
+
+    // Create new patient user
+    const patient = new User({
+      firstName,
+      middleName: middleName || '',
+      lastName,
+      fullName: `${firstName}${middleName ? ' ' + middleName : ''} ${lastName}`,
+      gender: gender ? gender.toLowerCase() : 'male',
+      dateOfBirth: new Date(dateOfBirth),
+      contactNumber1: contactNumber,
+      email,
+      password: password || 'defaultPassword123',
+      role: 'patient',
+      homeAddress: {
+        street: address?.street || '',
+        city: address?.city || '',
+        state: address?.state || '',
+        country: address?.country || '',
+        pincode: address?.pincode || ''
+      },
+      verificationStatus: 'pending',
+      profileCompletion: 0
+    });
+
+    // Calculate profile completion for patient
+    patient.profileCompletion = patient.calculateProfileCompletion();
+
+    await patient.save();
+
+    // Return response without password
+    const patientResponse = patient.toObject();
+    delete patientResponse.password;
+
+    res.status(201).json({
+      message: 'Patient registered successfully',
+      patient: patientResponse,
+      profileCompletion: patient.profileCompletion
+    });
+  } catch (error) {
+    console.error('Patient registration error:', error);
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// ==================== LOGIN ENDPOINTS ====================
+
+// Universal login (works for all user types)
 router.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, fcmToken, deviceType, appVersion } = req.body;
 
     // Find user and include password for comparison
     const user = await User.findOne({ email }).select('+password');
@@ -107,10 +250,52 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-    // Check password
+    // Check if user has a password set
+    if (!user.password) {
+      // For users without password (like doctors who registered without password)
+      // Allow login with just email for now, but suggest setting a password
+      
+      // Update FCM token and device info
+      if (fcmToken) {
+        user.fcmToken = fcmToken;
+        user.deviceInfo.deviceType = deviceType || 'android';
+        user.deviceInfo.appVersion = appVersion;
+        user.deviceInfo.lastLoginAt = new Date();
+        await user.save();
+      }
+
+      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+        expiresIn: '30d'
+      });
+
+      return res.json({
+        token,
+        user: {
+          id: user._id,
+          fullName: user.fullName,
+          email: user.email,
+          role: user.role,
+          specialization: user.specialization,
+          hospitalName: user.hospitalName1
+        },
+        message: 'Login successful. Please set a password for security.',
+        requiresPasswordSetup: true
+      });
+    }
+
+    // Check password for users who have one set
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.status(401).json({ message: 'Invalid email or password' });
+    }
+
+    // Update FCM token and device info
+    if (fcmToken) {
+      user.fcmToken = fcmToken;
+      user.deviceInfo.deviceType = deviceType || 'android';
+      user.deviceInfo.appVersion = appVersion;
+      user.deviceInfo.lastLoginAt = new Date();
+      await user.save();
     }
 
     // Generate JWT token
@@ -124,8 +309,215 @@ router.post('/login', async (req, res) => {
         id: user._id,
         fullName: user.fullName,
         email: user.email,
+        role: user.role,
         specialization: user.specialization,
-        hospitalName: user.hospitalName
+        hospitalName: user.hospitalName1
+      },
+      requiresPasswordSetup: false
+    });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// Doctor-specific login (passwordless)
+router.post('/doctor/login', async (req, res) => {
+  try {
+    const { email, fcmToken, deviceType, appVersion } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
+
+    // Find user
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json({ message: 'User not found' });
+    }
+
+    // Check if user is a doctor
+    if (user.role !== 'doctor') {
+      return res.status(401).json({ message: 'This login is only for doctors' });
+    }
+
+    // Update FCM token and device info
+    if (fcmToken) {
+      user.fcmToken = fcmToken;
+      user.deviceInfo.deviceType = deviceType || 'android';
+      user.deviceInfo.appVersion = appVersion;
+      user.deviceInfo.lastLoginAt = new Date();
+      await user.save();
+    }
+
+    // Generate JWT token
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: '30d'
+    });
+
+    res.json({
+      token,
+      user: {
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        role: user.role,
+        specialization: user.specialization,
+        hospitalName: user.hospitalName1
+      },
+      message: 'Login successful. Please set a password for security.',
+      requiresPasswordSetup: !user.password
+    });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// Patient-specific login
+router.post('/patient/login', async (req, res) => {
+  try {
+    const { email, password, fcmToken, deviceType, appVersion } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
+
+    // Find user and include password for comparison
+    const user = await User.findOne({ email }).select('+password');
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
+
+    // Check if user is a patient
+    if (user.role !== 'patient') {
+      return res.status(401).json({ message: 'This login is only for patients' });
+    }
+
+    // Check if user has a password set
+    if (!user.password) {
+      return res.status(401).json({ message: 'Password is required for patient login' });
+    }
+
+    // Check password
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
+
+    // Update FCM token and device info
+    if (fcmToken) {
+      user.fcmToken = fcmToken;
+      user.deviceInfo.deviceType = deviceType || 'android';
+      user.deviceInfo.appVersion = appVersion;
+      user.deviceInfo.lastLoginAt = new Date();
+      await user.save();
+    }
+
+    // Generate JWT token
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: '30d'
+    });
+
+    res.json({
+      token,
+      user: {
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        role: user.role,
+        contactNumber: user.contactNumber1
+      },
+      requiresPasswordSetup: false
+    });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// Admin login
+router.post('/admin/login', async (req, res) => {
+  try {
+    const { email, password, fcmToken, deviceType, appVersion } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required' });
+    }
+
+    // Find user and include password for comparison
+    const user = await User.findOne({ email }).select('+password');
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
+
+    // Check if user is an admin
+    if (user.role !== 'admin') {
+      return res.status(401).json({ message: 'This login is only for administrators' });
+    }
+
+    // Check password
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Invalid email or password' });
+    }
+
+    // Update FCM token and device info
+    if (fcmToken) {
+      user.fcmToken = fcmToken;
+      user.deviceInfo.deviceType = deviceType || 'android';
+      user.deviceInfo.appVersion = appVersion;
+      user.deviceInfo.lastLoginAt = new Date();
+      await user.save();
+    }
+
+    // Generate JWT token
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: '30d'
+    });
+
+    res.json({
+      token,
+      user: {
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        role: user.role
+      },
+      requiresPasswordSetup: false
+    });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// ==================== PASSWORD MANAGEMENT ====================
+
+// Set password for user
+router.post('/set-password', auth, async (req, res) => {
+  try {
+    const { password, confirmPassword } = req.body;
+
+    if (!password) {
+      return res.status(400).json({ message: 'Password is required' });
+    }
+
+    if (password !== confirmPassword) {
+      return res.status(400).json({ message: 'Passwords do not match' });
+    }
+
+    if (password.length < 8) {
+      return res.status(400).json({ message: 'Password must be at least 8 characters long' });
+    }
+
+    // Set the password
+    req.user.password = password;
+    await req.user.save();
+
+    res.json({
+      message: 'Password set successfully',
+      user: {
+        id: req.user._id,
+        fullName: req.user.fullName,
+        email: req.user.email,
+        role: req.user.role
       }
     });
   } catch (error) {
@@ -133,11 +525,55 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// Update FCM token
+router.post('/update-fcm-token', auth, async (req, res) => {
+  try {
+    const { fcmToken, deviceType, appVersion } = req.body;
+
+    if (!fcmToken) {
+      return res.status(400).json({ message: 'FCM token is required' });
+    }
+
+    // Update FCM token and device info
+    req.user.fcmToken = fcmToken;
+    req.user.deviceInfo.deviceType = deviceType || 'android';
+    req.user.deviceInfo.appVersion = appVersion;
+    req.user.deviceInfo.lastLoginAt = new Date();
+    await req.user.save();
+
+    res.json({
+      message: 'FCM token updated successfully',
+      user: {
+        id: req.user._id,
+        fullName: req.user.fullName,
+        email: req.user.email,
+        role: req.user.role,
+        deviceInfo: req.user.deviceInfo
+      }
+    });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// ==================== PROFILE ENDPOINTS ====================
+
 // Get current user profile
 router.get('/profile', auth, async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
-    res.json(user);
+    const user = await User.findById(req.user._id).select('-password');
+    
+    // Calculate current profile completion
+    const profileCompletion = user.calculateProfileCompletion();
+    
+    // Create response object with profile completion
+    const userResponse = user.toObject();
+    userResponse.profileCompletion = profileCompletion;
+    
+    res.json({
+      user: userResponse,
+      profileCompletion: profileCompletion
+    });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -147,12 +583,12 @@ router.get('/profile', auth, async (req, res) => {
 router.patch('/profile', auth, async (req, res) => {
   const updates = Object.keys(req.body);
   const allowedUpdates = [
-    'fullName',
-    'specialization',
-    'hospitalName',
-    'phoneNumber',
-    'address',
-    'profileImage'
+    'firstName', 'lastName', 'middleName', 'gender', 'dateOfBirth',
+    'contactNumber1', 'contactNumber2', 'showContactDetails',
+    'homeAddress', 'medicalLicenseNumber', 'medicalDegrees', 'specialization',
+    'hospitalName1', 'hospitalAddress1', 'hospitalName2', 'hospitalAddress2',
+    'clinicAddress', 'practiceStartDate', 'treatedDiseases', 'documents',
+    'communityDetails', 'communicationPreferences'
   ];
 
   const isValidOperation = updates.every(update => allowedUpdates.includes(update));
@@ -162,12 +598,34 @@ router.patch('/profile', auth, async (req, res) => {
 
   try {
     updates.forEach(update => req.user[update] = req.body[update]);
+    
+    // Update full name if first or last name changed
+    if (req.body.firstName || req.body.lastName) {
+      req.user.fullName = `${req.user.firstName}${req.user.middleName ? ' ' + req.user.middleName : ''} ${req.user.lastName}`;
+      if (req.user.role === 'doctor') {
+        req.user.fullName = `Dr. ${req.user.fullName}`;
+      }
+    }
+
+    // Calculate profile completion
+    req.user.profileCompletion = req.user.calculateProfileCompletion();
+    
     await req.user.save();
-    res.json(req.user);
+    
+    const userResponse = req.user.toObject();
+    delete userResponse.password;
+    
+    res.json({
+      message: 'Profile updated successfully',
+      user: userResponse,
+      profileCompletion: req.user.profileCompletion
+    });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 });
+
+// ==================== VALIDATION ENDPOINTS ====================
 
 // Validate doctor registration number
 router.post('/validate-registration', async (req, res) => {

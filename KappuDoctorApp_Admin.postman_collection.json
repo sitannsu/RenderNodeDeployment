@@ -256,6 +256,365 @@
           }
         }
       ]
+    },
+    {
+      "name": "File Upload APIs",
+      "item": [
+        {
+          "name": "Upload Single File",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "folder",
+                  "value": "documents",
+                  "type": "text",
+                  "description": "Optional: documents, medical-certificates, profile-pictures, referral-attachments"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/upload/file",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "upload", "file"]
+            },
+            "description": "Upload a single file to S3 with optional folder parameter"
+          }
+        },
+        {
+          "name": "Upload Multiple Files",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "files",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "files",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "folder",
+                  "value": "documents",
+                  "type": "text",
+                  "description": "Optional: documents, medical-certificates, profile-pictures, referral-attachments"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/upload/files",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "upload", "files"]
+            },
+            "description": "Upload multiple files to S3 (max 10 files) with optional folder parameter"
+          }
+        },
+        {
+          "name": "Delete File from S3",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/upload/file/documents/1705123456789-abc123.pdf",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "upload", "file", "documents/1705123456789-abc123.pdf"]
+            },
+            "description": "Delete a file from AWS S3"
+          }
+        },
+        {
+          "name": "Get File Info",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/upload/file/documents/1705123456789-abc123.pdf/info",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "upload", "file", "documents/1705123456789-abc123.pdf", "info"]
+            },
+            "description": "Get information about a file in AWS S3"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notification Management",
+      "item": [
+        {
+          "name": "Send Test Notification",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Test Notification\",\n  \"body\": \"This is a test notification\",\n  \"data\": {\n    \"type\": \"test\",\n    \"timestamp\": \"2024-01-15T10:30:00Z\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications/test/:userId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notifications", "test", ":userId"],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "user_id_here"
+                }
+              ]
+            },
+            "description": "Send a test notification to a specific user"
+          }
+        },
+        {
+          "name": "Broadcast to All Doctors",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"System Announcement\",\n  \"body\": \"Important system update for all doctors\",\n  \"data\": {\n    \"type\": \"announcement\",\n    \"priority\": \"high\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications/broadcast/doctors",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notifications", "broadcast", "doctors"]
+            },
+            "description": "Send broadcast notification to all doctors"
+          }
+        },
+        {
+          "name": "Validate FCM Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fcmToken\": \"fcm_token_here\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications/validate-token",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notifications", "validate-token"]
+            },
+            "description": "Validate an FCM token"
+          }
+        },
+        {
+          "name": "Get Notification Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notifications", "status"]
+            },
+            "description": "Get user's notification status (FCM token availability)"
+          }
+        },
+        {
+          "name": "Get User Notifications",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications?page=1&limit=10&read=false&type=referral",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notifications"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "read",
+                  "value": "false"
+                },
+                {
+                  "key": "type",
+                  "value": "referral"
+                }
+              ]
+            },
+            "description": "Get all notifications for the current user with pagination and filters"
+          }
+        },
+        {
+          "name": "Get Unread Count",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications/unread/count",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notifications", "unread", "count"]
+            },
+            "description": "Get unread notification count"
+          }
+        },
+        {
+          "name": "Mark Notification as Read",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications/:id/read",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notifications", ":id", "read"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "notification_id_here"
+                }
+              ]
+            },
+            "description": "Mark a specific notification as read"
+          }
+        },
+        {
+          "name": "Mark All Notifications as Read",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications/read-all",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notifications", "read-all"]
+            },
+            "description": "Mark all notifications as read"
+          }
+        },
+        {
+          "name": "Delete Notification",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notifications", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "notification_id_here"
+                }
+              ]
+            },
+            "description": "Delete a specific notification"
+          }
+        },
+        {
+          "name": "Delete All Read Notifications",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications/read/all",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notifications", "read", "all"]
+            },
+            "description": "Delete all read notifications"
+          }
+        }
+      ]
     }
   ]
 }

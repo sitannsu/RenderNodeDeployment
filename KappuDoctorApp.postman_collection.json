@@ -459,6 +459,120 @@
           }
         }
       ]
+    },
+    {
+      "name": "File Upload",
+      "item": [
+        {
+          "name": "Upload Single File",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "folder",
+                  "value": "documents",
+                  "type": "text",
+                  "description": "Optional: documents, medical-certificates, profile-pictures, referral-attachments"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/upload/file",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "upload", "file"]
+            },
+            "description": "Upload a single file to S3 with optional folder parameter"
+          }
+        },
+        {
+          "name": "Upload Multiple Files",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "files",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "files",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "folder",
+                  "value": "documents",
+                  "type": "text",
+                  "description": "Optional: documents, medical-certificates, profile-pictures, referral-attachments"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/upload/files",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "upload", "files"]
+            },
+            "description": "Upload multiple files to S3 (max 10 files) with optional folder parameter"
+          }
+        },
+        {
+          "name": "Delete File from S3",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/upload/file/documents/1705123456789-abc123.pdf",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "upload", "file", "documents/1705123456789-abc123.pdf"]
+            },
+            "description": "Delete a file from AWS S3"
+          }
+        },
+        {
+          "name": "Get File Info",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/upload/file/documents/1705123456789-abc123.pdf/info",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "upload", "file", "documents/1705123456789-abc123.pdf", "info"]
+            },
+            "description": "Get information about a file in AWS S3"
+          }
+        }
+      ]
     }
   ]
 }
