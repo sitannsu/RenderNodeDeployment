@@ -14,10 +14,10 @@ router.post('/', auth, async (req, res) => {
     await referral.save();
     
     // Populate doctor information
-    await referral.populate('referringDoctor referredToDoctor', 'fullName specialization hospitalName');
+    await referral.populate('referringDoctor referredDoctor', 'fullName specialization hospitalName');
     
     // Send notification to the referred doctor
-    if (referral.referredToDoctor) {
+    if (referral.referredDoctor) {
       const referralData = {
         referralId: referral._id.toString(),
         referringDoctorId: req.user._id.toString(),
@@ -27,7 +27,7 @@ router.post('/', auth, async (req, res) => {
       };
 
       const notificationResult = await notificationService.sendReferralNotification(
-        referral.referredToDoctor._id.toString(),
+        referral.referredDoctor._id.toString(),
         referralData
       );
 
@@ -55,16 +55,16 @@ router.get('/', auth, async (req, res) => {
     if (type === 'sent') {
       query.referringDoctor = req.user._id;
     } else if (type === 'received') {
-      query.referredToDoctor = req.user._id;
+      query.referredDoctor = req.user._id;
     } else {
       query.$or = [
         { referringDoctor: req.user._id },
-        { referredToDoctor: req.user._id }
+        { referredDoctor: req.user._id }
       ];
     }
 
     const referrals = await Referral.find(query)
-      .populate('referringDoctor referredToDoctor', 'fullName specialization hospitalName')
+      .populate('referringDoctor referredDoctor', 'fullName specialization hospitalName')
       .sort({ createdAt: -1 });
 
     res.json(referrals);
@@ -77,7 +77,7 @@ router.get('/', auth, async (req, res) => {
 router.get('/:id', auth, async (req, res) => {
   try {
     const referral = await Referral.findById(req.params.id)
-      .populate('referringDoctor referredToDoctor', 'fullName specialization hospitalName');
+      .populate('referringDoctor referredDoctor', 'fullName specialization hospitalName');
 
     if (!referral) {
       return res.status(404).json({ message: 'Referral not found' });
@@ -85,7 +85,7 @@ router.get('/:id', auth, async (req, res) => {
 
     // Check if the user is involved in this referral
     if (!referral.referringDoctor._id.equals(req.user._id) && 
-        !referral.referredToDoctor._id.equals(req.user._id)) {
+        !referral.referredDoctor._id.equals(req.user._id)) {
       return res.status(403).json({ message: 'Not authorized to view this referral' });
     }
 
@@ -106,13 +106,13 @@ router.patch('/:id/status', auth, async (req, res) => {
     }
 
     // Only the referred doctor can update the status
-    if (!referral.referredToDoctor.equals(req.user._id)) {
+    if (!referral.referredDoctor.equals(req.user._id)) {
       return res.status(403).json({ message: 'Not authorized to update this referral' });
     }
 
     referral.status = status;
     await referral.save();
-    await referral.populate('referringDoctor referredToDoctor', 'fullName specialization hospitalName');
+    await referral.populate('referringDoctor referredDoctor', 'fullName specialization hospitalName');
 
     // Send notification to the referring doctor about status update
     if (referral.referringDoctor && referral.referringDoctor._id.toString() !== req.user._id.toString()) {
@@ -149,13 +149,13 @@ router.patch('/:id/notes', auth, async (req, res) => {
 
     // Both doctors can add notes
     if (!referral.referringDoctor.equals(req.user._id) && 
-        !referral.referredToDoctor.equals(req.user._id)) {
+        !referral.referredDoctor.equals(req.user._id)) {
       return res.status(403).json({ message: 'Not authorized to update this referral' });
     }
 
     referral.notes = notes;
     await referral.save();
-    await referral.populate('referringDoctor referredToDoctor', 'fullName specialization hospitalName');
+    await referral.populate('referringDoctor referredDoctor', 'fullName specialization hospitalName');
 
     res.json(referral);
   } catch (error) {
@@ -169,10 +169,10 @@ router.get('/stats/summary', auth, async (req, res) => {
     const stats = await Referral.aggregate([
       {
         $match: {
-          $or: [
-            { referringDoctor: req.user._id },
-            { referredToDoctor: req.user._id }
-          ]
+                  $or: [
+          { referringDoctor: req.user._id },
+          { referredDoctor: req.user._id }
+        ]
         }
       },
       {
