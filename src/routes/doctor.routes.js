@@ -1,4 +1,5 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const User = require('../models/user.model');
 const auth = require('../middleware/auth');
 const router = express.Router();
@@ -87,7 +88,7 @@ router.get('/stats/:id', auth, async (req, res) => {
   try {
     const stats = await User.aggregate([
       {
-        $match: { _id: mongoose.Types.ObjectId(req.params.id) }
+        $match: { _id: new mongoose.Types.ObjectId(req.params.id) }
       },
       {
         $lookup: {

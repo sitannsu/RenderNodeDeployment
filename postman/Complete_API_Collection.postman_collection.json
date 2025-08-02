@@ -1,6 +1,6 @@
 {
   "info": {
-    "name": "Kappu Doctor App - Complete API Collection 5",
+    "name": "Kappu Doctor App - Complete API Collection 6",
     "description": "Complete API collection for Kappu Doctor App including doctor, patient, admin, and referral management",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
@@ -616,6 +616,25 @@
           "response": []
         },
         {
+          "name": "Get Doctor Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/doctors/stats/{{doctor_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "doctors", "stats", "{{doctor_id}}"]
+            },
+            "description": "Returns doctor-specific statistics including total referrals sent/received, pending referrals, and unread messages"
+          },
+          "response": []
+        },
+        {
           "name": "Get Admin Dashboard",
           "request": {
             "method": "GET",
@@ -982,4 +1001,4 @@
       ]
     }
   ]
-} 
+}
