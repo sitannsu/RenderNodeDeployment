@@ -81,31 +81,60 @@ router.post('/request-otp', async (req, res) => {
 router.post('/verify-otp', async (req, res) => {
   try {
     const { phoneNumber, otp, fcmToken, deviceType, appVersion } = req.body;
+    console.log('Verify OTP Request:', { phoneNumber, otp, deviceType, appVersion });
 
     const patient = await Patient.findOne({ phoneNumber });
+    console.log('Found patient:', { 
+      found: !!patient, 
+      phoneNumber,
+      patientOtp: patient?.otp,
+      verified: patient?.verified
+    });
+
     if (!patient) {
       return res.status(400).json({ message: 'Invalid phone number' });
     }
 
-    console.log('Verifying OTP:', { phoneNumber, otp, env: process.env.NODE_ENV });
+    console.log('Environment:', { 
+      NODE_ENV: process.env.NODE_ENV,
+      isDev: process.env.NODE_ENV === 'development'
+    });
 
     // In development mode, always accept 123456 as valid OTP
     if (process.env.NODE_ENV === 'development') {
+      console.log('Development mode OTP check:', { 
+        receivedOtp: otp,
+        isValid: otp === '123456'
+      });
+      
       if (otp !== '123456') {
-        console.log('Invalid test OTP:', { receivedOtp: otp });
-        return res.status(400).json({ message: 'Invalid OTP. In development, use 123456.' });
+        return res.status(400).json({ 
+          message: 'Invalid OTP. In development, use 123456.',
+          debug: { receivedOtp: otp }
+        });
       }
       console.log('Valid test OTP accepted');
     } else {
       // In production, verify actual OTP
+      console.log('Production OTP check:', {
+        hasOtp: !!patient.otp,
+        storedOtp: patient.otp?.code,
+        otpExpiry: patient.otp?.expiresAt,
+        isExpired: patient.otp?.expiresAt < new Date()
+      });
+
       if (!patient.otp || !patient.otp.code || patient.otp.expiresAt < new Date()) {
-        console.log('OTP expired or missing:', { storedOtp: patient.otp });
         return res.status(400).json({ message: 'OTP expired' });
       }
 
       if (patient.otp.code !== otp) {
-        console.log('Invalid OTP:', { storedOtp: patient.otp.code, receivedOtp: otp });
-        return res.status(400).json({ message: 'Invalid OTP' });
+        return res.status(400).json({ 
+          message: 'Invalid OTP',
+          debug: { 
+            storedOtp: patient.otp.code, 
+            receivedOtp: otp 
+          }
+        });
       }
     }
 
