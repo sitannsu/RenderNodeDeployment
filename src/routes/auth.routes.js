@@ -179,78 +179,36 @@ router.post('/doctor/register', async (req, res) => {
 // Universal login (works for all user types)
 router.post('/login', async (req, res) => {
   try {
-    const { email, password, fcmToken, deviceType, appVersion } = req.body;
+    const { email, password } = req.body;
 
-    // Find user and include password for comparison
+    // Find user by email
     const user = await User.findOne({ email }).select('+password');
     if (!user) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-    // Check if user has a password set
-    if (!user.password) {
-      // For users without password (like doctors who registered without password)
-      // Allow login with just email for now, but suggest setting a password
-      
-      // Update FCM token and device info
-      if (fcmToken) {
-        user.fcmToken = fcmToken;
-        user.deviceInfo.deviceType = deviceType || 'android';
-        user.deviceInfo.appVersion = appVersion;
-        user.deviceInfo.lastLoginAt = new Date();
-        await user.save({ validateBeforeSave: false });
-      }
-
-      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-        expiresIn: '30d'
-      });
-
-      return res.json({
-        token,
-        user: {
-          id: user._id,
-          fullName: user.fullName,
-          email: user.email,
-          role: user.role,
-          specialization: user.specialization,
-          hospitalName: user.hospitalName1
-        },
-        message: 'Login successful. Please set a password for security.',
-        requiresPasswordSetup: true
-      });
-    }
-
-    // Check password for users who have one set
+    // Check password
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-    // Update FCM token and device info
-    if (fcmToken) {
-      user.fcmToken = fcmToken;
-      user.deviceInfo.deviceType = deviceType || 'android';
-      user.deviceInfo.appVersion = appVersion;
-      user.deviceInfo.lastLoginAt = new Date();
-      await user.save();
-    }
-
     // Generate JWT token
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: '30d'
-    });
+    const token = jwt.sign(
+      { id: user._id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: '30d' }
+    );
 
-    res.json({
+    // Return success response
+    res.status(200).json({
       token,
       user: {
         id: user._id,
-        fullName: user.fullName,
         email: user.email,
-        role: user.role,
-        specialization: user.specialization,
-        hospitalName: user.hospitalName1
+        role: user.role
       },
-      requiresPasswordSetup: false
+      message: 'Login successful'
     });
   } catch (error) {
     res.status(400).json({ message: error.message });
