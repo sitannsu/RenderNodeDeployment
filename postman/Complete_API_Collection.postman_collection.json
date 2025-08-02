@@ -635,6 +635,25 @@
           "response": []
         },
         {
+          "name": "Get Doctor Stats Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/doctors/statsDetails/{{doctor_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "doctors", "statsDetails", "{{doctor_id}}"]
+            },
+            "description": "Returns doctor-specific statistics including total referrals sent/received, pending referrals, unread messages, and arrays of referring and referred doctors"
+          },
+          "response": []
+        },
+        {
           "name": "Get Admin Dashboard",
           "request": {
             "method": "GET",

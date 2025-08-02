@@ -135,7 +135,9 @@ router.get('/stats/:id', auth, async (req, res) => {
                 cond: { $eq: ['$$message.read', false] }
               }
             }
-          }
+          },
+          referredDoctors: 1,
+          referringDoctors: 1
         }
       }
     ]);
@@ -144,7 +146,167 @@ router.get('/stats/:id', auth, async (req, res) => {
       totalReferralsSent: 0,
       totalReferralsReceived: 0,
       pendingReferrals: 0,
-      unreadMessages: 0
+      unreadMessages: 0,
+      referredDoctors: [],
+      referringDoctors: []
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Get detailed doctor statistics with referral doctor lists
+router.get('/statsDetails/:id', auth, async (req, res) => {
+  try {
+    const stats = await User.aggregate([
+      {
+        $match: { _id: new mongoose.Types.ObjectId(req.params.id) }
+      },
+      {
+        $lookup: {
+          from: 'referrals',
+          localField: '_id',
+          foreignField: 'referringDoctor',
+          as: 'referralsSent'
+        }
+      },
+      {
+        $lookup: {
+          from: 'referrals',
+          localField: '_id',
+          foreignField: 'referredDoctor',
+          as: 'referralsReceived'
+        }
+      },
+      {
+        $lookup: {
+          from: 'messages',
+          localField: '_id',
+          foreignField: 'recipient',
+          as: 'messagesReceived'
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          let: { referralsSent: '$referralsSent' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $in: ['$_id', {
+                    $map: {
+                      input: '$$referralsSent',
+                      as: 'ref',
+                      in: '$$ref.referredDoctor'
+                    }
+                  }]
+                }
+              }
+            },
+            {
+              $project: {
+                _id: 1,
+                fullName: 1,
+                specialization: 1,
+                hospitalName1: 1,
+                contactNo: 1,
+                profileImage: {
+                  $ifNull: [
+                    '$profileImage',
+                    {
+                      $concat: [
+                        'https://ui-avatars.com/api/?name=',
+                        { $replaceAll: { input: '$fullName', find: ' ', replacement: '+' } },
+                        '&background=random'
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          as: 'referredDoctors'
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          let: { referralsReceived: '$referralsReceived' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $in: ['$_id', {
+                    $map: {
+                      input: '$$referralsReceived',
+                      as: 'ref',
+                      in: '$$ref.referringDoctor'
+                    }
+                  }]
+                }
+              }
+            },
+            {
+              $project: {
+                _id: 1,
+                fullName: 1,
+                specialization: 1,
+                hospitalName1: 1,
+                contactNo: 1,
+                profileImage: {
+                  $ifNull: [
+                    '$profileImage',
+                    {
+                      $concat: [
+                        'https://ui-avatars.com/api/?name=',
+                        { $replaceAll: { input: '$fullName', find: ' ', replacement: '+' } },
+                        '&background=random'
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          as: 'referringDoctors'
+        }
+      },
+      {
+        $project: {
+          totalReferralsSent: { $size: '$referralsSent' },
+          totalReferralsReceived: { $size: '$referralsReceived' },
+          pendingReferrals: {
+            $size: {
+              $filter: {
+                input: '$referralsReceived',
+                as: 'referral',
+                cond: { $eq: ['$$referral.status', 'pending'] }
+              }
+            }
+          },
+          unreadMessages: {
+            $size: {
+              $filter: {
+                input: '$messagesReceived',
+                as: 'message',
+                cond: { $eq: ['$$message.read', false] }
+              }
+            }
+          },
+          referredDoctors: 1,
+          referringDoctors: 1
+        }
+      }
+    ]);
+
+    res.json(stats[0] || {
+      totalReferralsSent: 0,
+      totalReferralsReceived: 0,
+      pendingReferrals: 0,
+      unreadMessages: 0,
+      referredDoctors: [],
+      referringDoctors: []
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
