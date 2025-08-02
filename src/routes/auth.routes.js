@@ -198,7 +198,7 @@ router.post('/login', async (req, res) => {
         user.deviceInfo.deviceType = deviceType || 'android';
         user.deviceInfo.appVersion = appVersion;
         user.deviceInfo.lastLoginAt = new Date();
-        await user.save();
+        await user.save({ validateBeforeSave: false });
       }
 
       const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
@@ -283,7 +283,7 @@ router.post('/doctor/login', async (req, res) => {
       user.deviceInfo.deviceType = deviceType || 'android';
       user.deviceInfo.appVersion = appVersion;
       user.deviceInfo.lastLoginAt = new Date();
-      await user.save();
+      await user.save({ validateBeforeSave: false });
     }
 
     // Generate JWT token
@@ -343,7 +343,7 @@ router.post('/admin/login', async (req, res) => {
       user.deviceInfo.deviceType = deviceType || 'android';
       user.deviceInfo.appVersion = appVersion;
       user.deviceInfo.lastLoginAt = new Date();
-      await user.save();
+      await user.save({ validateBeforeSave: false });
     }
 
     // Generate JWT token
@@ -417,7 +417,7 @@ router.post('/update-fcm-token', auth, async (req, res) => {
     req.user.deviceInfo.deviceType = deviceType || 'android';
     req.user.deviceInfo.appVersion = appVersion;
     req.user.deviceInfo.lastLoginAt = new Date();
-    await req.user.save();
+    await req.user.save({ validateBeforeSave: false });
 
     res.json({
       message: 'FCM token updated successfully',
