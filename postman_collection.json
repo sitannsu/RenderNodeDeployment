@@ -205,7 +205,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"referredToDoctor\": \"{{doctorId}}\",\n  \"patientName\": \"John Doe\",\n  \"patientAge\": 45,\n  \"patientGender\": \"male\",\n  \"reason\": \"Cardiac consultation required\",\n  \"notes\": \"Patient has a history of hypertension\"\n}"
+              "raw": "{\n  \"referredDoctor\": \"{{doctorId}}\",\n  \"patientName\": \"John Doe\",\n  \"patientAge\": 45,\n  \"patientGender\": \"male\",\n  \"reason\": \"Cardiac consultation required\",\n  \"notes\": \"Patient has a history of hypertension\"\n}"
             }
           },
           "response": [
@@ -226,7 +226,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"referredToDoctor\": \"{{doctorId}}\",\n  \"patientName\": \"John Doe\",\n  \"patientAge\": 45,\n  \"patientGender\": \"male\",\n  \"reason\": \"Cardiac consultation required\",\n  \"notes\": \"Patient has a history of hypertension\"\n}"
+                  "raw": "{\n  \"referredDoctor\": \"{{doctorId}}\",\n  \"patientName\": \"John Doe\",\n  \"patientAge\": 45,\n  \"patientGender\": \"male\",\n  \"reason\": \"Cardiac consultation required\",\n  \"notes\": \"Patient has a history of hypertension\"\n}"
                 }
               },
               "status": "Created",
@@ -237,7 +237,7 @@
                   "value": "application/json"
                 }
               ],
-              "body": "{\n  \"_id\": \"60f1a7b9e6b7c2001f3e9c42\",\n  \"referringDoctor\": {\n    \"_id\": \"60f1a7b9e6b7c2001f3e9c40\",\n    \"fullName\": \"Dr. Jane Smith\",\n    \"specialization\": \"General Medicine\",\n    \"hospitalName\": \"City Hospital\"\n  },\n  \"referredToDoctor\": {\n    \"_id\": \"60f1a7b9e6b7c2001f3e9c41\",\n    \"fullName\": \"Dr. John Doe\",\n    \"specialization\": \"Cardiology\",\n    \"hospitalName\": \"Heart Care Center\"\n  },\n  \"patientName\": \"John Doe\",\n  \"patientAge\": 45,\n  \"patientGender\": \"male\",\n  \"reason\": \"Cardiac consultation required\",\n  \"notes\": \"Patient has a history of hypertension\",\n  \"status\": \"pending\",\n  \"createdAt\": \"2023-07-16T12:34:56.789Z\",\n  \"updatedAt\": \"2023-07-16T12:34:56.789Z\"\n}"
+              "body": "{\n  \"_id\": \"60f1a7b9e6b7c2001f3e9c42\",\n  \"referringDoctor\": {\n    \"_id\": \"60f1a7b9e6b7c2001f3e9c40\",\n    \"fullName\": \"Dr. Jane Smith\",\n    \"specialization\": \"General Medicine\",\n    \"hospitalName\": \"City Hospital\"\n  },\n  \"referredDoctor\": {\n    \"_id\": \"60f1a7b9e6b7c2001f3e9c41\",\n    \"fullName\": \"Dr. John Doe\",\n    \"specialization\": \"Cardiology\",\n    \"hospitalName\": \"Heart Care Center\"\n  },\n  \"patientName\": \"John Doe\",\n  \"patientAge\": 45,\n  \"patientGender\": \"male\",\n  \"reason\": \"Cardiac consultation required\",\n  \"notes\": \"Patient has a history of hypertension\",\n  \"status\": \"pending\",\n  \"createdAt\": \"2023-07-16T12:34:56.789Z\",\n  \"updatedAt\": \"2023-07-16T12:34:56.789Z\"\n}"
             }
           ]
         },
@@ -259,7 +259,7 @@
               "status": "OK",
               "code": 200,
               "_postman_previewlanguage": "json",
-              "body": "{\n  \"sent\": [\n    {\n      \"id\": \"referral_12345\",\n      \"patientName\": \"Patient A\",\n      \"referredToDoctor\": {\n        \"id\": \"doctor_67890\",\n        \"name\": \"Dr. Jane Smith\",\n        \"specialization\": \"Neurology\"\n      },\n      \"status\": \"accepted\",\n      \"createdAt\": \"2025-07-30T08:30:00Z\"\n    }\n  ],\n  \"received\": [\n    {\n      \"id\": \"referral_67890\",\n      \"patientName\": \"Patient B\",\n      \"referringDoctor\": {\n        \"id\": \"doctor_13579\",\n        \"name\": \"Dr. Bob Wilson\",\n        \"specialization\": \"Cardiology\"\n      },\n      \"status\": \"pending\",\n      \"createdAt\": \"2025-07-30T09:15:00Z\"\n    }\n  ]\n}"
+              "body": "{\n  \"sent\": [\n    {\n      \"id\": \"referral_12345\",\n      \"patientName\": \"Patient A\",\n      \"referredDoctor\": {\n        \"id\": \"doctor_67890\",\n        \"name\": \"Dr. Jane Smith\",\n        \"specialization\": \"Neurology\"\n      },\n      \"status\": \"accepted\",\n      \"createdAt\": \"2025-07-30T08:30:00Z\"\n    }\n  ],\n  \"received\": [\n    {\n      \"id\": \"referral_67890\",\n      \"patientName\": \"Patient B\",\n      \"referringDoctor\": {\n        \"id\": \"doctor_13579\",\n        \"name\": \"Dr. Bob Wilson\",\n        \"specialization\": \"Cardiology\"\n      },\n      \"status\": \"pending\",\n      \"createdAt\": \"2025-07-30T09:15:00Z\"\n    }\n  ]\n}"
             }
           ]
         }

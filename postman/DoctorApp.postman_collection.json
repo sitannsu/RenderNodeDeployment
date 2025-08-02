@@ -417,9 +417,9 @@
           "request": {
             "method": "POST",
             "url": {
-              "raw": "{{base_url}}/patient/auth/request-otp",
+              "raw": "{{base_url}}/api/patient/auth/request-otp",
               "host": ["{{base_url}}"],
-              "path": ["patient", "auth", "request-otp"]
+              "path": ["api", "patient", "auth", "request-otp"]
             },
             "body": {
               "mode": "raw",
@@ -437,9 +437,9 @@
           "request": {
             "method": "POST",
             "url": {
-              "raw": "{{base_url}}/patient/auth/verify-otp",
+              "raw": "{{base_url}}/api/patient/auth/verify-otp",
               "host": ["{{base_url}}"],
-              "path": ["patient", "auth", "verify-otp"]
+              "path": ["api", "patient", "auth", "verify-otp"]
             },
             "body": {
               "mode": "raw",
@@ -453,21 +453,21 @@
           }
         },
         {
-          "name": "Get Patient Profile",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{patient_token}}"
+                      "name": "Get Patient Profile",
+            "request": {
+              "method": "GET",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{patient_token}}"
+                }
+              ],
+              "url": {
+                "raw": "{{base_url}}/api/patient/auth/profile",
+                "host": ["{{base_url}}"],
+                "path": ["api", "patient", "auth", "profile"]
               }
-            ],
-            "url": {
-              "raw": "{{base_url}}/patient/auth/profile",
-              "host": ["{{base_url}}"],
-              "path": ["patient", "auth", "profile"]
             }
-          }
         },
         {
           "name": "Update Patient Profile",
@@ -480,9 +480,9 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/patient/auth/profile",
+              "raw": "{{base_url}}/api/patient/auth/profile",
               "host": ["{{base_url}}"],
-              "path": ["patient", "auth", "profile"]
+              "path": ["api", "patient", "auth", "profile"]
             },
             "body": {
               "mode": "raw",
@@ -492,6 +492,36 @@
                   "language": "json"
                 }
               }
+            }
+          }
+        },
+        {
+          "name": "Update Patient FCM Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patient_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"fcmToken\": \"new_fcm_token_here\",\n    \"deviceType\": \"android\",\n    \"appVersion\": \"1.0.0\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/patient/auth/update-fcm-token",
+              "host": ["{{base_url}}"],
+              "path": ["api", "patient", "auth", "update-fcm-token"]
             }
           }
         }
@@ -675,7 +705,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"referredToDoctor\": \"doctor_id\",\n    \"patientName\": \"John Patient\",\n    \"reason\": \"Specialized consultation needed\",\n    \"notes\": \"Patient history and current condition\"\n}",
+              "raw": "{\n    \"referredDoctor\": \"doctor_id\",\n    \"patientName\": \"John Patient\",\n    \"reason\": \"Specialized consultation needed\",\n    \"notes\": \"Patient history and current condition\"\n}",
               "options": {
                 "raw": {
                   "language": "json"

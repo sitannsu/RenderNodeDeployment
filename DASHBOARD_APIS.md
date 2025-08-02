@@ -83,7 +83,7 @@ GET /api/dashboard/activity?limit=10
       "data": {
         "patientName": "Jane Doe",
         "referringDoctor": "Dr. Alice Johnson",
-        "referredToDoctor": "Dr. Bob Wilson",
+        "referredDoctor": "Dr. Bob Wilson",
         "status": "pending",
         "date": "2024-01-15T09:15:00.000Z"
       },

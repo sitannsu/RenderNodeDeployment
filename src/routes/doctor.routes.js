@@ -101,7 +101,7 @@ router.get('/stats/:id', auth, async (req, res) => {
         $lookup: {
           from: 'referrals',
           localField: '_id',
-          foreignField: 'referredToDoctor',
+          foreignField: 'referredDoctor',
           as: 'referralsReceived'
         }
       },

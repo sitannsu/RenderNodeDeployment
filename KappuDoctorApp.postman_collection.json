@@ -197,7 +197,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"patientName\": \"Jane Smith\",\n    \"patientAge\": 45,\n    \"patientGender\": \"female\",\n    \"diagnosis\": \"Hypertension\",\n    \"reason\": \"Specialist consultation needed\",\n    \"urgency\": \"medium\",\n    \"referredToDoctor\": \"doctor_id_here\",\n    \"medicalHistory\": \"No significant history\",\n    \"currentMedications\": [\n        {\n            \"name\": \"Amlodipine\",\n            \"dosage\": \"5mg\",\n            \"frequency\": \"Once daily\"\n        }\n    ],\n    \"notes\": \"Patient has been experiencing elevated blood pressure for 3 months\"\n}"
+              "raw": "{\n    \"patientName\": \"Jane Smith\",\n    \"patientAge\": 45,\n    \"patientGender\": \"female\",\n    \"diagnosis\": \"Hypertension\",\n    \"reason\": \"Specialist consultation needed\",\n    \"urgency\": \"medium\",\n    \"referredDoctor\": \"doctor_id_here\",\n    \"medicalHistory\": \"No significant history\",\n    \"currentMedications\": [\n        {\n            \"name\": \"Amlodipine\",\n            \"dosage\": \"5mg\",\n            \"frequency\": \"Once daily\"\n        }\n    ],\n    \"notes\": \"Patient has been experiencing elevated blood pressure for 3 months\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/referrals",

@@ -77,10 +77,10 @@ router.post('/request-otp', async (req, res) => {
   }
 });
 
-// Verify OTP and complete registration/login
+// Verify OTP and login patient
 router.post('/verify-otp', async (req, res) => {
   try {
-    const { phoneNumber, otp, name, email, age, gender, address } = req.body;
+    const { phoneNumber, otp, fcmToken, deviceType, appVersion } = req.body;
 
     const patient = await Patient.findOne({ phoneNumber });
     if (!patient) {
@@ -109,12 +109,15 @@ router.post('/verify-otp', async (req, res) => {
       }
     }
 
-    // Update patient details if provided
-    if (name) patient.name = name;
-    if (email) patient.email = email;
-    if (age) patient.age = age;
-    if (gender) patient.gender = gender;
-    if (address) patient.address = address;
+    // Update FCM token and device info if provided
+    if (fcmToken) {
+      patient.fcmToken = fcmToken;
+      patient.deviceInfo = {
+        deviceType: deviceType || 'android',
+        appVersion: appVersion,
+        lastLoginAt: new Date()
+      };
+    }
 
     // Clear OTP and mark as verified
     patient.otp = undefined;
@@ -134,6 +137,37 @@ router.post('/verify-otp', async (req, res) => {
         phoneNumber: patient.phoneNumber,
         email: patient.email,
         verified: patient.verified
+      },
+      message: 'Patient login successful'
+    });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// Update FCM token
+router.post('/update-fcm-token', patientAuth, async (req, res) => {
+  try {
+    const { fcmToken, deviceType, appVersion } = req.body;
+
+    if (!fcmToken) {
+      return res.status(400).json({ message: 'FCM token is required' });
+    }
+
+    req.patient.fcmToken = fcmToken;
+    req.patient.deviceInfo = {
+      deviceType: deviceType || 'android',
+      appVersion: appVersion,
+      lastLoginAt: new Date()
+    };
+    await req.patient.save();
+
+    res.json({ 
+      message: 'FCM token updated successfully',
+      patient: {
+        id: req.patient._id,
+        phoneNumber: req.patient.phoneNumber,
+        fcmToken: req.patient.fcmToken
       }
     });
   } catch (error) {
@@ -145,7 +179,7 @@ router.post('/verify-otp', async (req, res) => {
 router.patch('/profile', patientAuth, async (req, res) => {
   try {
     const updates = Object.keys(req.body);
-    const allowedUpdates = ['name', 'email', 'age', 'gender', 'address', 'fcmToken'];
+    const allowedUpdates = ['name', 'email', 'age', 'gender', 'address'];
     
     const isValidOperation = updates.every(update => allowedUpdates.includes(update));
     if (!isValidOperation) {

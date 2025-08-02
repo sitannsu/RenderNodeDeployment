@@ -227,64 +227,38 @@ POST /api/auth/login
 
 ---
 
-## 3. Patient Registration
+## 3. Patient Authentication (OTP-based)
 
-### Endpoint
+### 3.1 Request OTP
 ```
-POST /api/auth/patient/register
+POST /api/patient/auth/request-otp
 ```
 
 ### Request Body
 ```json
 {
-  "firstName": "Jane",
-  "lastName": "Smith",
-  "middleName": "",
-  "gender": "female",
-  "dateOfBirth": "1990-05-15",
-  "contactNumber": "+911234567892",
-  "email": "jane.smith@example.com",
-  "address": {
-    "city": "Delhi",
-    "state": "Delhi",
-    "country": "India"
-  },
-  "allowContactVisibility": false
+  "phoneNumber": "+911234567890"
 }
 ```
 
 ### Response
 ```json
 {
-  "message": "Patient registered successfully",
-  "patient": {
-    "_id": "patient_id",
-    "firstName": "Jane",
-    "lastName": "Smith",
-    "fullName": "Jane Smith",
-    "gender": "female",
-    "email": "jane.smith@example.com",
-    "role": "patient",
-    "profileCompletion": 75
-  },
-  "profileCompletion": 75
+  "message": "OTP sent successfully",
+  "otp": "123456"
 }
 ```
 
----
-
-## 4. Patient Login
-
-### Endpoint
+### 3.2 Verify OTP and Login
 ```
-POST /api/auth/patient/login
+POST /api/patient/auth/verify-otp
 ```
 
 ### Request Body
 ```json
 {
-  "email": "jane.smith@example.com",
-  "password": "securePassword123",
+  "phoneNumber": "+911234567890",
+  "otp": "123456",
   "fcmToken": "fcm_token_here",
   "deviceType": "android",
   "appVersion": "1.0.0"
@@ -295,14 +269,113 @@ POST /api/auth/patient/login
 ```json
 {
   "token": "jwt_token_here",
-  "user": {
-    "id": "user_id",
-    "fullName": "Jane Smith",
-    "email": "jane.smith@example.com",
-    "role": "patient",
-    "contactNumber": "+911234567892"
+  "patient": {
+    "id": "patient_id",
+    "name": "John Doe",
+    "phoneNumber": "+911234567890",
+    "email": "john@example.com",
+    "verified": true
   },
-  "requiresPasswordSetup": false
+  "message": "Patient login successful"
+}
+```
+
+### 3.3 Update FCM Token
+```
+POST /api/patient/auth/update-fcm-token
+Authorization: Bearer <patient_token>
+```
+
+### Request Body
+```json
+{
+  "fcmToken": "new_fcm_token_here",
+  "deviceType": "android",
+  "appVersion": "1.0.0"
+}
+```
+
+### Response
+```json
+{
+  "message": "FCM token updated successfully",
+  "patient": {
+    "id": "patient_id",
+    "phoneNumber": "+911234567890",
+    "fcmToken": "new_fcm_token_here"
+  }
+}
+```
+
+### 3.4 Get Patient Profile
+```
+GET /api/patient/auth/profile
+Authorization: Bearer <patient_token>
+```
+
+### Response
+```json
+{
+  "id": "patient_id",
+  "name": "John Doe",
+  "phoneNumber": "+911234567890",
+  "email": "john@example.com",
+  "age": 30,
+  "gender": "male",
+  "address": {
+    "street": "123 Main St",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "pincode": "400001"
+  },
+  "verified": true,
+  "fcmToken": "fcm_token_here",
+  "deviceInfo": {
+    "deviceType": "android",
+    "appVersion": "1.0.0",
+    "lastLoginAt": "2024-01-15T10:30:00.000Z"
+  }
+}
+```
+
+### 3.5 Update Patient Profile
+```
+PATCH /api/patient/auth/profile
+Authorization: Bearer <patient_token>
+```
+
+### Request Body
+```json
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "age": 30,
+  "gender": "male",
+  "address": {
+    "street": "123 Main St",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "pincode": "400001"
+  }
+}
+```
+
+### Response
+```json
+{
+  "id": "patient_id",
+  "name": "John Doe",
+  "phoneNumber": "+911234567890",
+  "email": "john@example.com",
+  "age": 30,
+  "gender": "male",
+  "address": {
+    "street": "123 Main St",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "pincode": "400001"
+  },
+  "verified": true
 }
 ```
 
@@ -851,7 +924,7 @@ Authorization: Bearer <admin_token>
       "data": {
         "patientName": "John Smith",
         "referringDoctor": "Dr. John Doe",
-        "referredToDoctor": "Dr. Jane Smith",
+        "referredDoctor": "Dr. Jane Smith",
         "status": "pending",
         "date": "2024-01-15T09:15:00.000Z"
       },

@@ -50,7 +50,18 @@ const patientSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-  fcmToken: String
+  fcmToken: String,
+  deviceInfo: {
+    deviceType: {
+      type: String,
+      default: 'android'
+    },
+    appVersion: String,
+    lastLoginAt: {
+      type: Date,
+      default: Date.now
+    }
+  }
 }, {
   timestamps: true
 });

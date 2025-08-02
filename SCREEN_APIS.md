@@ -85,7 +85,7 @@ Body: {
   "diagnosis": "string",
   "reason": "string",
   "urgency": "string",
-  "referredToDoctor": "string",
+  "referredDoctor": "string",
   "medicalHistory": "string",
   "currentMedications": [
     {

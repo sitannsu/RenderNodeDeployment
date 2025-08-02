@@ -170,72 +170,9 @@ router.post('/doctor/register', async (req, res) => {
   }
 });
 
-// ==================== PATIENT REGISTRATION ====================
-
-// Register new patient
-router.post('/patient/register', async (req, res) => {
-  try {
-    const {
-      firstName,
-      lastName,
-      middleName,
-      gender,
-      dateOfBirth,
-      contactNumber,
-      email,
-      password,
-      address,
-      allowContactVisibility = false
-    } = req.body;
-
-    // Check if email already exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: 'Email already registered' });
-    }
-
-    // Create new patient user
-    const patient = new User({
-      firstName,
-      middleName: middleName || '',
-      lastName,
-      fullName: `${firstName}${middleName ? ' ' + middleName : ''} ${lastName}`,
-      gender: gender ? gender.toLowerCase() : 'male',
-      dateOfBirth: new Date(dateOfBirth),
-      contactNumber1: contactNumber,
-      email,
-      password: password || 'defaultPassword123',
-      role: 'patient',
-      homeAddress: {
-        street: address?.street || '',
-        city: address?.city || '',
-        state: address?.state || '',
-        country: address?.country || '',
-        pincode: address?.pincode || ''
-      },
-      verificationStatus: 'pending',
-      profileCompletion: 0
-    });
-
-    // Calculate profile completion for patient
-    patient.profileCompletion = patient.calculateProfileCompletion();
-
-    await patient.save();
-
-    // Return response without password
-    const patientResponse = patient.toObject();
-    delete patientResponse.password;
-
-    res.status(201).json({
-      message: 'Patient registered successfully',
-      patient: patientResponse,
-      profileCompletion: patient.profileCompletion
-    });
-  } catch (error) {
-    console.error('Patient registration error:', error);
-    res.status(400).json({ message: error.message });
-  }
-});
+// ==================== PATIENT AUTHENTICATION ====================
+// Note: Patient authentication is handled via OTP in /api/patient-auth/ routes
+// No registration required - patients login directly with phone number and OTP
 
 // ==================== LOGIN ENDPOINTS ====================
 
@@ -372,66 +309,7 @@ router.post('/doctor/login', async (req, res) => {
   }
 });
 
-// Patient-specific login
-router.post('/patient/login', async (req, res) => {
-  try {
-    const { email, password, fcmToken, deviceType, appVersion } = req.body;
-
-    if (!email) {
-      return res.status(400).json({ message: 'Email is required' });
-    }
-
-    // Find user and include password for comparison
-    const user = await User.findOne({ email }).select('+password');
-    if (!user) {
-      return res.status(401).json({ message: 'Invalid email or password' });
-    }
-
-    // Check if user is a patient
-    if (user.role !== 'patient') {
-      return res.status(401).json({ message: 'This login is only for patients' });
-    }
-
-    // Check if user has a password set
-    if (!user.password) {
-      return res.status(401).json({ message: 'Password is required for patient login' });
-    }
-
-    // Check password
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid email or password' });
-    }
-
-    // Update FCM token and device info
-    if (fcmToken) {
-      user.fcmToken = fcmToken;
-      user.deviceInfo.deviceType = deviceType || 'android';
-      user.deviceInfo.appVersion = appVersion;
-      user.deviceInfo.lastLoginAt = new Date();
-      await user.save();
-    }
-
-    // Generate JWT token
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: '30d'
-    });
-
-    res.json({
-      token,
-      user: {
-        id: user._id,
-        fullName: user.fullName,
-        email: user.email,
-        role: user.role,
-        contactNumber: user.contactNumber1
-      },
-      requiresPasswordSetup: false
-    });
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-});
+// Note: Patient login is handled via OTP in /api/patient-auth/ routes
 
 // Admin login
 router.post('/admin/login', async (req, res) => {

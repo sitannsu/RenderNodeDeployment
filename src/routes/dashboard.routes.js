@@ -154,7 +154,7 @@ router.get('/activity', auth, isAdmin, async (req, res) => {
       // Recent referrals
       Referral.find()
         .populate('referringDoctor', 'fullName')
-        .populate('referredToDoctor', 'fullName')
+        .populate('referredDoctor', 'fullName')
         .select('patientName status createdAt')
         .sort({ createdAt: -1 })
         .limit(limit),
@@ -192,7 +192,7 @@ router.get('/activity', auth, isAdmin, async (req, res) => {
         data: {
           patientName: referral.patientName,
           referringDoctor: referral.referringDoctor?.fullName || 'Unknown',
-          referredToDoctor: referral.referredToDoctor?.fullName || 'Unknown',
+          referredDoctor: referral.referredDoctor?.fullName || 'Unknown',
           status: referral.status,
           date: referral.createdAt
         },
