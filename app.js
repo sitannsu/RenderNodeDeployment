@@ -1,4 +1,7 @@
 // Environment variables are loaded in server.js
+const dotenv = require("dotenv");
+dotenv.config({ path: "./environments/dev.env" });
+
 const express = require('express');
 const cors = require('cors');
 const authRoutes = require('./src/routes/auth.routes');
@@ -12,6 +15,7 @@ const uploadRoutes = require('./src/routes/upload.routes');
 const { router: patientAuthRoutes } = require('./src/routes/patient.auth.routes');
 const patientDoctorRoutes = require('./src/routes/patient.doctor.routes');
 const patientQueryRoutes = require('./src/routes/patient.query.routes');
+const adminRoutes = require('./src/routes/admin.routes');
 
 const app = express();
 const PORT = process.env.PORT || 5005;
@@ -26,6 +30,7 @@ app.use(express.json());
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/admin', adminRoutes);
 app.use('/api/doctors', doctorRoutes);
 app.use('/api/referrals', referralRoutes);
 app.use('/api/messages', messageRoutes);

@@ -1,8 +1,11 @@
 const mongoose = require("mongoose");
 
 const connectDatabase = () => {
+  const mongoUrl = process.env.MONGODB_URI;
+  console.log("MongoDB URL:", mongoUrl); // Added for debugging
+
   mongoose
-    .connect(process.env.MONGODB_URI, {
+    .connect(mongoUrl, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     })

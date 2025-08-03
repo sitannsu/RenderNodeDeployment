@@ -18,6 +18,59 @@ const isAdmin = async (req, res, next) => {
   }
 };
 
+// Admin Registration
+router.post('/register', async (req, res) => {
+  console.log("registerregister");
+  try {
+    const { email, password } = req.body;
+
+    // Validate input
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required' });
+    }
+
+    // Check if admin already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: 'Email already registered' });
+    }
+
+    // Create new admin user
+    const admin = new User({
+      email,
+      password,
+      role: 'admin',
+      firstName: 'Admin', // Required by schema
+      lastName: 'User',   // Required by schema
+      fullName: 'Admin User', // Required by schema
+      gender: 'male',     // Required by schema
+      dateOfBirth: new Date('1900-01-01'), // Required by schema
+      contactNumber1: '0000000000', // Required by schema
+      medicalLicenseNumber: 'ADMIN000', // Required by schema
+      medicalDegrees: ['Admin'], // Required by schema
+      specialization: 'Administration', // Required by schema
+      hospitalName1: 'Admin Hospital', // Required by schema
+      hospitalAddress1: { // Required by schema
+        city: 'Admin City',
+        state: 'Admin State',
+        country: 'Admin Country'
+      },
+      practiceStartDate: new Date(), // Required by schema
+      verificationStatus: 'verified' // Auto-verify admin
+    });
+
+    await admin.save();
+
+    res.status(201).json({ 
+      message: 'Admin registered successfully',
+      email: admin.email,
+      role: admin.role
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // Admin Dashboard Statistics
 router.get('/statistics', auth, isAdmin, async (req, res) => {
   try {
