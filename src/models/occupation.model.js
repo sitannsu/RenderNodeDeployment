@@ -3,27 +3,30 @@ const mongoose = require('mongoose');
 const occupationSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: [true, 'Occupation name is required'],
+    required: true,
     unique: true,
     trim: true
   },
   description: {
     type: String,
+    required: true,
     trim: true
   },
-  status: {
-    type: String,
-    enum: ['active', 'inactive'],
-    default: 'active'
+  doctorCount: {
+    type: Number,
+    default: 0
   },
-  createdBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
+  isActive: {
+    type: Boolean,
+    default: true
   }
 }, {
   timestamps: true
 });
 
+// Add text indexes for search
+occupationSchema.index({ name: 'text', description: 'text' });
+
 const Occupation = mongoose.model('Occupation', occupationSchema);
+
 module.exports = Occupation;

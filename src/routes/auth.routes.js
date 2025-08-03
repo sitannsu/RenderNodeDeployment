@@ -6,6 +6,51 @@ const PatientProfile = require('../models/patientProfile.model');
 const nmcService = require('../services/nmc.service');
 const router = express.Router();
 
+// General login route
+router.post('/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required' });
+    }
+
+    // Find user and include password for comparison
+    const user = await User.findOne({ email }).select('+password');
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
+
+    // Check password
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Invalid email or password' });
+    }
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: '30d' }
+    );
+
+    // Return success response
+    res.status(200).json({
+      token,
+      user: {
+        id: user._id,
+        email: user.email,
+        role: user.role,
+        fullName: user.fullName
+      },
+      message: 'Login successful'
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(400).json({ message: error.message });
+  }
+});
+
 // Middleware to protect routes
 const auth = async (req, res, next) => {
   try {

@@ -30,7 +30,7 @@ const advertisementSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: ['active', 'inactive', 'scheduled'],
-    default: 'scheduled'
+    default: 'active'
   },
   placement: {
     type: String,
@@ -40,7 +40,7 @@ const advertisementSchema = new mongoose.Schema({
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: false // Made optional
   }
 }, {
   timestamps: true
