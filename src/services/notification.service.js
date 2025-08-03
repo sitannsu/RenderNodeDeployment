@@ -61,17 +61,29 @@ class NotificationService {
             priority: 'high',
             defaultSound: true,
             defaultVibrateTimings: true
+          },
+          fcmOptions: {
+            analyticsLabel: 'kappudoctors_notification'
           }
         },
         apns: {
+          headers: {
+            'apns-priority': '10'
+          },
           payload: {
             aps: {
               sound: 'default',
-              badge: 1
+              badge: 1,
+              'mutable-content': 1
             }
+          },
+          fcmOptions: {
+            analyticsLabel: 'kappudoctors_notification'
           }
         }
       };
+
+      console.log('📱 Sending FCM message with token:', user.fcmToken);
 
       // Send notification
       const response = await messaging.send(message);

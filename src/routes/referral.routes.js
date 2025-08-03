@@ -18,6 +18,11 @@ router.post('/', auth, async (req, res) => {
     
     // Send notification to the referred doctor
     if (referral.referredDoctor) {
+      console.log('🔍 Preparing to send notification:');
+      console.log('- Referred Doctor ID:', referral.referredDoctor._id.toString());
+      console.log('- Referring Doctor:', req.user.fullName);
+      console.log('- Patient:', referral.patientName);
+      
       const referralData = {
         referralId: referral._id.toString(),
         referringDoctorId: req.user._id.toString(),
