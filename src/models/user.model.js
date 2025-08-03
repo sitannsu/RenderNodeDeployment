@@ -181,6 +181,17 @@ const userSchema = new mongoose.Schema({
     }
   },
   
+  // Referral System
+  myReferralCode: {
+    type: String,
+    unique: true,
+    sparse: true
+  },
+  referredBy: {
+    type: String,
+    trim: true
+  },
+  
   // System Fields
   password: {
     type: String,
@@ -225,10 +236,41 @@ const userSchema = new mongoose.Schema({
   timestamps: true
 });
 
+// Index for referral code lookups
+userSchema.index({ myReferralCode: 1 });
+
 // Hash password before saving
 userSchema.pre('save', async function(next) {
   if (!this.isModified('password') || !this.password) return next();
   this.password = await bcrypt.hash(this.password, 12);
+  next();
+});
+
+// Generate unique referral code before saving
+userSchema.pre('save', async function(next) {
+  if (!this.myReferralCode) {
+    // Generate a unique 8-character referral code
+    const generateCode = () => {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let code = '';
+      for (let i = 0; i < 8; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return code;
+    };
+
+    // Keep trying until we get a unique code
+    let code;
+    let isUnique = false;
+    while (!isUnique) {
+      code = generateCode();
+      const existingUser = await User.findOne({ myReferralCode: code });
+      if (!existingUser) {
+        isUnique = true;
+      }
+    }
+    this.myReferralCode = code;
+  }
   next();
 });
 

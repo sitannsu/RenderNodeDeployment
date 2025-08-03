@@ -295,7 +295,11 @@ router.get('/statsDetails/:id', auth, async (req, res) => {
             }
           },
           referredDoctors: 1,
-          referringDoctors: 1
+          referringDoctors: 1,
+          referralInfo: {
+            myReferralCode: 1,
+            referredBy: 1
+          }
         }
       }
     ]);
@@ -306,7 +310,11 @@ router.get('/statsDetails/:id', auth, async (req, res) => {
       pendingReferrals: 0,
       unreadMessages: 0,
       referredDoctors: [],
-      referringDoctors: []
+      referringDoctors: [],
+      referralInfo: {
+        myReferralCode: null,
+        referredBy: null
+      }
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

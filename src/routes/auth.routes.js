@@ -75,6 +75,32 @@ const auth = async (req, res, next) => {
 
 // ==================== DOCTOR REGISTRATION ====================
 
+// Verify referral code
+router.post('/verify-referral', async (req, res) => {
+  try {
+    const { referralCode } = req.body;
+
+    if (!referralCode) {
+      return res.status(400).json({ message: 'Referral code is required' });
+    }
+
+    const referrer = await User.findOne({ myReferralCode: referralCode });
+    if (!referrer) {
+      return res.status(404).json({ message: 'Invalid referral code' });
+    }
+
+    res.json({
+      isValid: true,
+      referrer: {
+        name: referrer.fullName,
+        role: referrer.role
+      }
+    });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
 // Register new doctor
 router.post('/doctor/register', async (req, res) => {
   try {
@@ -99,13 +125,22 @@ router.post('/doctor/register', async (req, res) => {
       treatedDiseases,
       documents,
       communityDetails,
-      communicationPreferences
+      communicationPreferences,
+      referralCode
     } = req.body;
 
     // Check if email already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: 'Email already registered' });
+    }
+
+    // Verify referral code if provided
+    if (referralCode) {
+      const referrer = await User.findOne({ myReferralCode: referralCode });
+      if (!referrer) {
+        return res.status(400).json({ message: 'Invalid referral code' });
+      }
     }
 
     // Process hospitals array to extract first hospital as primary
@@ -192,7 +227,8 @@ router.post('/doctor/register', async (req, res) => {
         emailCommunication: communicationPreferences?.emailCommunication || true
       },
       verificationStatus: 'pending',
-      profileCompletion: 0 // Will be calculated after save
+      profileCompletion: 0, // Will be calculated after save
+      referredBy: referralCode || ''
     });
 
     // Calculate profile completion
@@ -447,9 +483,15 @@ router.get('/profile', auth, async (req, res) => {
     // Calculate current profile completion
     const profileCompletion = user.calculateProfileCompletion();
     
-    // Create response object with profile completion
+    // Create response object with profile completion and referral code
     const userResponse = user.toObject();
     userResponse.profileCompletion = profileCompletion;
+    
+    // Add referral code info
+    userResponse.referralInfo = {
+      myReferralCode: user.myReferralCode,
+      referredBy: user.referredBy || null
+    };
     
     res.json({
       user: userResponse,
