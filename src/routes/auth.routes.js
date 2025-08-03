@@ -41,7 +41,9 @@ router.post('/login', async (req, res) => {
         id: user._id,
         email: user.email,
         role: user.role,
-        fullName: user.fullName
+        fullName: user.fullName,
+        myReferralCode: user.myReferralCode,
+        referredBy: user.referredBy
       },
       message: 'Login successful'
     });
@@ -287,7 +289,10 @@ router.post('/login', async (req, res) => {
       user: {
         id: user._id,
         email: user.email,
-        role: user.role
+        role: user.role,
+        fullName: user.fullName,
+        myReferralCode: user.myReferralCode,
+        referredBy: user.referredBy
       },
       message: 'Login successful'
     });
@@ -334,9 +339,11 @@ router.post('/doctor/login', async (req, res) => {
       token,
       user: {
         id: user._id,
-        fullName: user.fullName,
         email: user.email,
         role: user.role,
+        fullName: user.fullName,
+        myReferralCode: user.myReferralCode,
+        referredBy: user.referredBy,
         specialization: user.specialization,
         hospitalName: user.hospitalName1
       },
@@ -394,11 +401,13 @@ router.post('/admin/login', async (req, res) => {
       token,
       user: {
         id: user._id,
-        fullName: user.fullName,
         email: user.email,
-        role: user.role
+        role: user.role,
+        fullName: user.fullName,
+        myReferralCode: user.myReferralCode,
+        referredBy: user.referredBy
       },
-      requiresPasswordSetup: false
+      message: 'Login successful'
     });
   } catch (error) {
     res.status(400).json({ message: error.message });
