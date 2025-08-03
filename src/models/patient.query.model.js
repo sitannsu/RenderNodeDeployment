@@ -12,12 +12,11 @@ const patientQuerySchema = new mongoose.Schema({
     required: true
   },
   symptoms: {
-    type: String,
-    required: [true, 'Symptoms description is required']
+    type: String
   },
   duration: {
     type: String,
-    required: [true, 'Duration of symptoms is required']
+   
   },
   previousTreatments: {
     type: String
@@ -42,7 +41,7 @@ const patientQuerySchema = new mongoose.Schema({
   },
   consultationType: {
     type: String,
-    enum: ['online', 'in-person'],
+    // enum: ['online', 'in-person'],
     required: true
   },
   appointmentTime: {
