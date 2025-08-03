@@ -3,12 +3,12 @@ const mongoose = require('mongoose');
 const referralSchema = new mongoose.Schema({
   referringDoctor: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'DoctorProfile',
+    ref: 'User',
     required: true
   },
   referredDoctor: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'DoctorProfile',
+    ref: 'User',
     required: true
   },
   patientName: {
@@ -18,7 +18,7 @@ const referralSchema = new mongoose.Schema({
   },
   patientPhone: {
     type: String,
-    required: [true, 'Patient phone number is required'],
+ 
     trim: true
   },
   reason: {

@@ -13,9 +13,10 @@ class NotificationService {
    * @returns {Promise<Object>} - Result of sending notification
    */
   async sendNotificationToUser(userId, notification, data = {}, type = 'system', relatedData = {}) {
+    let notificationRecord;
     try {
       // Create notification record in database
-      const notificationRecord = new Notification({
+      notificationRecord = new Notification({
         recipient: userId,
         type: type,
         title: notification.title,
