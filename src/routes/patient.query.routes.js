@@ -68,24 +68,34 @@ router.post('/queries', patientAuth, async (req, res) => {
       previousTreatments,
       attachments,
       preferredTime,
-      consultationType
+      consultationType,
+      subject,
+      urgency,
+      patientContactNo
     } = req.body;
 
-    // Verify doctor exists
+    // Verify doctor exists and get patient data
     const doctor = await User.findById(doctorId);
     if (!doctor) {
       return res.status(404).json({ message: 'Doctor not found' });
     }
 
+    // Get patient data from JWT token
+    const patient = req.patient;
+    const patientName = patient.fullName || patient.name || 'Patient'; // Try both fullName and name fields
+
     const query = new PatientQuery({
-      patient: req.patient._id,
+      patient: patient._id,
       doctor: doctorId,
-      symptoms,
-      duration,
-      previousTreatments,
-      attachments,
-      preferredTime,
-      consultationType
+      symptoms: symptoms || '',
+      duration: duration || '',
+      previousTreatments: previousTreatments || '',
+      attachments: attachments || [],
+      preferredTime: preferredTime || new Date(),
+      consultationType: consultationType || 'online',
+      subject: subject || '',
+      urgency: urgency || 'medium',
+      patientContactNo: patientContactNo || ''
     });
 
     await query.save();
@@ -96,10 +106,23 @@ router.post('/queries', patientAuth, async (req, res) => {
     // Send notification to the doctor about the new query
     const queryData = {
       queryId: query._id.toString(),
-      patientId: req.patient._id.toString(),
-      patientName: req.patient.fullName,
-      query: query.symptoms
+      patientId: patient._id.toString(),
+      patientName: patientName,
+      patientContactNo: patientContactNo || '',
+      query: symptoms || '',
+      subject: subject || 'Medical Query',
+      urgency: urgency || 'medium',
+      consultationType: consultationType || 'online'
     };
+
+    console.log('📱 Preparing to send notification:', {
+      doctorId,
+      patientName,
+      patientContactNo,
+      subject,
+      urgency,
+      queryData
+    });
 
     const notificationResult = await notificationService.sendPatientQueryNotification(
       doctorId,
