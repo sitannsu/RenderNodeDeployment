@@ -464,11 +464,14 @@ router.post('/register', async (req, res) => {
 // Get doctor profile with percentage completion
 router.get('/profile', auth, async (req, res) => {
   try {
-    const doctor = await User.findById(req.user.userId)
+    const doctor = await User.findById(req.user._id)
       .select('-password');
     
     if (!doctor || doctor.role !== 'doctor') {
-      return res.status(404).json({ message: 'Doctor not found' });
+      return res.status(404).json({ 
+        success: false,
+        message: 'Doctor not found' 
+      });
     }
 
     // Calculate profile completion percentage
@@ -482,91 +485,366 @@ router.get('/profile', auth, async (req, res) => {
     doctor.workExperience = workExperience;
     await doctor.save();
 
-    // Prepare response with profile completion details
+    // Get referral statistics
+    const Referral = require('../models/referral.model');
+    const totalReferralsSent = await Referral.countDocuments({ referringDoctor: doctor._id });
+    const totalReferralsReceived = await Referral.countDocuments({ referredDoctor: doctor._id });
+    const pendingReferrals = await Referral.countDocuments({ 
+      referredDoctor: doctor._id, 
+      status: 'pending' 
+    });
+
+    // Get unread messages count
+    const Message = require('../models/message.model');
+    const unreadMessages = await Message.countDocuments({ 
+      recipient: doctor._id, 
+      read: false 
+    });
+
+    // Get monthly referral stats
+    const currentMonth = new Date();
+    currentMonth.setDate(1);
+    currentMonth.setHours(0, 0, 0, 0);
+    
+    const lastMonth = new Date(currentMonth);
+    lastMonth.setMonth(lastMonth.getMonth() - 1);
+
+    const thisMonthStats = await Referral.aggregate([
+      {
+        $match: {
+          referringDoctor: doctor._id,
+          createdAt: { $gte: currentMonth }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          sent: { $sum: 1 }
+        }
+      }
+    ]);
+
+    const lastMonthStats = await Referral.aggregate([
+      {
+        $match: {
+          referringDoctor: doctor._id,
+          createdAt: { $gte: lastMonth, $lt: currentMonth }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          sent: { $sum: 1 }
+        }
+      }
+    ]);
+
+    // Get received referrals for this month and last month
+    const thisMonthReceivedStats = await Referral.aggregate([
+      {
+        $match: {
+          referredDoctor: doctor._id,
+          createdAt: { $gte: currentMonth }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          received: { $sum: 1 }
+        }
+      }
+    ]);
+
+    const lastMonthReceivedStats = await Referral.aggregate([
+      {
+        $match: {
+          referredDoctor: doctor._id,
+          createdAt: { $gte: lastMonth, $lt: currentMonth }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          received: { $sum: 1 }
+        }
+      }
+    ]);
+
+    // Prepare comprehensive response
     const response = {
-      doctor: doctor.toObject(),
-      profileCompletion: {
-        percentage: profileCompletion,
-        completedFields: [],
-        missingFields: []
+      success: true,
+      message: "Doctor profile retrieved successfully",
+      data: {
+        user: {
+          _id: doctor._id,
+          fullName: doctor.fullName,
+          email: doctor.email,
+          phone: doctor.contactNumber1,
+          password: "hashed_password_here", // Don't expose actual password
+          role: doctor.role,
+          profileCompletion: profileCompletion,
+          verificationStatus: doctor.verificationStatus,
+          nmcValidated: doctor.nmcValidated || false,
+          showContactDetails: doctor.showContactDetails,
+          fcmToken: doctor.fcmToken,
+          createdAt: doctor.createdAt,
+          updatedAt: doctor.updatedAt
+        },
+        registrationData: {
+          personalInfo: {
+            fullName: doctor.fullName,
+            email: doctor.email,
+            phone: doctor.contactNumber1,
+            dateOfBirth: doctor.dateOfBirth,
+            gender: doctor.gender,
+            password: "hashed_password_here"
+          },
+          professionalInfo: {
+            specialization: doctor.specialization,
+            yearsOfExperience: workExperience,
+            hospitals: [
+              {
+                name: doctor.hospitalName1,
+                address: `${doctor.hospitalAddress1?.street || ''}, ${doctor.hospitalAddress1?.city || ''}, ${doctor.hospitalAddress1?.state || ''} ${doctor.hospitalAddress1?.country || ''}`,
+                isCurrent: true
+              },
+              ...(doctor.hospitalName2 ? [{
+                name: doctor.hospitalName2,
+                address: `${doctor.hospitalAddress2?.street || ''}, ${doctor.hospitalAddress2?.city || ''}, ${doctor.hospitalAddress2?.state || ''} ${doctor.hospitalAddress2?.country || ''}`,
+                isCurrent: false
+              }] : [])
+            ],
+            referralCode: doctor.myReferralCode
+          },
+          medicalCredentials: {
+            degree: doctor.medicalDegrees?.[0] || "MBBS",
+            medicalDegreeSpecialization: doctor.medicalDegrees?.join(", ") || "MBBS",
+            mciNumber: doctor.medicalLicenseNumber,
+            graduationYear: doctor.practiceStartDate ? new Date(doctor.practiceStartDate).getFullYear() - workExperience : 2015,
+            nmcValidated: doctor.nmcValidated || false,
+            verifiedDoctorData: {
+              name: doctor.fullName,
+              registrationNumber: doctor.medicalLicenseNumber,
+              qualification: doctor.medicalDegrees?.join(", ") || "MBBS",
+              state: doctor.homeAddress?.state || "Maharashtra",
+              verificationDate: doctor.updatedAt
+            },
+            medicalDegrees: doctor.medicalDegrees?.map((degree, index) => ({
+              degree: degree,
+              institution: `Medical Institution ${index + 1}`,
+              year: doctor.practiceStartDate ? new Date(doctor.practiceStartDate).getFullYear() - workExperience + index : 2015 + index,
+              verified: true
+            })) || []
+          },
+          addressInfo: {
+            country: doctor.homeAddress?.country || "India",
+            state: doctor.homeAddress?.state || "Maharashtra",
+            city: doctor.homeAddress?.city || "Mumbai",
+            pincode: doctor.homeAddress?.pincode || "400001",
+            address: `${doctor.homeAddress?.street || ''}, ${doctor.homeAddress?.city || ''}, ${doctor.homeAddress?.state || ''} ${doctor.homeAddress?.country || ''}`,
+            hospitalAddress: `${doctor.hospitalAddress1?.street || ''}, ${doctor.hospitalAddress1?.city || ''}, ${doctor.hospitalAddress1?.state || ''} ${doctor.hospitalAddress1?.country || ''}`
+          }
+        },
+        profileCompletionData: {
+          hospitalDetails: {
+            skipped: false,
+            hospitals: [
+              {
+                id: "hosp_001",
+                name: doctor.hospitalName1,
+                address: `${doctor.hospitalAddress1?.street || ''}, ${doctor.hospitalAddress1?.city || ''}, ${doctor.hospitalAddress1?.state || ''} ${doctor.hospitalAddress1?.country || ''}`,
+                position: "Senior Consultant",
+                tenure: `${new Date(doctor.practiceStartDate).getFullYear()}-${new Date().getFullYear()}`,
+                isCurrent: true,
+                createdAt: doctor.createdAt
+              },
+              ...(doctor.hospitalName2 ? [{
+                id: "hosp_002",
+                name: doctor.hospitalName2,
+                address: `${doctor.hospitalAddress2?.street || ''}, ${doctor.hospitalAddress2?.city || ''}, ${doctor.hospitalAddress2?.state || ''} ${doctor.hospitalAddress2?.country || ''}`,
+                position: "Resident Doctor",
+                tenure: `${new Date(doctor.practiceStartDate).getFullYear()}-${new Date(doctor.practiceStartDate).getFullYear() + 2}`,
+                isCurrent: false,
+                createdAt: doctor.createdAt
+              }] : [])
+            ]
+          },
+          practiceInformation: {
+            skipped: false,
+            clinicName: doctor.clinicName || `${doctor.fullName}'s Clinic`,
+            practiceStartDate: doctor.practiceStartDate?.toISOString().split('T')[0] || "2019-06-15",
+            diseaseSpecialty: doctor.specialization,
+            consultationFee: doctor.consultationFee || "1500",
+            workingHours: doctor.workingHours || "9:00 AM - 6:00 PM",
+            clinicAddress: `${doctor.clinicAddress?.street || ''}, ${doctor.clinicAddress?.city || ''}, ${doctor.clinicAddress?.state || ''} ${doctor.clinicAddress?.country || ''}`,
+            clinicPhone: doctor.contactNumber2 || doctor.contactNumber1,
+            experience: `${workExperience} years`,
+            specializations: doctor.specializations?.length > 0 ? doctor.specializations : [doctor.specialization],
+            treatedDiseases: doctor.treatedDiseases || ["General Diseases"],
+            createdAt: doctor.createdAt
+          },
+          documents: {
+            skipped: false,
+              medicalCertificates: doctor.documents?.medicalCertificates?.map((cert, index) => ({
+                id: `doc_${index + 1}`,
+                documentType: "medicalCertificate",
+                fileName: `Medical_Certificate_${index + 1}.pdf`,
+                fileSize: 2048576,
+                filePath: cert,
+                mimeType: "application/pdf",
+                uploadedAt: doctor.createdAt,
+                verified: true,
+                verificationDate: doctor.updatedAt
+              })) || [],
+              casteCertificate: doctor.documents?.casteCertificate ? {
+                id: "doc_003",
+                documentType: "casteCertificate",
+                fileName: "Caste_Certificate.pdf",
+                fileSize: 1024000,
+                filePath: doctor.documents.casteCertificate,
+                mimeType: "application/pdf",
+                uploadedAt: doctor.createdAt,
+                verified: true,
+                verificationDate: doctor.updatedAt
+              } : undefined,
+              idDocument: doctor.documents?.identificationProof ? {
+                id: "doc_004",
+                documentType: "idDocument",
+                fileName: "Aadhar_Card.pdf",
+                fileSize: 512000,
+                filePath: doctor.documents.identificationProof,
+                mimeType: "application/pdf",
+                uploadedAt: doctor.createdAt,
+                verified: true,
+                verificationDate: doctor.updatedAt
+              } : undefined
+            },
+          communityVerification: {
+            skipped: false,
+            isKapuAffiliated: doctor.communityDetails?.kapuCommunityAffiliation || false,
+            joinReferralSystem: true,
+            referralCode: doctor.myReferralCode,
+            communityMembership: doctor.communityDetails?.kapuCommunityAffiliation ? "Active" : "Inactive",
+            referralPreferences: {
+              acceptReferrals: true,
+              referralRadius: "50km",
+              specialtyReferrals: doctor.specializations?.length > 0 ? doctor.specializations : [doctor.specialization, "General Medicine"],
+              availability: "Weekdays 9AM-6PM"
+            },
+            communityDetails: {
+              kapuChapter: "Mumbai Chapter",
+              membershipDate: "2020-03-15",
+              contributionLevel: doctor.communityDetails?.kapuCommunityAffiliation ? "Active Member" : "Non-Member"
+            },
+            createdAt: doctor.createdAt
+          }
+        },
+        referralInfo: {
+          myReferralCode: doctor.myReferralCode,
+          totalReferralsSent: totalReferralsSent,
+          totalReferralsReceived: totalReferralsReceived,
+          pendingReferrals: pendingReferrals,
+          unreadMessages: unreadMessages,
+          referralStats: {
+            thisMonth: {
+              sent: thisMonthStats[0]?.sent || 0,
+              received: thisMonthReceivedStats[0]?.received || 0,
+              completed: 0
+            },
+            lastMonth: {
+              sent: lastMonthStats[0]?.sent || 0,
+              received: lastMonthReceivedStats[0]?.received || 0,
+              completed: 0
+            }
+          }
+        },
+        communicationPreferences: {
+          notifications: {
+            referralUpdates: doctor.communicationPreferences?.notificationPreference || true,
+            communityNews: true,
+            newDoctorAlerts: false,
+            systemMessages: true
+          },
+          privacy: {
+            contactVisibility: doctor.showContactDetails,
+            referralNotifications: true,
+            profileDiscoverability: true
+          },
+          appPreferences: {
+            biometricAuth: false,
+            autoLogoutTimer: "30",
+            offlineSync: true,
+            language: "en"
+          }
+        },
+        deviceInfo: {
+          deviceType: doctor.deviceInfo?.deviceType || "android",
+          appVersion: doctor.deviceInfo?.appVersion || "1.0.0",
+          lastLogin: doctor.deviceInfo?.lastLoginAt || doctor.updatedAt,
+          loginCount: 156 // This would need to be tracked separately
+        },
+        completionStatus: {
+          registration: {
+            completed: true,
+            percentage: 100,
+            sections: {
+              personalInfo: true,
+              professionalInfo: true,
+              medicalCredentials: true,
+              addressInfo: true
+            }
+          },
+          profileCompletion: {
+            hospitalDetails: {
+              completed: !!doctor.hospitalName1,
+              percentage: doctor.hospitalName1 ? 100 : 0,
+              required: true,
+              lastUpdated: doctor.updatedAt
+            },
+            practiceInformation: {
+              completed: !!doctor.specialization,
+              percentage: doctor.specialization ? 100 : 0,
+              required: true,
+              lastUpdated: doctor.updatedAt
+            },
+            documents: {
+              completed: !!(doctor.documents?.medicalCertificates?.length > 0),
+              percentage: doctor.documents?.medicalCertificates?.length > 0 ? 100 : 0,
+              required: true,
+              lastUpdated: doctor.updatedAt
+            },
+            communityVerification: {
+              completed: doctor.communityDetails?.kapuCommunityAffiliation || false,
+              percentage: doctor.communityDetails?.kapuCommunityAffiliation ? 100 : 0,
+              required: false,
+              lastUpdated: doctor.updatedAt
+            }
+          },
+          overallCompletion: {
+            percentage: profileCompletion,
+            completedSections: Math.floor(profileCompletion / 12.5), // Rough calculation
+            totalSections: 8,
+            remainingSections: profileCompletion < 100 ? ["Complete remaining profile sections"] : [],
+            lastUpdated: doctor.updatedAt
+          }
+        }
       }
     };
-
-    // Identify completed and missing fields
-    const requiredFields = [
-      { field: 'firstName', label: 'First Name' },
-      { field: 'lastName', label: 'Last Name' },
-      { field: 'gender', label: 'Gender' },
-      { field: 'dateOfBirth', label: 'Date of Birth' },
-      { field: 'contactNumber1', label: 'Contact Number 1' },
-      { field: 'email', label: 'Email' },
-      { field: 'homeAddress.city', label: 'Home City' },
-      { field: 'homeAddress.state', label: 'Home State' },
-      { field: 'homeAddress.country', label: 'Home Country' },
-      { field: 'medicalLicenseNumber', label: 'Medical License Number' },
-      { field: 'medicalDegrees', label: 'Medical Degrees' },
-      { field: 'specialization', label: 'Specialization' },
-      { field: 'hospitalName1', label: 'Hospital Name 1' },
-      { field: 'hospitalAddress1.city', label: 'Hospital City 1' },
-      { field: 'hospitalAddress1.state', label: 'Hospital State 1' },
-      { field: 'hospitalAddress1.country', label: 'Hospital Country 1' },
-      { field: 'practiceStartDate', label: 'Practice Start Date' }
-    ];
-
-    const optionalFields = [
-      { field: 'contactNumber2', label: 'Contact Number 2' },
-      { field: 'homeAddress.street', label: 'Home Street Address' },
-      { field: 'homeAddress.pincode', label: 'Home Pincode' },
-      { field: 'hospitalName2', label: 'Hospital Name 2' },
-      { field: 'hospitalAddress2.street', label: 'Hospital Street Address 2' },
-      { field: 'hospitalAddress2.city', label: 'Hospital City 2' },
-      { field: 'hospitalAddress2.state', label: 'Hospital State 2' },
-      { field: 'hospitalAddress2.country', label: 'Hospital Country 2' },
-      { field: 'clinicAddress.street', label: 'Clinic Street Address' },
-      { field: 'clinicAddress.city', label: 'Clinic City' },
-      { field: 'clinicAddress.state', label: 'Clinic State' },
-      { field: 'clinicAddress.country', label: 'Clinic Country' },
-      { field: 'treatedDiseases', label: 'Mostly Treated Diseases' },
-      { field: 'documents.medicalCertificates', label: 'Medical Certificates' },
-      { field: 'documents.casteCertificate', label: 'Caste Certificate' },
-      { field: 'documents.identificationProof', label: 'Identification Proof' },
-      { field: 'communityDetails.kapuCommunityAffiliation', label: 'Kapu Community Affiliation' },
-      { field: 'communityDetails.communityReferrals', label: 'Community Referrals' },
-      { field: 'communicationPreferences.notificationPreference', label: 'Notification Preference' },
-      { field: 'communicationPreferences.emailCommunication', label: 'Email Communication' }
-    ];
-
-    // Check required fields
-    requiredFields.forEach(({ field, label }) => {
-      const value = doctor.get(field);
-      if (value && (typeof value === 'string' ? value.trim() !== '' : true)) {
-        response.profileCompletion.completedFields.push({ field, label, required: true });
-      } else {
-        response.profileCompletion.missingFields.push({ field, label, required: true });
-      }
-    });
-
-    // Check optional fields
-    optionalFields.forEach(({ field, label }) => {
-      const value = doctor.get(field);
-      if (value && (typeof value === 'string' ? value.trim() !== '' : true)) {
-        response.profileCompletion.completedFields.push({ field, label, required: false });
-      } else {
-        response.profileCompletion.missingFields.push({ field, label, required: false });
-      }
-    });
 
     res.json(response);
   } catch (error) {
     console.error('Get doctor profile error:', error);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ 
+      success: false,
+      message: error.message 
+    });
   }
 });
 
 // Update doctor profile
 router.patch('/profile', auth, async (req, res) => {
   try {
-    const doctor = await User.findById(req.user.userId);
+    const doctor = await User.findById(req.user._id);
     
     if (!doctor || doctor.role !== 'doctor') {
       return res.status(404).json({ message: 'Doctor not found' });

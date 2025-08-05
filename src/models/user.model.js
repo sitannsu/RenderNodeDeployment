@@ -148,6 +148,22 @@ const userSchema = new mongoose.Schema({
     type: [String],
     default: []
   },
+  clinicName: {
+    type: String,
+    trim: true
+  },
+  consultationFee: {
+    type: String,
+    trim: true
+  },
+  workingHours: {
+    type: String,
+    trim: true
+  },
+  specializations: {
+    type: [String],
+    default: []
+  },
   
   // Documents
   documents: {
@@ -207,6 +223,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ['pending', 'verified', 'rejected'],
     default: 'pending'
+  },
+  nmcValidated: {
+    type: Boolean,
+    default: false
   },
   profileCompletion: {
     type: Number,
