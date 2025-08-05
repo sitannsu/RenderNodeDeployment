@@ -1,0 +1,207 @@
+{
+  "info": {
+    "name": "Doctor Profile Management",
+    "description": "Small collection for doctor authentication and profile management",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://rendernodedeployment.onrender.com"
+    },
+    {
+      "key": "doctor_token",
+      "value": "your_doctor_jwt_token_here"
+    }
+  ],
+  "item": [
+    {
+      "name": "Doctor Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"fcmToken\": \"fcm_token_here\",\n  \"deviceType\": \"android\",\n  \"appVersion\": \"1.0.0\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/auth/doctor/login",
+          "host": ["{{base_url}}"],
+          "path": ["api", "auth", "doctor", "login"]
+        },
+        "description": "Login as a doctor using email and device information"
+      },
+      "response": [
+        {
+          "name": "Success Response",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"fcmToken\": \"fcm_token_here\",\n  \"deviceType\": \"android\",\n  \"appVersion\": \"1.0.0\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/doctor/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "doctor", "login"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"success\": true,\n  \"message\": \"Login successful\",\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"user\": {\n    \"_id\": \"68873ecbdbdfb5f783864a95\",\n    \"fullName\": \"Dr. John Doe\",\n    \"email\": \"john.doe@example.com\",\n    \"role\": \"doctor\",\n    \"profileCompletion\": 85,\n    \"verificationStatus\": \"pending\"\n  }\n}"
+        }
+      ]
+    },
+    {
+      "name": "Get Doctor Profile",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{doctor_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/doctors/profile",
+          "host": ["{{base_url}}"],
+          "path": ["api", "doctors", "profile"]
+        },
+        "description": "Get comprehensive doctor profile data"
+      },
+      "response": [
+        {
+          "name": "Success Response",
+          "originalRequest": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/doctors/profile",
+              "host": ["{{base_url}}"],
+              "path": ["api", "doctors", "profile"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"success\": true,\n  \"message\": \"Doctor profile retrieved successfully\",\n  \"data\": {\n    \"user\": {\n      \"_id\": \"68873ecbdbdfb5f783864a95\",\n      \"fullName\": \"Dr. John Doe\",\n      \"email\": \"john.doe@example.com\",\n      \"phone\": \"+91 98765 43210\",\n      \"role\": \"doctor\",\n      \"profileCompletion\": 85,\n      \"verificationStatus\": \"pending\",\n      \"nmcValidated\": true,\n      \"showContactDetails\": true,\n      \"fcmToken\": \"fcm_token_here\",\n      \"createdAt\": \"2024-01-15T10:30:00.000Z\",\n      \"updatedAt\": \"2024-01-20T14:45:00.000Z\"\n    },\n    \"registrationData\": {\n      \"personalInfo\": {\n        \"fullName\": \"Dr. John Doe\",\n        \"email\": \"john.doe@example.com\",\n        \"phone\": \"+91 98765 43210\",\n        \"dateOfBirth\": \"1985-06-15T00:00:00.000Z\",\n        \"gender\": \"male\"\n      },\n      \"professionalInfo\": {\n        \"specialization\": \"Cardiology\",\n        \"yearsOfExperience\": 8,\n        \"hospitals\": [\n          {\n            \"name\": \"City General Hospital\",\n            \"address\": \"123 Medical Street, Mumbai, Maharashtra 400001\",\n            \"isCurrent\": true\n          }\n        ],\n        \"referralCode\": \"KD2025DR789\"\n      },\n      \"medicalCredentials\": {\n        \"degree\": \"MBBS\",\n        \"medicalDegreeSpecialization\": \"MD Cardiology\",\n        \"mciNumber\": \"MCI-123456\",\n        \"graduationYear\": 2015,\n        \"nmcValidated\": true,\n        \"verifiedDoctorData\": {\n          \"name\": \"Dr. John Doe\",\n          \"registrationNumber\": \"MCI-123456\",\n          \"qualification\": \"MBBS, MD Cardiology\",\n          \"state\": \"Maharashtra\",\n          \"verificationDate\": \"2024-01-18T12:00:00.000Z\"\n        },\n        \"medicalDegrees\": [\n          {\n            \"degree\": \"MBBS\",\n            \"institution\": \"Mumbai Medical College\",\n            \"year\": 2015,\n            \"verified\": true\n          }\n        ]\n      },\n      \"addressInfo\": {\n        \"country\": \"India\",\n        \"state\": \"Maharashtra\",\n        \"city\": \"Mumbai\",\n        \"pincode\": \"400001\",\n        \"address\": \"789 Doctor Lane, Andheri West, Mumbai, Maharashtra 400001\",\n        \"hospitalAddress\": \"123 Medical Street, Mumbai, Maharashtra 400001\"\n      }\n    },\n    \"profileCompletionData\": {\n      \"hospitalDetails\": {\n        \"skipped\": false,\n        \"hospitals\": [\n          {\n            \"id\": \"hosp_001\",\n            \"name\": \"City General Hospital\",\n            \"address\": \"123 Medical Street, Mumbai, Maharashtra 400001\",\n            \"position\": \"Senior Consultant Cardiologist\",\n            \"tenure\": \"2019-2023\",\n            \"isCurrent\": true,\n            \"createdAt\": \"2024-01-15T10:30:00.000Z\"\n          }\n        ]\n      },\n      \"practiceInformation\": {\n        \"skipped\": false,\n        \"clinicName\": \"Dr. John's Cardiology Clinic\",\n        \"practiceStartDate\": \"2019-06-15\",\n        \"diseaseSpecialty\": \"Cardiology\",\n        \"consultationFee\": \"1500\",\n        \"workingHours\": \"9:00 AM - 6:00 PM\",\n        \"clinicAddress\": \"789 Doctor Lane, Mumbai, Maharashtra 400003\",\n        \"clinicPhone\": \"+91 98765 43211\",\n        \"experience\": \"8 years\",\n        \"specializations\": [\n          \"Interventional Cardiology\",\n          \"Echocardiography\"\n        ],\n        \"treatedDiseases\": [\n          \"Coronary Artery Disease\",\n          \"Heart Failure\"\n        ],\n        \"createdAt\": \"2024-01-15T10:30:00.000Z\"\n      },\n      \"documents\": {\n        \"skipped\": false,\n        \"medicalCertificates\": [\n          {\n            \"id\": \"doc_001\",\n            \"documentType\": \"medicalCertificate\",\n            \"fileName\": \"MBBS_Certificate.pdf\",\n            \"fileSize\": 2048576,\n            \"filePath\": \"/uploads/documents/mbbs_cert.pdf\",\n            \"mimeType\": \"application/pdf\",\n            \"uploadedAt\": \"2024-01-15T10:30:00.000Z\",\n            \"verified\": true,\n            \"verificationDate\": \"2024-01-18T12:00:00.000Z\"\n          }\n        ],\n        \"casteCertificate\": {\n          \"id\": \"doc_003\",\n          \"documentType\": \"casteCertificate\",\n          \"fileName\": \"Caste_Certificate.pdf\",\n          \"fileSize\": 1024000,\n          \"filePath\": \"/uploads/documents/caste_cert.pdf\",\n          \"mimeType\": \"application/pdf\",\n          \"uploadedAt\": \"2024-01-15T10:30:00.000Z\",\n          \"verified\": true,\n          \"verificationDate\": \"2024-01-18T12:00:00.000Z\"\n        },\n        \"idDocument\": {\n          \"id\": \"doc_004\",\n          \"documentType\": \"idDocument\",\n          \"fileName\": \"Aadhar_Card.pdf\",\n          \"fileSize\": 512000,\n          \"filePath\": \"/uploads/documents/aadhar.pdf\",\n          \"mimeType\": \"application/pdf\",\n          \"uploadedAt\": \"2024-01-15T10:30:00.000Z\",\n          \"verified\": true,\n          \"verificationDate\": \"2024-01-18T12:00:00.000Z\"\n        }\n      },\n      \"communityVerification\": {\n        \"skipped\": false,\n        \"isKapuAffiliated\": true,\n        \"joinReferralSystem\": true,\n        \"referralCode\": \"KD2025DR789\",\n        \"communityMembership\": \"Active\",\n        \"referralPreferences\": {\n          \"acceptReferrals\": true,\n          \"referralRadius\": \"50km\",\n          \"specialtyReferrals\": [\"Cardiology\", \"General Medicine\"],\n          \"availability\": \"Weekdays 9AM-6PM\"\n        },\n        \"communityDetails\": {\n          \"kapuChapter\": \"Mumbai Chapter\",\n          \"membershipDate\": \"2020-03-15\",\n          \"contributionLevel\": \"Active Member\"\n        },\n        \"createdAt\": \"2024-01-15T10:30:00.000Z\"\n      }\n    },\n    \"referralInfo\": {\n      \"myReferralCode\": \"KD2025DR789\",\n      \"totalReferralsSent\": 45,\n      \"totalReferralsReceived\": 23,\n      \"pendingReferrals\": 5,\n      \"unreadMessages\": 2,\n      \"referralStats\": {\n        \"thisMonth\": {\n          \"sent\": 8,\n          \"received\": 3,\n          \"completed\": 12\n        },\n        \"lastMonth\": {\n          \"sent\": 12,\n          \"received\": 7,\n          \"completed\": 18\n        }\n      }\n    },\n    \"communicationPreferences\": {\n      \"notifications\": {\n        \"referralUpdates\": true,\n        \"communityNews\": true,\n        \"newDoctorAlerts\": false,\n        \"systemMessages\": true\n      },\n      \"privacy\": {\n        \"contactVisibility\": true,\n        \"referralNotifications\": true,\n        \"profileDiscoverability\": true\n      },\n      \"appPreferences\": {\n        \"biometricAuth\": false,\n        \"autoLogoutTimer\": \"30\",\n        \"offlineSync\": true,\n        \"language\": \"en\"\n      }\n    },\n    \"deviceInfo\": {\n      \"deviceType\": \"android\",\n      \"appVersion\": \"1.0.0\",\n      \"lastLogin\": \"2024-01-20T14:45:00.000Z\",\n      \"loginCount\": 156\n    },\n    \"completionStatus\": {\n      \"registration\": {\n        \"completed\": true,\n        \"percentage\": 100,\n        \"sections\": {\n          \"personalInfo\": true,\n          \"professionalInfo\": true,\n          \"medicalCredentials\": true,\n          \"addressInfo\": true\n        }\n      },\n      \"profileCompletion\": {\n        \"hospitalDetails\": {\n          \"completed\": true,\n          \"percentage\": 100,\n          \"required\": true,\n          \"lastUpdated\": \"2024-01-15T10:30:00.000Z\"\n        },\n        \"practiceInformation\": {\n          \"completed\": true,\n          \"percentage\": 100,\n          \"required\": true,\n          \"lastUpdated\": \"2024-01-15T10:30:00.000Z\"\n        },\n        \"documents\": {\n          \"completed\": true,\n          \"percentage\": 100,\n          \"required\": true,\n          \"lastUpdated\": \"2024-01-15T10:30:00.000Z\"\n        },\n        \"communityVerification\": {\n          \"completed\": true,\n          \"percentage\": 100,\n          \"required\": false,\n          \"lastUpdated\": \"2024-01-15T10:30:00.000Z\"\n        }\n      },\n      \"overallCompletion\": {\n        \"percentage\": 85,\n        \"completedSections\": 7,\n        \"totalSections\": 8,\n        \"remainingSections\": [],\n        \"lastUpdated\": \"2024-01-20T14:45:00.000Z\"\n      }\n    }\n  }\n}"
+        }
+      ]
+    },
+    {
+      "name": "Update Doctor Profile",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{doctor_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"middleName\": \"Michael\",\n  \"gender\": \"male\",\n  \"dateOfBirth\": \"1985-06-15\",\n  \"contactNumber1\": \"+91 98765 43210\",\n  \"contactNumber2\": \"+91 98765 43211\",\n  \"showContactDetails\": true,\n  \"homeAddress\": {\n    \"street\": \"789 Doctor Lane\",\n    \"city\": \"Mumbai\",\n    \"state\": \"Maharashtra\",\n    \"country\": \"India\",\n    \"pincode\": \"400001\"\n  },\n  \"medicalLicenseNumber\": \"MCI-123456\",\n  \"medicalDegrees\": [\"MBBS\", \"MD Cardiology\"],\n  \"specialization\": \"Cardiology\",\n  \"hospitalName1\": \"City General Hospital\",\n  \"hospitalAddress1\": {\n    \"street\": \"123 Medical Street\",\n    \"city\": \"Mumbai\",\n    \"state\": \"Maharashtra\",\n    \"country\": \"India\"\n  },\n  \"clinicAddress\": {\n    \"street\": \"789 Doctor Lane\",\n    \"city\": \"Mumbai\",\n    \"state\": \"Maharashtra\",\n    \"country\": \"India\"\n  },\n  \"practiceStartDate\": \"2019-06-15\",\n  \"treatedDiseases\": [\n    \"Coronary Artery Disease\",\n    \"Heart Failure\",\n    \"Arrhythmias\",\n    \"Hypertension\"\n  ],\n  \"documents\": {\n    \"medicalCertificates\": [\n      \"/uploads/documents/mbbs_cert.pdf\",\n      \"/uploads/documents/md_cardio.pdf\"\n    ],\n    \"casteCertificate\": \"/uploads/documents/caste_cert.pdf\",\n    \"identificationProof\": \"/uploads/documents/aadhar.pdf\"\n  },\n  \"communityDetails\": {\n    \"kapuCommunityAffiliation\": true,\n    \"communityReferrals\": [\n      {\n        \"name\": \"Dr. Jane Smith\",\n        \"relationship\": \"Colleague\",\n        \"contactNumber\": \"+91 98765 43212\"\n      }\n    ]\n  },\n  \"communicationPreferences\": {\n    \"notificationPreference\": true,\n    \"emailCommunication\": true\n  },\n  \"clinicName\": \"Dr. John's Cardiology Clinic\",\n  \"consultationFee\": \"1500\",\n  \"workingHours\": \"9:00 AM - 6:00 PM\",\n  \"specializations\": [\n    \"Interventional Cardiology\",\n    \"Echocardiography\",\n    \"Stress Testing\",\n    \"Cardiac Catheterization\"\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/doctors/profile",
+          "host": ["{{base_url}}"],
+          "path": ["api", "doctors", "profile"]
+        },
+        "description": "Update doctor profile with comprehensive information"
+      },
+      "response": [
+        {
+          "name": "Success Response",
+          "originalRequest": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"middleName\": \"Michael\",\n  \"gender\": \"male\",\n  \"dateOfBirth\": \"1985-06-15\",\n  \"contactNumber1\": \"+91 98765 43210\",\n  \"contactNumber2\": \"+91 98765 43211\",\n  \"showContactDetails\": true,\n  \"homeAddress\": {\n    \"street\": \"789 Doctor Lane\",\n    \"city\": \"Mumbai\",\n    \"state\": \"Maharashtra\",\n    \"country\": \"India\",\n    \"pincode\": \"400001\"\n  },\n  \"medicalLicenseNumber\": \"MCI-123456\",\n  \"medicalDegrees\": [\"MBBS\", \"MD Cardiology\"],\n  \"specialization\": \"Cardiology\",\n  \"hospitalName1\": \"City General Hospital\",\n  \"hospitalAddress1\": {\n    \"street\": \"123 Medical Street\",\n    \"city\": \"Mumbai\",\n    \"state\": \"Maharashtra\",\n    \"country\": \"India\"\n  },\n  \"clinicAddress\": {\n    \"street\": \"789 Doctor Lane\",\n    \"city\": \"Mumbai\",\n    \"state\": \"Maharashtra\",\n    \"country\": \"India\"\n  },\n  \"practiceStartDate\": \"2019-06-15\",\n  \"treatedDiseases\": [\n    \"Coronary Artery Disease\",\n    \"Heart Failure\",\n    \"Arrhythmias\",\n    \"Hypertension\"\n  ],\n  \"documents\": {\n    \"medicalCertificates\": [\n      \"/uploads/documents/mbbs_cert.pdf\",\n      \"/uploads/documents/md_cardio.pdf\"\n    ],\n    \"casteCertificate\": \"/uploads/documents/caste_cert.pdf\",\n    \"identificationProof\": \"/uploads/documents/aadhar.pdf\"\n  },\n  \"communityDetails\": {\n    \"kapuCommunityAffiliation\": true,\n    \"communityReferrals\": [\n      {\n        \"name\": \"Dr. Jane Smith\",\n        \"relationship\": \"Colleague\",\n        \"contactNumber\": \"+91 98765 43212\"\n      }\n    ]\n  },\n  \"communicationPreferences\": {\n    \"notificationPreference\": true,\n    \"emailCommunication\": true\n  },\n  \"clinicName\": \"Dr. John's Cardiology Clinic\",\n  \"consultationFee\": \"1500\",\n  \"workingHours\": \"9:00 AM - 6:00 PM\",\n  \"specializations\": [\n    \"Interventional Cardiology\",\n    \"Echocardiography\",\n    \"Stress Testing\",\n    \"Cardiac Catheterization\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/doctors/profile",
+              "host": ["{{base_url}}"],
+              "path": ["api", "doctors", "profile"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"message\": \"Profile updated successfully\",\n  \"doctor\": {\n    \"_id\": \"68873ecbdbdfb5f783864a95\",\n    \"firstName\": \"John\",\n    \"lastName\": \"Doe\",\n    \"middleName\": \"Michael\",\n    \"fullName\": \"Dr. John Michael Doe\",\n    \"gender\": \"male\",\n    \"dateOfBirth\": \"1985-06-15T00:00:00.000Z\",\n    \"contactNumber1\": \"+91 98765 43210\",\n    \"contactNumber2\": \"+91 98765 43211\",\n    \"showContactDetails\": true,\n    \"email\": \"john.doe@example.com\",\n    \"homeAddress\": {\n      \"street\": \"789 Doctor Lane\",\n      \"city\": \"Mumbai\",\n      \"state\": \"Maharashtra\",\n      \"country\": \"India\",\n      \"pincode\": \"400001\"\n    },\n    \"medicalLicenseNumber\": \"MCI-123456\",\n    \"medicalDegrees\": [\"MBBS\", \"MD Cardiology\"],\n    \"specialization\": \"Cardiology\",\n    \"hospitalName1\": \"City General Hospital\",\n    \"hospitalAddress1\": {\n      \"street\": \"123 Medical Street\",\n      \"city\": \"Mumbai\",\n      \"state\": \"Maharashtra\",\n      \"country\": \"India\"\n    },\n    \"clinicAddress\": {\n      \"street\": \"789 Doctor Lane\",\n      \"city\": \"Mumbai\",\n      \"state\": \"Maharashtra\",\n      \"country\": \"India\"\n    },\n    \"practiceStartDate\": \"2019-06-15T00:00:00.000Z\",\n    \"workExperience\": 5,\n    \"treatedDiseases\": [\n      \"Coronary Artery Disease\",\n      \"Heart Failure\",\n      \"Arrhythmias\",\n      \"Hypertension\"\n    ],\n    \"documents\": {\n      \"medicalCertificates\": [\n        \"/uploads/documents/mbbs_cert.pdf\",\n        \"/uploads/documents/md_cardio.pdf\"\n      ],\n      \"casteCertificate\": \"/uploads/documents/caste_cert.pdf\",\n      \"identificationProof\": \"/uploads/documents/aadhar.pdf\"\n    },\n    \"communityDetails\": {\n      \"kapuCommunityAffiliation\": true,\n      \"communityReferrals\": [\n        {\n          \"name\": \"Dr. Jane Smith\",\n          \"relationship\": \"Colleague\",\n          \"contactNumber\": \"+91 98765 43212\"\n        }\n      ]\n    },\n    \"communicationPreferences\": {\n      \"notificationPreference\": true,\n      \"emailCommunication\": true\n    },\n    \"myReferralCode\": \"KD2025DR789\",\n    \"referredBy\": null,\n    \"role\": \"doctor\",\n    \"verificationStatus\": \"pending\",\n    \"nmcValidated\": false,\n    \"profileCompletion\": 95,\n    \"fcmToken\": \"fcm_token_here\",\n    \"deviceInfo\": {\n      \"deviceType\": \"android\",\n      \"appVersion\": \"1.0.0\",\n      \"lastLoginAt\": \"2024-01-20T14:45:00.000Z\"\n    },\n    \"clinicName\": \"Dr. John's Cardiology Clinic\",\n    \"consultationFee\": \"1500\",\n    \"workingHours\": \"9:00 AM - 6:00 PM\",\n    \"specializations\": [\n      \"Interventional Cardiology\",\n      \"Echocardiography\",\n      \"Stress Testing\",\n      \"Cardiac Catheterization\"\n    ],\n    \"createdAt\": \"2024-01-15T10:30:00.000Z\",\n    \"updatedAt\": \"2024-01-20T14:45:00.000Z\"\n  },\n  \"profileCompletion\": 95\n}"
+        }
+      ]
+    }
+  ]
+} 
