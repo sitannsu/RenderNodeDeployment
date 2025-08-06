@@ -496,6 +496,22 @@ router.get('/profile', auth, async (req, res) => {
     const userResponse = user.toObject();
     userResponse.profileCompletion = profileCompletion;
     
+    // Convert individual hospital fields to hospitals array
+    const hospitals = [];
+    if (user.hospitalName1) {
+      hospitals.push({
+        name: user.hospitalName1,
+        address: user.hospitalAddress1 || {}
+      });
+    }
+    if (user.hospitalName2) {
+      hospitals.push({
+        name: user.hospitalName2,
+        address: user.hospitalAddress2 || {}
+      });
+    }
+    userResponse.hospitals = hospitals;
+    
     // Add referral code info
     userResponse.referralInfo = {
       myReferralCode: user.myReferralCode,
@@ -518,8 +534,7 @@ router.patch('/profile', auth, async (req, res) => {
     'firstName', 'lastName', 'middleName', 'gender', 'dateOfBirth',
     'contactNumber1', 'contactNumber2', 'showContactDetails',
     'homeAddress', 'medicalLicenseNumber', 'medicalDegrees', 'specialization',
-    'hospitalName1', 'hospitalAddress1', 'hospitalName2', 'hospitalAddress2',
-    'clinicAddress', 'practiceStartDate', 'treatedDiseases', 'documents',
+    'hospitals', 'clinicAddress', 'practiceStartDate', 'treatedDiseases', 'documents',
     'communityDetails', 'communicationPreferences'
   ];
 
@@ -529,7 +544,28 @@ router.patch('/profile', auth, async (req, res) => {
   }
 
   try {
-    updates.forEach(update => req.user[update] = req.body[update]);
+    updates.forEach(update => {
+      if (update === 'hospitals') {
+        // Handle hospitals array - convert to individual hospital fields
+        if (req.body.hospitals && Array.isArray(req.body.hospitals)) {
+          // Set first hospital as primary
+          if (req.body.hospitals.length > 0) {
+            const primaryHospital = req.body.hospitals[0];
+            req.user.hospitalName1 = primaryHospital.name || '';
+            req.user.hospitalAddress1 = primaryHospital.address || {};
+          }
+          
+          // Set second hospital if exists
+          if (req.body.hospitals.length > 1) {
+            const secondaryHospital = req.body.hospitals[1];
+            req.user.hospitalName2 = secondaryHospital.name || '';
+            req.user.hospitalAddress2 = secondaryHospital.address || {};
+          }
+        }
+      } else {
+        req.user[update] = req.body[update];
+      }
+    });
     
     // Update full name if first or last name changed
     if (req.body.firstName || req.body.lastName) {

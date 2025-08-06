@@ -863,6 +863,7 @@ router.patch('/profile', auth, async (req, res) => {
       medicalLicenseNumber,
       medicalDegrees,
       specialization,
+      hospitals,
       hospitalName1,
       hospitalAddress1,
       hospitalName2,
@@ -907,20 +908,43 @@ router.patch('/profile', auth, async (req, res) => {
     if (specialization) doctor.specialization = specialization;
 
     // Update hospital information
-    if (hospitalName1) doctor.hospitalName1 = hospitalName1;
-    if (hospitalAddress1) {
-      if (hospitalAddress1.street !== undefined) doctor.hospitalAddress1.street = hospitalAddress1.street;
-      if (hospitalAddress1.city) doctor.hospitalAddress1.city = hospitalAddress1.city;
-      if (hospitalAddress1.state) doctor.hospitalAddress1.state = hospitalAddress1.state;
-      if (hospitalAddress1.country) doctor.hospitalAddress1.country = hospitalAddress1.country;
-    }
+    if (hospitals && Array.isArray(hospitals)) {
+      // Clear existing hospital fields
+      doctor.hospitalName1 = '';
+      doctor.hospitalAddress1 = {};
+      doctor.hospitalName2 = '';
+      doctor.hospitalAddress2 = {};
+      
+      // Set first hospital as primary
+      if (hospitals.length > 0) {
+        const primaryHospital = hospitals[0];
+        doctor.hospitalName1 = primaryHospital.name || '';
+        doctor.hospitalAddress1 = primaryHospital.address || {};
+      }
+      
+      // Set second hospital if exists
+      if (hospitals.length > 1) {
+        const secondaryHospital = hospitals[1];
+        doctor.hospitalName2 = secondaryHospital.name || '';
+        doctor.hospitalAddress2 = secondaryHospital.address || {};
+      }
+    } else {
+      // Fallback to individual hospital fields for backward compatibility
+      if (hospitalName1) doctor.hospitalName1 = hospitalName1;
+      if (hospitalAddress1) {
+        if (hospitalAddress1.street !== undefined) doctor.hospitalAddress1.street = hospitalAddress1.street;
+        if (hospitalAddress1.city) doctor.hospitalAddress1.city = hospitalAddress1.city;
+        if (hospitalAddress1.state) doctor.hospitalAddress1.state = hospitalAddress1.state;
+        if (hospitalAddress1.country) doctor.hospitalAddress1.country = hospitalAddress1.country;
+      }
 
-    if (hospitalName2 !== undefined) doctor.hospitalName2 = hospitalName2;
-    if (hospitalAddress2) {
-      if (hospitalAddress2.street !== undefined) doctor.hospitalAddress2.street = hospitalAddress2.street;
-      if (hospitalAddress2.city !== undefined) doctor.hospitalAddress2.city = hospitalAddress2.city;
-      if (hospitalAddress2.state !== undefined) doctor.hospitalAddress2.state = hospitalAddress2.state;
-      if (hospitalAddress2.country !== undefined) doctor.hospitalAddress2.country = hospitalAddress2.country;
+      if (hospitalName2 !== undefined) doctor.hospitalName2 = hospitalName2;
+      if (hospitalAddress2) {
+        if (hospitalAddress2.street !== undefined) doctor.hospitalAddress2.street = hospitalAddress2.street;
+        if (hospitalAddress2.city !== undefined) doctor.hospitalAddress2.city = hospitalAddress2.city;
+        if (hospitalAddress2.state !== undefined) doctor.hospitalAddress2.state = hospitalAddress2.state;
+        if (hospitalAddress2.country !== undefined) doctor.hospitalAddress2.country = hospitalAddress2.country;
+      }
     }
 
     // Update clinic information
