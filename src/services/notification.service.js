@@ -213,6 +213,40 @@ class NotificationService {
   }
 
   /**
+   * Send notification for doctor response to patient query
+   * @param {string} patientId - ID of the patient who sent the query
+   * @param {Object} responseData - Doctor response data
+   * @returns {Promise<Object>} - Result of sending notification
+   */
+  async sendDoctorResponseNotification(patientId, responseData) {
+    const statusMessage = responseData.status === 'accepted' ? 'accepted' : 
+                         responseData.status === 'rejected' ? 'declined' : 'responded to';
+    
+    const notification = {
+      title: 'Doctor Response Received',
+      body: `Dr. ${responseData.doctorName} has ${statusMessage} your medical query`,
+      clickAction: 'OPEN_QUERY_RESPONSE',
+      priority: 'high'
+    };
+
+    const data = {
+      type: 'doctor_response',
+      queryId: responseData.queryId,
+      doctorName: responseData.doctorName,
+      status: responseData.status,
+      appointmentTime: responseData.appointmentTime,
+      consultationType: responseData.consultationType
+    };
+
+    const relatedData = {
+      queryId: responseData.queryId,
+      senderId: responseData.doctorId || null
+    };
+
+    return await this.sendNotificationToUser(patientId, notification, data, 'doctor_response', relatedData);
+  }
+
+  /**
    * Send notification to multiple users
    * @param {Array<string>} userIds - Array of user IDs
    * @param {Object} notification - Notification object

@@ -1,6 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const User = require('../models/user.model');
+const PatientQuery = require('../models/patient.query.model');
+const notificationService = require('../services/notification.service');
 const auth = require('../middleware/auth');
 const router = express.Router();
 
@@ -1007,6 +1009,462 @@ router.patch('/profile', auth, async (req, res) => {
   } catch (error) {
     console.error('Update doctor profile error:', error);
     res.status(400).json({ message: error.message });
+  }
+});
+
+// =============================================================================
+// PATIENT QUERY MANAGEMENT ENDPOINTS FOR DOCTORS
+// =============================================================================
+
+// Debug endpoint to check if queries route is working
+router.get('/queries/debug', auth, async (req, res) => {
+  try {
+    console.log('🔍 Debug endpoint called by user:', req.user._id, req.user.role);
+    
+    // Check total number of queries in database
+    const totalQueries = await PatientQuery.countDocuments({});
+    const doctorQueries = await PatientQuery.countDocuments({ doctor: req.user._id });
+    
+    res.json({
+      success: true,
+      debug: {
+        userId: req.user._id,
+        userRole: req.user.role,
+        totalQueriesInDB: totalQueries,
+        queriesForThisDoctor: doctorQueries,
+        timestamp: new Date().toISOString()
+      }
+    });
+  } catch (error) {
+    console.error('Debug endpoint error:', error);
+    res.status(500).json({ 
+      success: false,
+      error: error.message 
+    });
+  }
+});
+
+// Get all patient queries for the authenticated doctor
+router.get('/queries', auth, async (req, res) => {
+  try {
+    const { status, page = 1, limit = 10, sortBy = 'createdAt', sortOrder = 'desc' } = req.query;
+    
+    console.log('🔍 Doctor queries endpoint called:', {
+      doctorId: req.user._id,
+      role: req.user.role,
+      status,
+      page,
+      limit
+    });
+    
+    // Check if user is a doctor
+    if (req.user.role !== 'doctor') {
+      return res.status(403).json({ message: 'Access denied. Doctor role required.' });
+    }
+
+    // Build filter for queries sent to this doctor
+    const filter = { doctor: req.user._id };
+    console.log('[Doctor Queries API] Filter:', filter);
+    
+    if (status) {
+      filter.status = status;
+      console.log('[Doctor Queries API] Status filter applied:', status);
+    }
+
+    // Calculate pagination
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    console.log('[Doctor Queries API] Pagination:', { skip, limit });
+    
+    // Build sort object
+    const sort = {};
+    sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
+    console.log('[Doctor Queries API] Sort:', sort);
+
+    // Get queries with essential patient details only
+    const queries = await PatientQuery.find(filter)
+      .select('patient symptoms subject urgency status consultationType preferredTime doctorResponse doctorResponseTime createdAt updatedAt doctor')
+      .populate('patient', '_id')
+      .sort(sort)
+      .skip(skip)
+      .limit(parseInt(limit));
+    console.log('[Doctor Queries API] Queries fetched:', queries.length, queries.map(q => q._id));
+
+    // Get total count for pagination
+    const totalQueries = await PatientQuery.countDocuments(filter);
+
+    // Get status counts for summary
+    const statusCounts = await PatientQuery.aggregate([
+      { $match: { doctor: req.user._id } },
+      { $group: { _id: '$status', count: { $sum: 1 } } }
+    ]);
+
+    const statusSummary = {
+      pending: 0,
+      accepted: 0,
+      rejected: 0,
+      completed: 0
+    };
+
+    statusCounts.forEach(item => {
+      statusSummary[item._id] = item.count;
+    });
+
+    // Format queries for doctor dashboard view
+    const formattedQueries = queries.map(query => ({
+  queryId: query._id,
+  patientId: query.patient?._id,
+  doctorId: query.doctor || req.user._id,
+  time: query.createdAt,
+  reply: query.doctorResponse,
+  details: `${query.subject || ''}: ${query.symptoms || ''}`.trim()
+}));
+
+    res.json({
+      success: true,
+      message: 'Patient queries retrieved successfully',
+      data: {
+        queries: formattedQueries,
+        pagination: {
+          currentPage: parseInt(page),
+          totalPages: Math.ceil(totalQueries / parseInt(limit)),
+          totalQueries,
+          limit: parseInt(limit)
+        },
+        summary: {
+          totalQueries,
+          statusCounts: statusSummary
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Get doctor queries error:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Failed to retrieve patient queries',
+      error: error.message 
+    });
+  }
+});
+
+// Get specific patient query details for the authenticated doctor
+router.get('/queries/:queryId', auth, async (req, res) => {
+  try {
+    const { queryId } = req.params;
+
+    // Check if user is a doctor
+    if (req.user.role !== 'doctor') {
+      return res.status(403).json({ message: 'Access denied. Doctor role required.' });
+    }
+
+    // Find the query and ensure it belongs to this doctor
+    const query = await PatientQuery.findOne({
+      _id: queryId,
+      doctor: req.user._id
+    }).populate('patient', 'name phoneNumber email age gender address');
+
+    if (!query) {
+      return res.status(404).json({ 
+        success: false,
+        message: 'Patient query not found' 
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Patient query details retrieved successfully',
+      data: query
+    });
+  } catch (error) {
+    console.error('Get specific doctor query error:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Failed to retrieve patient query details',
+      error: error.message 
+    });
+  }
+});
+
+// Reply to a patient query and update status
+router.patch('/queries/:queryId/reply', auth, async (req, res) => {
+  try {
+    const { queryId } = req.params;
+    const { 
+      doctorResponse, 
+      status, 
+      appointmentTime, 
+      consultationType,
+      additionalNotes 
+    } = req.body;
+
+    // Check if user is a doctor
+    if (req.user.role !== 'doctor') {
+      return res.status(403).json({ message: 'Access denied. Doctor role required.' });
+    }
+
+    // Validate required fields
+    if (!doctorResponse) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Doctor response is required' 
+      });
+    }
+
+    if (!status || !['accepted', 'rejected', 'completed'].includes(status)) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Valid status is required (accepted, rejected, or completed)' 
+      });
+    }
+
+    // Find the query and ensure it belongs to this doctor
+    const query = await PatientQuery.findOne({
+      _id: queryId,
+      doctor: req.user._id
+    }).populate('patient', 'name phoneNumber email fcmToken');
+
+    if (!query) {
+      return res.status(404).json({ 
+        success: false,
+        message: 'Patient query not found' 
+      });
+    }
+
+    // Check if query is still pending (can only reply to pending queries)
+    if (query.status !== 'pending') {
+      return res.status(400).json({ 
+        success: false,
+        message: `Cannot reply to ${query.status} query. Only pending queries can be replied to.` 
+      });
+    }
+
+    // Update the query with doctor's response
+    query.doctorResponse = doctorResponse;
+    query.status = status;
+    query.doctorResponseTime = new Date();
+
+    if (appointmentTime) {
+      query.appointmentTime = new Date(appointmentTime);
+    }
+
+    if (consultationType) {
+      query.consultationType = consultationType;
+    }
+
+    // Add additional notes if provided
+    if (additionalNotes) {
+      query.additionalNotes = additionalNotes;
+    }
+
+    await query.save();
+
+    // Send notification to patient about doctor's response
+    try {
+      const notificationData = {
+        queryId: query._id.toString(),
+        doctorName: req.user.fullName,
+        doctorResponse: doctorResponse,
+        status: status,
+        appointmentTime: appointmentTime || null,
+        consultationType: consultationType || query.consultationType
+      };
+
+      console.log('📱 Sending doctor response notification to patient:', {
+        patientId: query.patient._id.toString(),
+        doctorName: req.user.fullName,
+        status
+      });
+
+      await notificationService.sendDoctorResponseNotification(
+        query.patient._id,
+        notificationData
+      );
+    } catch (notificationError) {
+      console.error('Failed to send notification:', notificationError);
+      // Don't fail the response if notification fails
+    }
+
+    // Populate the updated query for response
+    const updatedQuery = await PatientQuery.findById(query._id)
+      .populate('patient', 'name phoneNumber email age gender')
+      .populate('doctor', 'fullName specialization hospitalName1');
+
+    res.json({
+      success: true,
+      message: `Patient query ${status} successfully`,
+      data: updatedQuery
+    });
+  } catch (error) {
+    console.error('Reply to patient query error:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Failed to reply to patient query',
+      error: error.message 
+    });
+  }
+});
+
+// Update query status only (without detailed response)
+router.patch('/queries/:queryId/status', auth, async (req, res) => {
+  try {
+    const { queryId } = req.params;
+    const { status, appointmentTime } = req.body;
+
+    // Check if user is a doctor
+    if (req.user.role !== 'doctor') {
+      return res.status(403).json({ message: 'Access denied. Doctor role required.' });
+    }
+
+    // Validate status
+    if (!status || !['accepted', 'rejected', 'completed'].includes(status)) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'Valid status is required (accepted, rejected, or completed)' 
+      });
+    }
+
+    // Find and update the query
+    const query = await PatientQuery.findOneAndUpdate(
+      { _id: queryId, doctor: req.user._id },
+      { 
+        status,
+        doctorResponseTime: new Date(),
+        ...(appointmentTime && { appointmentTime: new Date(appointmentTime) })
+      },
+      { new: true }
+    ).populate('patient', 'name phoneNumber email age gender');
+
+    if (!query) {
+      return res.status(404).json({ 
+        success: false,
+        message: 'Patient query not found' 
+      });
+    }
+
+    res.json({
+      success: true,
+      message: `Query status updated to ${status}`,
+      data: query
+    });
+  } catch (error) {
+    console.error('Update query status error:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Failed to update query status',
+      error: error.message 
+    });
+  }
+});
+
+// Get doctor's query statistics
+router.get('/queries/stats/summary', auth, async (req, res) => {
+  try {
+    // Check if user is a doctor
+    if (req.user.role !== 'doctor') {
+      return res.status(403).json({ message: 'Access denied. Doctor role required.' });
+    }
+
+    const doctorId = req.user._id;
+
+    // Get overall statistics
+    const totalQueries = await PatientQuery.countDocuments({ doctor: doctorId });
+    
+    // Get status breakdown
+    const statusStats = await PatientQuery.aggregate([
+      { $match: { doctor: doctorId } },
+      { $group: { _id: '$status', count: { $sum: 1 } } }
+    ]);
+
+    // Get monthly statistics
+    const currentMonth = new Date();
+    currentMonth.setDate(1);
+    currentMonth.setHours(0, 0, 0, 0);
+
+    const monthlyStats = await PatientQuery.aggregate([
+      { 
+        $match: { 
+          doctor: doctorId,
+          createdAt: { $gte: currentMonth }
+        } 
+      },
+      { $group: { _id: '$status', count: { $sum: 1 } } }
+    ]);
+
+    // Get average response time
+    const responseTimeStats = await PatientQuery.aggregate([
+      { 
+        $match: { 
+          doctor: doctorId,
+          doctorResponseTime: { $exists: true },
+          createdAt: { $exists: true }
+        } 
+      },
+      {
+        $project: {
+          responseTimeHours: {
+            $divide: [
+              { $subtract: ['$doctorResponseTime', '$createdAt'] },
+              1000 * 60 * 60 // Convert to hours
+            ]
+          }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          avgResponseTime: { $avg: '$responseTimeHours' },
+          minResponseTime: { $min: '$responseTimeHours' },
+          maxResponseTime: { $max: '$responseTimeHours' }
+        }
+      }
+    ]);
+
+    // Format the statistics
+    const statusSummary = {
+      pending: 0,
+      accepted: 0,
+      rejected: 0,
+      completed: 0
+    };
+
+    statusStats.forEach(item => {
+      statusSummary[item._id] = item.count;
+    });
+
+    const monthlySummary = {
+      pending: 0,
+      accepted: 0,
+      rejected: 0,
+      completed: 0
+    };
+
+    monthlyStats.forEach(item => {
+      monthlySummary[item._id] = item.count;
+    });
+
+    res.json({
+      success: true,
+      message: 'Query statistics retrieved successfully',
+      data: {
+        overview: {
+          totalQueries,
+          totalThisMonth: monthlyStats.reduce((sum, item) => sum + item.count, 0)
+        },
+        statusBreakdown: statusSummary,
+        monthlyBreakdown: monthlySummary,
+        responseTime: responseTimeStats[0] || {
+          avgResponseTime: 0,
+          minResponseTime: 0,
+          maxResponseTime: 0
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Get query statistics error:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Failed to retrieve query statistics',
+      error: error.message 
+    });
   }
 });
 

@@ -28,6 +28,10 @@
     {
       "key": "patient_id",
       "value": "patient_id_here"
+    },
+    {
+      "key": "query_id",
+      "value": "query_id_here"
     }
   ],
   "item": [
@@ -1206,6 +1210,318 @@
               "raw": "{{base_url}}/api/admin/stats",
               "host": ["{{base_url}}"],
               "path": ["api", "admin", "stats"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Doctor Query Management",
+      "item": [
+        {
+          "name": "Get All Patient Queries for Doctor",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/doctors/queries?status=pending&page=1&limit=10&sortBy=createdAt&sortOrder=desc",
+              "host": ["{{base_url}}"],
+              "path": ["api", "doctors", "queries"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "pending",
+                  "description": "Filter by status: pending, accepted, rejected, completed"
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number for pagination"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Number of queries per page"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "description": "Field to sort by"
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "description": "Sort order: asc or desc"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Specific Patient Query Details for Doctor",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/doctors/queries/{{query_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "doctors", "queries", "{{query_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reply to Patient Query (Accept)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"doctorResponse\": \"Based on your symptoms, I recommend you visit the emergency room immediately. The chest pain combined with shortness of breath could indicate a serious condition that requires immediate medical attention.\",\n  \"status\": \"accepted\",\n  \"appointmentTime\": \"2024-01-20T14:00:00.000Z\",\n  \"consultationType\": \"in-person\",\n  \"additionalNotes\": \"Please bring your recent ECG reports and any previous cardiac test results if available. Also, avoid any strenuous activity until the appointment.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/doctors/queries/{{query_id}}/reply",
+              "host": ["{{base_url}}"],
+              "path": ["api", "doctors", "queries", "{{query_id}}", "reply"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reply to Patient Query (Reject)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"doctorResponse\": \"Thank you for your query. Based on the symptoms you've described, I would recommend consulting with a specialist in emergency medicine or visiting your nearest emergency department immediately. This is outside my area of expertise and requires urgent attention.\",\n  \"status\": \"rejected\",\n  \"additionalNotes\": \"Please seek immediate medical attention at the nearest hospital emergency department.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/doctors/queries/{{query_id}}/reply",
+              "host": ["{{base_url}}"],
+              "path": ["api", "doctors", "queries", "{{query_id}}", "reply"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reply to Patient Query (Complete)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"doctorResponse\": \"Thank you for following up. Based on our consultation and the test results, your condition has improved significantly. Please continue with the prescribed medication for another week and maintain a healthy lifestyle. If you experience any new symptoms, please don't hesitate to contact me.\",\n  \"status\": \"completed\",\n  \"additionalNotes\": \"Follow-up appointment scheduled if needed. Continue current treatment plan.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/doctors/queries/{{query_id}}/reply",
+              "host": ["{{base_url}}"],
+              "path": ["api", "doctors", "queries", "{{query_id}}", "reply"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Query Status Only",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"completed\",\n  \"appointmentTime\": \"2024-01-25T16:00:00.000Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/doctors/queries/{{query_id}}/status",
+              "host": ["{{base_url}}"],
+              "path": ["api", "doctors", "queries", "{{query_id}}", "status"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Doctor Query Statistics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/doctors/queries/stats/summary",
+              "host": ["{{base_url}}"],
+              "path": ["api", "doctors", "queries", "stats", "summary"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Enhanced Patient Query Management",
+      "item": [
+        {
+          "name": "Create Patient Query (Enhanced)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patient_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"doctorId\": \"{{doctor_id}}\",\n  \"symptoms\": \"I have been experiencing severe chest pain and shortness of breath for the past 2 days. The pain is sharp and occurs especially when I take deep breaths or move around.\",\n  \"duration\": \"2 days\",\n  \"previousTreatments\": \"I took paracetamol and rested, but the pain persists. I also tried applying a heating pad.\",\n  \"attachments\": [\n    {\n      \"url\": \"https://example.com/xray-report.jpg\",\n      \"description\": \"Chest X-ray taken yesterday\"\n    },\n    {\n      \"url\": \"https://example.com/ecg-report.pdf\",\n      \"description\": \"ECG report from local clinic\"\n    }\n  ],\n  \"preferredTime\": \"Morning (9 AM - 12 PM)\",\n  \"consultationType\": \"online\",\n  \"subject\": \"Urgent chest pain consultation\",\n  \"urgency\": \"high\",\n  \"patientContactNo\": \"+911234567890\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/patient/queries",
+              "host": ["{{base_url}}"],
+              "path": ["api", "patient", "queries"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Patient Queries (With Status Filter)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patient_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/patient/queries?status=pending&page=1&limit=5",
+              "host": ["{{base_url}}"],
+              "path": ["api", "patient", "queries"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "pending",
+                  "description": "Filter by status: pending, accepted, rejected, completed"
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "limit",
+                  "value": "5",
+                  "description": "Number of queries per page"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Patient Query (Enhanced)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patient_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"attachments\": [\n    {\n      \"url\": \"https://example.com/updated-report.pdf\",\n      \"description\": \"Updated blood test results\"\n    }\n  ],\n  \"preferredTime\": \"Afternoon (2 PM - 5 PM)\",\n  \"consultationType\": \"in-person\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/patient/queries/{{query_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "patient", "queries", "{{query_id}}"]
             }
           },
           "response": []

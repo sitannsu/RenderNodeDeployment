@@ -537,3 +537,483 @@ You can test these APIs using Postman or any API testing tool. Make sure to:
 4. Include the token in the Authorization header
 5. Use the correct HTTP methods (GET for profile retrieval, PATCH for updates)
 6. Optionally set a password for security after login 
+
+---
+
+# Doctor Patient Query Management APIs
+
+This section describes the APIs for doctors to manage patient queries sent to them.
+
+## Base URL
+```
+http://localhost:3000/api/doctors
+```
+
+All endpoints require doctor authentication using Bearer token.
+
+---
+
+## 1. Get All Patient Queries for Doctor
+
+### Endpoint
+```
+GET /api/doctors/queries
+```
+
+### Description
+Retrieves all patient queries sent to the authenticated doctor with essential information optimized for dashboard view. Returns patient details, query summary, and status information with filtering, pagination, and sorting options.
+
+### Headers
+```
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+### Query Parameters
+- **status** (optional): Filter by query status (`pending`, `accepted`, `rejected`, `completed`)
+- **page** (optional): Page number for pagination (default: 1)
+- **limit** (optional): Number of queries per page (default: 10)
+- **sortBy** (optional): Field to sort by (default: `createdAt`)
+- **sortOrder** (optional): Sort order (`asc` or `desc`, default: `desc`)
+
+### Example Request
+```
+GET /api/doctors/queries?status=pending&page=1&limit=5&sortBy=createdAt&sortOrder=desc
+```
+
+### Response Optimization
+This endpoint returns **optimized data for doctor dashboard view**:
+- **Patient info**: Only essential details (name, phone, age, gender)
+- **Symptoms**: Truncated to 100 characters for list view
+- **Query fields**: Subject, urgency, status, consultation type, timing
+- **Response status**: Boolean flag indicating if doctor has responded
+- **No doctor details**: Avoids returning doctor's own information
+- **No full attachments**: Use detailed endpoint for complete information
+
+### Response Format
+```json
+{
+  "success": true,
+  "message": "Patient queries retrieved successfully",
+  "data": {
+    "queries": [
+      {
+        "_id": "query_id",
+        "patient": {
+          "_id": "patient_id",
+          "name": "John Doe",
+          "phoneNumber": "+1234567890",
+          "age": 35,
+          "gender": "male"
+        },
+        "subject": "Chest pain consultation",
+        "symptoms": "Chest pain and shortness of breath for the past 2 days. The pain is sharp and occurs especially...",
+        "urgency": "high",
+        "status": "pending",
+        "consultationType": "online",
+        "preferredTime": "Morning (9 AM - 12 PM)",
+        "hasResponse": false,
+        "responseTime": null,
+        "createdAt": "2024-01-15T10:30:00.000Z",
+        "updatedAt": "2024-01-15T10:30:00.000Z"
+      }
+    ],
+    "pagination": {
+      "currentPage": 1,
+      "totalPages": 3,
+      "totalQueries": 15,
+      "limit": 5
+    },
+    "summary": {
+      "totalQueries": 15,
+      "statusCounts": {
+        "pending": 8,
+        "accepted": 4,
+        "rejected": 1,
+        "completed": 2
+      }
+    }
+  }
+}
+```
+
+---
+
+## 2. Get Specific Patient Query Details
+
+### Endpoint
+```
+GET /api/doctors/queries/:queryId
+```
+
+### Description
+Retrieves detailed information about a specific patient query sent to the authenticated doctor.
+
+### Headers
+```
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+### Path Parameters
+- **queryId** (required): The ID of the patient query
+
+### Example Request
+```
+GET /api/doctors/queries/507f1f77bcf86cd799439011
+```
+
+### Response Format
+```json
+{
+  "success": true,
+  "message": "Patient query details retrieved successfully",
+  "data": {
+    "_id": "507f1f77bcf86cd799439011",
+    "patient": {
+      "_id": "patient_id",
+      "name": "John Doe",
+      "phoneNumber": "+1234567890",
+      "email": "patient@example.com",
+      "age": 35,
+      "gender": "male",
+      "address": {
+        "street": "123 Main St",
+        "city": "New York",
+        "state": "NY",
+        "pincode": "10001"
+      }
+    },
+    "symptoms": "Chest pain and shortness of breath",
+    "duration": "2 days",
+    "previousTreatments": "Took paracetamol",
+    "attachments": [
+      {
+        "url": "attachment1.jpg",
+        "description": "X-ray report"
+      }
+    ],
+    "preferredTime": "Morning",
+    "status": "pending",
+    "consultationType": "online",
+    "subject": "Chest pain consultation",
+    "urgency": "high",
+    "patientContactNo": "+1234567890",
+    "doctorResponse": null,
+    "doctorResponseTime": null,
+    "appointmentTime": null,
+    "additionalNotes": null,
+    "createdAt": "2024-01-15T10:30:00.000Z",
+    "updatedAt": "2024-01-15T10:30:00.000Z"
+  }
+}
+```
+
+---
+
+## 3. Reply to Patient Query
+
+### Endpoint
+```
+PATCH /api/doctors/queries/:queryId/reply
+```
+
+### Description
+Allows the doctor to reply to a patient query with a detailed response and update the query status.
+
+### Headers
+```
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+### Path Parameters
+- **queryId** (required): The ID of the patient query
+
+### Request Body
+```json
+{
+  "doctorResponse": "Based on your symptoms, I recommend you visit the emergency room immediately. The chest pain combined with shortness of breath could indicate a serious condition.",
+  "status": "accepted",
+  "appointmentTime": "2024-01-16T14:00:00.000Z",
+  "consultationType": "in-person",
+  "additionalNotes": "Please bring your recent ECG reports if available"
+}
+```
+
+### Request Body Fields
+- **doctorResponse** (required): Doctor's detailed response to the patient
+- **status** (required): New status of the query (`accepted`, `rejected`, or `completed`)
+- **appointmentTime** (optional): Scheduled appointment time (ISO format)
+- **consultationType** (optional): Type of consultation (`online` or `in-person`)
+- **additionalNotes** (optional): Any additional notes or instructions
+
+### Response Format
+```json
+{
+  "success": true,
+  "message": "Patient query accepted successfully",
+  "data": {
+    "_id": "507f1f77bcf86cd799439011",
+    "patient": {
+      "_id": "patient_id",
+      "name": "John Doe",
+      "phoneNumber": "+1234567890",
+      "email": "patient@example.com",
+      "age": 35,
+      "gender": "male"
+    },
+    "doctor": {
+      "_id": "doctor_id",
+      "fullName": "Dr. Jane Smith",
+      "specialization": "Cardiology",
+      "hospitalName1": "City General Hospital"
+    },
+    "symptoms": "Chest pain and shortness of breath",
+    "duration": "2 days",
+    "previousTreatments": "Took paracetamol",
+    "status": "accepted",
+    "doctorResponse": "Based on your symptoms, I recommend you visit the emergency room immediately...",
+    "doctorResponseTime": "2024-01-15T11:30:00.000Z",
+    "appointmentTime": "2024-01-16T14:00:00.000Z",
+    "consultationType": "in-person",
+    "additionalNotes": "Please bring your recent ECG reports if available",
+    "createdAt": "2024-01-15T10:30:00.000Z",
+    "updatedAt": "2024-01-15T11:30:00.000Z"
+  }
+}
+```
+
+---
+
+## 4. Update Query Status Only
+
+### Endpoint
+```
+PATCH /api/doctors/queries/:queryId/status
+```
+
+### Description
+Allows the doctor to quickly update only the status of a patient query without providing a detailed response.
+
+### Headers
+```
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+### Path Parameters
+- **queryId** (required): The ID of the patient query
+
+### Request Body
+```json
+{
+  "status": "completed",
+  "appointmentTime": "2024-01-16T14:00:00.000Z"
+}
+```
+
+### Request Body Fields
+- **status** (required): New status of the query (`accepted`, `rejected`, or `completed`)
+- **appointmentTime** (optional): Scheduled appointment time (ISO format)
+
+### Response Format
+```json
+{
+  "success": true,
+  "message": "Query status updated to completed",
+  "data": {
+    "_id": "507f1f77bcf86cd799439011",
+    "patient": {
+      "_id": "patient_id",
+      "name": "John Doe",
+      "phoneNumber": "+1234567890",
+      "email": "patient@example.com",
+      "age": 35,
+      "gender": "male"
+    },
+    "status": "completed",
+    "doctorResponseTime": "2024-01-15T12:00:00.000Z",
+    "appointmentTime": "2024-01-16T14:00:00.000Z",
+    "createdAt": "2024-01-15T10:30:00.000Z",
+    "updatedAt": "2024-01-15T12:00:00.000Z"
+  }
+}
+```
+
+---
+
+## 5. Get Doctor's Query Statistics
+
+### Endpoint
+```
+GET /api/doctors/queries/stats/summary
+```
+
+### Description
+Retrieves comprehensive statistics about the doctor's patient queries including status breakdown, monthly trends, and response times.
+
+### Headers
+```
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+### Response Format
+```json
+{
+  "success": true,
+  "message": "Query statistics retrieved successfully",
+  "data": {
+    "overview": {
+      "totalQueries": 45,
+      "totalThisMonth": 12
+    },
+    "statusBreakdown": {
+      "pending": 8,
+      "accepted": 25,
+      "rejected": 5,
+      "completed": 7
+    },
+    "monthlyBreakdown": {
+      "pending": 3,
+      "accepted": 6,
+      "rejected": 1,
+      "completed": 2
+    },
+    "responseTime": {
+      "avgResponseTime": 2.5,
+      "minResponseTime": 0.5,
+      "maxResponseTime": 24.0
+    }
+  }
+}
+```
+
+### Statistics Fields
+- **overview**: General statistics
+  - **totalQueries**: Total number of queries received by the doctor
+  - **totalThisMonth**: Number of queries received this month
+- **statusBreakdown**: Count of queries by status (all time)
+- **monthlyBreakdown**: Count of queries by status (current month)
+- **responseTime**: Response time statistics in hours
+  - **avgResponseTime**: Average response time in hours
+  - **minResponseTime**: Fastest response time in hours
+  - **maxResponseTime**: Slowest response time in hours
+
+---
+
+## Error Responses
+
+### 403 Forbidden (Non-doctor access)
+```json
+{
+  "message": "Access denied. Doctor role required."
+}
+```
+
+### 404 Not Found (Query not found)
+```json
+{
+  "success": false,
+  "message": "Patient query not found"
+}
+```
+
+### 400 Bad Request (Invalid status)
+```json
+{
+  "success": false,
+  "message": "Valid status is required (accepted, rejected, or completed)"
+}
+```
+
+### 400 Bad Request (Cannot reply to non-pending query)
+```json
+{
+  "success": false,
+  "message": "Cannot reply to accepted query. Only pending queries can be replied to."
+}
+```
+
+### 401 Unauthorized
+```json
+{
+  "message": "Authentication required"
+}
+```
+
+---
+
+## Query Status Flow
+
+1. **pending**: Initial status when patient submits a query
+2. **accepted**: Doctor accepts the query and may schedule an appointment
+3. **rejected**: Doctor declines the query (with optional reason)
+4. **completed**: Query has been fully addressed and closed
+
+**Note**: Only queries with `pending` status can be replied to with detailed responses. Queries in other statuses can only have their status updated.
+
+---
+
+## Notification System
+
+When a doctor replies to or updates a patient query, an automatic push notification is sent to the patient containing:
+- Doctor's name
+- Response status (accepted/rejected/completed)
+- Appointment time (if scheduled)
+- Consultation type
+
+---
+
+## Query Urgency Levels
+
+- **low**: Non-urgent general inquiries
+- **medium**: Standard medical questions (default)
+- **high**: Urgent medical concerns requiring prompt attention
+
+---
+
+## Best Practices
+
+1. **Response Time**: Try to respond to high urgency queries within 2-4 hours
+2. **Detailed Responses**: Provide clear, actionable medical advice
+3. **Appointment Scheduling**: Include specific appointment times when accepting queries
+4. **Professional Communication**: Maintain professional language in all responses
+5. **Patient Safety**: For emergency symptoms, advise immediate medical attention
+
+---
+
+## Testing the Doctor Query APIs
+
+### Prerequisites
+1. Register a doctor account
+2. Login and get authentication token
+3. Have patient queries in the system (use patient app to create queries)
+
+### Example Test Sequence
+```bash
+# 1. Get all queries
+GET /api/doctors/queries
+Authorization: Bearer <doctor_token>
+
+# 2. Get specific query details
+GET /api/doctors/queries/{query_id}
+Authorization: Bearer <doctor_token>
+
+# 3. Reply to a query
+PATCH /api/doctors/queries/{query_id}/reply
+Authorization: Bearer <doctor_token>
+Content-Type: application/json
+
+{
+  "doctorResponse": "I recommend you schedule an appointment for further evaluation.",
+  "status": "accepted",
+  "appointmentTime": "2024-01-20T10:00:00.000Z",
+  "consultationType": "in-person"
+}
+
+# 4. Get updated statistics
+GET /api/doctors/queries/stats/summary
+Authorization: Bearer <doctor_token>
+```

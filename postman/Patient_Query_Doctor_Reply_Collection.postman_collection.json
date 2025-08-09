@@ -1,0 +1,836 @@
+{
+  "info": {
+    "name": "Patient Query & Doctor Reply - Complete Collection",
+    "description": "Complete API collection for Patient Queries and Doctor Replies in Kappu Doctor App. This collection covers the full workflow from patient query creation to doctor responses and management.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "patient-query-doctor-reply-collection",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    }
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://rendernodedeployment.onrender.com",
+      "description": "Base URL for the Kappu Doctor App API"
+    },
+    {
+      "key": "doctor_token",
+      "value": "your_doctor_jwt_token_here",
+      "description": "JWT token for doctor authentication"
+    },
+    {
+      "key": "patient_token", 
+      "value": "your_patient_jwt_token_here",
+      "description": "JWT token for patient authentication"
+    },
+    {
+      "key": "doctor_id",
+      "value": "doctor_id_here",
+      "description": "Doctor's unique ID"
+    },
+    {
+      "key": "patient_id",
+      "value": "patient_id_here", 
+      "description": "Patient's unique ID"
+    },
+    {
+      "key": "query_id",
+      "value": "query_id_here",
+      "description": "Patient query unique ID"
+    }
+  ],
+  "item": [
+    {
+      "name": "🩺 Patient Query Management",
+      "description": "APIs for patients to create, view, and manage their medical queries to doctors",
+      "item": [
+        {
+          "name": "Create Patient Query",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Save query ID for use in other requests",
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    if (response._id) {",
+                  "        pm.collectionVariables.set('query_id', response._id);",
+                  "        console.log('Query ID saved:', response._id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patient_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"doctorId\": \"{{doctor_id}}\",\n  \"symptoms\": \"I have been experiencing severe chest pain and shortness of breath for the past 2 days. The pain is sharp and occurs especially when I take deep breaths or move around. Sometimes I feel dizzy and nauseous.\",\n  \"duration\": \"2 days\",\n  \"previousTreatments\": \"I took paracetamol and rested, but the pain persists. I also tried applying a heating pad but it didn't help much.\",\n  \"attachments\": [\n    {\n      \"url\": \"https://example.com/chest-xray.jpg\",\n      \"description\": \"Chest X-ray taken at local clinic yesterday\"\n    },\n    {\n      \"url\": \"https://example.com/ecg-report.pdf\",\n      \"description\": \"ECG report showing irregular heartbeat\"\n    }\n  ],\n  \"preferredTime\": \"Morning (9 AM - 12 PM) or Evening (6 PM - 8 PM)\",\n  \"consultationType\": \"online\",\n  \"subject\": \"Urgent chest pain and breathing difficulty\",\n  \"urgency\": \"high\",\n  \"patientContactNo\": \"+911234567890\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/patient/queries",
+              "host": ["{{base_url}}"],
+              "path": ["api", "patient", "queries"]
+            },
+            "description": "Create a new medical query to a specific doctor. Includes symptoms, medical history, attachments, and consultation preferences."
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Patient Queries",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patient_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/patient/queries?status=pending&page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "patient", "queries"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "pending",
+                  "description": "Filter by status: pending, accepted, rejected, completed"
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number for pagination"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Number of queries per page"
+                }
+              ]
+            },
+            "description": "Retrieve all queries created by the authenticated patient with optional filtering and pagination."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Specific Patient Query",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patient_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/patient/queries/{{query_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "patient", "queries", "{{query_id}}"]
+            },
+            "description": "Get detailed information about a specific query including doctor responses and appointment details."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Patient Query",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{patient_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"attachments\": [\n    {\n      \"url\": \"https://example.com/updated-blood-report.pdf\",\n      \"description\": \"Latest blood test results\"\n    },\n    {\n      \"url\": \"https://example.com/additional-symptoms.jpg\",\n      \"description\": \"Photo showing additional symptoms\"\n    }\n  ],\n  \"preferredTime\": \"Afternoon (2 PM - 5 PM)\",\n  \"consultationType\": \"in-person\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/patient/queries/{{query_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "patient", "queries", "{{query_id}}"]
+            },
+            "description": "Update query details like attachments, preferred consultation time, or consultation type. Only pending queries can be updated."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "👨‍⚕️ Doctor Query Management",
+      "description": "APIs for doctors to view, respond to, and manage patient queries",
+      "item": [
+        {
+          "name": "Get All Patient Queries for Doctor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Test if endpoint returns correct structure",
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has correct structure', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "    pm.expect(jsonData.data).to.have.property('queries');",
+                  "});",
+                  "",
+                  "pm.test('Queries contain patient data only', function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    if (jsonData.data.queries.length > 0) {",
+                  "        const query = jsonData.data.queries[0];",
+                  "        pm.expect(query).to.have.property('patient');",
+                  "        pm.expect(query.patient).to.have.property('name');",
+                  "        pm.expect(query).to.not.have.property('homeAddress');",
+                  "        pm.expect(query).to.not.have.property('hospitalAddress1');",
+                  "    }",
+                  "});",
+                  "",
+                  "console.log('Response:', JSON.stringify(pm.response.json(), null, 2));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/doctors/queries?status=pending&page=1&limit=10&sortBy=createdAt&sortOrder=desc",
+              "host": ["{{base_url}}"],
+              "path": ["api", "doctors", "queries"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "pending",
+                  "description": "Filter by status: pending, accepted, rejected, completed"
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number for pagination"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Number of queries per page"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "description": "Field to sort by (createdAt, urgency, status)"
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "description": "Sort order: asc or desc"
+                }
+              ]
+            },
+            "description": "Get all patient queries sent to the authenticated doctor with essential information for dashboard view. Returns: patient name/ID, query subject, symptoms (truncated), urgency, status, timing, and response status - optimized for doctor dashboard listing."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Specific Patient Query Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/doctors/queries/{{query_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "doctors", "queries", "{{query_id}}"]
+            },
+            "description": "Get detailed information about a specific patient query including full patient details, medical history, and attachments."
+          },
+          "response": []
+        },
+        {
+          "name": "Accept Patient Query",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"doctorResponse\": \"Thank you for reaching out. Based on your symptoms of chest pain and shortness of breath, I recommend an immediate in-person consultation. These symptoms could indicate a cardiac issue that requires urgent evaluation. Please schedule an appointment as soon as possible.\",\n  \"status\": \"accepted\",\n  \"appointmentTime\": \"2024-01-20T14:00:00.000Z\",\n  \"consultationType\": \"in-person\",\n  \"additionalNotes\": \"Please bring your recent ECG reports, any previous cardiac test results, and a list of current medications. Avoid strenuous activity until our consultation. If symptoms worsen, go to the emergency room immediately.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/doctors/queries/{{query_id}}/reply",
+              "host": ["{{base_url}}"],
+              "path": ["api", "doctors", "queries", "{{query_id}}", "reply"]
+            },
+            "description": "Accept a patient query with detailed medical advice, appointment scheduling, and additional instructions. Patient receives automatic notification."
+          },
+          "response": []
+        },
+        {
+          "name": "Reject Patient Query",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"doctorResponse\": \"Thank you for your query. Based on the symptoms you've described (chest pain and breathing difficulties), I believe this requires immediate emergency medical attention rather than a scheduled consultation. I strongly recommend visiting your nearest emergency department immediately.\",\n  \"status\": \"rejected\",\n  \"additionalNotes\": \"This is an emergency situation that requires immediate hospital care. Please do not delay - go to the nearest emergency room or call emergency services.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/doctors/queries/{{query_id}}/reply",
+              "host": ["{{base_url}}"],
+              "path": ["api", "doctors", "queries", "{{query_id}}", "reply"]
+            },
+            "description": "Decline a patient query with medical reasoning and alternative recommendations. Useful when the case is outside doctor's expertise or requires emergency care."
+          },
+          "response": []
+        },
+        {
+          "name": "Complete Patient Query",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"doctorResponse\": \"Thank you for following up on your chest pain concern. Based on our consultation and the test results you provided, your condition has improved significantly. The ECG shows normal rhythm and the chest X-ray appears clear. Please continue with the prescribed medication for another week and maintain a healthy lifestyle with regular exercise and a balanced diet.\",\n  \"status\": \"completed\",\n  \"additionalNotes\": \"Follow-up appointment scheduled in 2 weeks if needed. Continue current treatment plan. Contact me immediately if you experience any recurring symptoms. Lifestyle recommendations: avoid smoking, limit caffeine, maintain regular sleep schedule.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/doctors/queries/{{query_id}}/reply",
+              "host": ["{{base_url}}"],
+              "path": ["api", "doctors", "queries", "{{query_id}}", "reply"]
+            },
+            "description": "Mark a patient query as completed with final medical advice and follow-up instructions. Used when the consultation is finished and no further action is needed."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Query Status Only",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"completed\",\n  \"appointmentTime\": \"2024-01-25T16:00:00.000Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/doctors/queries/{{query_id}}/status",
+              "host": ["{{base_url}}"],
+              "path": ["api", "doctors", "queries", "{{query_id}}", "status"]
+            },
+            "description": "Quickly update only the status of a query without providing detailed response. Useful for administrative updates or when brief status change is needed."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Doctor Query Statistics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/doctors/queries/stats/summary",
+              "host": ["{{base_url}}"],
+              "path": ["api", "doctors", "queries", "stats", "summary"]
+            },
+            "description": "Get comprehensive statistics about doctor's query management including response times, status breakdown, monthly trends, and performance metrics."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🔍 Doctor Search & Selection",
+      "description": "APIs for patients to search and select doctors before creating queries",
+      "item": [
+        {
+          "name": "Search Doctors",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Save first doctor ID for use in query creation",
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.doctors && response.doctors.length > 0) {",
+                  "        pm.collectionVariables.set('doctor_id', response.doctors[0]._id);",
+                  "        console.log('Doctor ID saved:', response.doctors[0]._id);",
+                  "        console.log('Doctor Name:', response.doctors[0].fullName);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/patient/doctors/search?query=cardio&specialization=Cardiology&location=Mumbai&hospital=General&page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "patient", "doctors", "search"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "cardio",
+                  "description": "General search term"
+                },
+                {
+                  "key": "specialization",
+                  "value": "Cardiology",
+                  "description": "Medical specialization"
+                },
+                {
+                  "key": "location",
+                  "value": "Mumbai",
+                  "description": "City or location"
+                },
+                {
+                  "key": "hospital",
+                  "value": "General",
+                  "description": "Hospital name"
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Results per page"
+                }
+              ]
+            },
+            "description": "Search for doctors by specialization, location, hospital, or general query. No authentication required."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Doctor Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/patient/doctors/{{doctor_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "patient", "doctors", "{{doctor_id}}"]
+            },
+            "description": "Get detailed information about a specific doctor including specialization, hospital, and experience."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🔐 Authentication",
+      "description": "Authentication endpoints for doctors and patients",
+      "item": [
+        {
+          "name": "Patient Login/Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Save patient token and ID",
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.token) {",
+                  "        pm.collectionVariables.set('patient_token', response.token);",
+                  "        console.log('Patient token saved');",
+                  "    }",
+                  "    if (response.patient && response.patient._id) {",
+                  "        pm.collectionVariables.set('patient_id', response.patient._id);",
+                  "        console.log('Patient ID saved:', response.patient._id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phoneNumber\": \"+911234567890\",\n  \"otp\": \"123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/patient/auth/verify-otp",
+              "host": ["{{base_url}}"],
+              "path": ["api", "patient", "auth", "verify-otp"]
+            },
+            "description": "Verify OTP and login/register patient. This will create patient account if it doesn't exist."
+          },
+          "response": []
+        },
+        {
+          "name": "Doctor Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Save doctor token and ID",
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.token) {",
+                  "        pm.collectionVariables.set('doctor_token', response.token);",
+                  "        console.log('Doctor token saved');",
+                  "    }",
+                  "    if (response.user && response.user.id) {",
+                  "        pm.collectionVariables.set('doctor_id', response.user.id);",
+                  "        console.log('Doctor ID saved:', response.user.id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"doctor@example.com\",\n  \"password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Login doctor with email and password to get authentication token."
+          },
+          "response": []
+        },
+        {
+          "name": "Send Patient OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phoneNumber\": \"+911234567890\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/patient/auth/send-otp",
+              "host": ["{{base_url}}"],
+              "path": ["api", "patient", "auth", "send-otp"]
+            },
+            "description": "Send OTP to patient's phone number for authentication."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🧪 Test Scenarios",
+      "description": "Pre-configured test scenarios for common workflows",
+      "item": [
+        {
+          "name": "Scenario 1: Patient Creates Query → Doctor Accepts",
+          "item": [
+            {
+              "name": "Step 1: Search for Cardiologist",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "// Auto-save first doctor ID",
+                      "if (pm.response.code === 200) {",
+                      "    const response = pm.response.json();",
+                      "    if (response.doctors && response.doctors.length > 0) {",
+                      "        pm.collectionVariables.set('doctor_id', response.doctors[0]._id);",
+                      "    }",
+                      "}",
+                      "",
+                      "// Auto-run next request after 1 second",
+                      "setTimeout(() => {",
+                      "    postman.setNextRequest('Step 2: Create Urgent Query');",
+                      "}, 1000);"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/patient/doctors/search?specialization=Cardiology&limit=5",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "patient", "doctors", "search"],
+                  "query": [
+                    {
+                      "key": "specialization",
+                      "value": "Cardiology"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "5"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Step 2: Create Urgent Query",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "// Auto-save query ID",
+                      "if (pm.response.code === 201) {",
+                      "    const response = pm.response.json();",
+                      "    if (response._id) {",
+                      "        pm.collectionVariables.set('query_id', response._id);",
+                      "    }",
+                      "}",
+                      "",
+                      "// Auto-run next request after 2 seconds",
+                      "setTimeout(() => {",
+                      "    postman.setNextRequest('Step 3: Doctor Views Query');",
+                      "}, 2000);"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{patient_token}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"doctorId\": \"{{doctor_id}}\",\n  \"symptoms\": \"Severe chest pain and difficulty breathing for 6 hours\",\n  \"duration\": \"6 hours\",\n  \"previousTreatments\": \"Took aspirin, no improvement\",\n  \"preferredTime\": \"As soon as possible\",\n  \"consultationType\": \"online\",\n  \"subject\": \"URGENT: Chest pain and breathing problems\",\n  \"urgency\": \"high\",\n  \"patientContactNo\": \"+911234567890\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/patient/queries",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "patient", "queries"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Step 3: Doctor Views Query",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "// Auto-run next request after 2 seconds",
+                      "setTimeout(() => {",
+                      "    postman.setNextRequest('Step 4: Doctor Accepts Query');",
+                      "}, 2000);"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{doctor_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/doctors/queries/{{query_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "doctors", "queries", "{{query_id}}"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Step 4: Doctor Accepts Query",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "// Stop the chain here",
+                      "postman.setNextRequest(null);"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{doctor_token}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"doctorResponse\": \"I understand your concern about chest pain and breathing difficulty. These symptoms require immediate attention. Please go to the nearest emergency room immediately or call emergency services. Do not wait for an appointment.\",\n  \"status\": \"accepted\",\n  \"consultationType\": \"emergency\",\n  \"additionalNotes\": \"EMERGENCY: Go to hospital immediately. Call emergency services if symptoms worsen.\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/doctors/queries/{{query_id}}/reply",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "doctors", "queries", "{{query_id}}", "reply"]
+                }
+              },
+              "response": []
+            }
+          ],
+          "description": "Complete workflow: Patient searches for doctor, creates urgent query, doctor reviews and accepts with emergency recommendation."
+        }
+      ]
+    }
+  ]
+}
