@@ -46,6 +46,20 @@ const patientQuerySchema = new mongoose.Schema({
   },
   appointmentTime: {
     type: Date
+  },
+  additionalNotes: {
+    type: String
+  },
+  subject: {
+    type: String
+  },
+  urgency: {
+    type: String,
+    enum: ['low', 'medium', 'high'],
+    default: 'medium'
+  },
+  patientContactNo: {
+    type: String
   }
 }, {
   timestamps: true
