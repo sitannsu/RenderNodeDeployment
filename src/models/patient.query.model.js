@@ -22,9 +22,9 @@ const patientQuerySchema = new mongoose.Schema({
     type: String
   },
   attachments: [{
-    type: String,
+    url: String,
     description: String
-  }],
+  }], // optional, not required
   preferredTime: {
     type: String
   },

@@ -8,6 +8,7 @@ const router = express.Router();
 
 // Get all doctors
 router.get('/', async (req, res) => {
+  console.log('GET /api/doctor/ called');
   try {
     const doctors = await User.find({ role: 'doctor' })
       .select('-password')
@@ -20,6 +21,7 @@ router.get('/', async (req, res) => {
 
 // Search doctors by specialization or name
 router.get('/search', async (req, res) => {
+  console.log('GET /api/doctor/search called');
   try {
     const { query, specialization, page = 1, limit = 10 } = req.query;
     let searchQuery = { role: 'doctor' };
@@ -58,8 +60,70 @@ router.get('/search', async (req, res) => {
   }
 });
 
+// Get all patient queries for the authenticated doctor
+router.get('/queries', auth, async (req, res) => {
+  console.log('Doctor queries endpoint called:', req.user);
+  try {
+    const { status, page = 1, limit = 10, sortBy = 'createdAt', sortOrder = 'desc' } = req.query;
+    
+    console.log('🔍 Doctor queries endpoint called:', {
+      doctorId: req.user._id,
+      role: req.user.role,
+      status,
+      page,
+      limit
+    });
+    
+    // Check if user is a doctor
+    if (req.user.role !== 'doctor') {
+      return res.status(403).json({ message: 'Access denied. Doctor role required.' });
+    }
+
+    // Build filter for queries sent to this doctor
+    const filter = { doctor: req.user._id };
+    console.log('[Doctor Queries API] Filter:', filter);
+    
+    if (status) {
+      filter.status = status;
+      console.log('[Doctor Queries API] Status filter applied:', status);
+    }
+
+    // Calculate pagination
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    console.log('[Doctor Queries API] Pagination:', { skip, limit });
+    
+    // Build sort object
+    const sort = {};
+    sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
+    console.log('[Doctor Queries API] Sort:', sort);
+
+    // Get queries with essential patient details only
+    const queries = await PatientQuery.find(filter)
+      .select('patient symptoms subject urgency status consultationType preferredTime doctorResponse doctorResponseTime createdAt updatedAt doctor')
+      .populate('patient', '_id')
+      .sort(sort)
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    // Get total count
+    const total = await PatientQuery.countDocuments(filter);
+
+    res.json({
+      queries,
+      totalQueries: total,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      totalPages: Math.ceil(total / parseInt(limit))
+    });
+  } catch (error) {
+    console.error('Doctor queries endpoint error:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // Get doctor by ID
 router.get('/:id', async (req, res) => {
+  console.log('GET /api/doctor/:id called');
   try {
     const { query, specialization } = req.query;
     let searchQuery = { role: 'doctor' };
@@ -87,6 +151,7 @@ router.get('/:id', async (req, res) => {
 
 // Get doctor statistics
 router.get('/stats/:id', auth, async (req, res) => {
+  console.log('GET /api/doctor/stats/:id called');
   try {
     const stats = await User.aggregate([
       {
@@ -159,6 +224,7 @@ router.get('/stats/:id', auth, async (req, res) => {
 
 // Get detailed doctor statistics with referral doctor lists
 router.get('/statsDetails/:id', auth, async (req, res) => {
+  console.log('GET /api/doctor/statsDetails/:id called');
   try {
     const stats = await User.aggregate([
       {
@@ -325,6 +391,7 @@ router.get('/statsDetails/:id', auth, async (req, res) => {
 
 // Register new doctor
 router.post('/register', async (req, res) => {
+  console.log('POST /api/doctor/register called');
   try {
     const {
       firstName,
@@ -1046,6 +1113,7 @@ router.get('/queries/debug', auth, async (req, res) => {
 
 // Get all patient queries for the authenticated doctor
 router.get('/queries', auth, async (req, res) => {
+  console.log('Doctor queries endpoint called:', req.user);
   try {
     const { status, page = 1, limit = 10, sortBy = 'createdAt', sortOrder = 'desc' } = req.query;
     
