@@ -13,7 +13,7 @@ const patientDoctorRoutes = require('./routes/patient.doctor.routes');
 const patientQueryRoutes = require('./routes/patient.query.routes');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5005``;
 
 // Middleware
 app.use(cors());

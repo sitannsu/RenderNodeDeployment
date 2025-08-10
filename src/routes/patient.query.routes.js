@@ -139,6 +139,7 @@ router.post('/queries', patientAuth, async (req, res) => {
 
 // Get patient's queries
 router.get('/queries', patientAuth, async (req, res) => {
+  console.log('Patient queries endpoint called:', req.patient);
   try {
     const { status, page = 1, limit = 10 } = req.query;
     const filter = { patient: req.patient._id };
