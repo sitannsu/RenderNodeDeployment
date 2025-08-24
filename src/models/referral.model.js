@@ -41,6 +41,11 @@ const referralSchema = new mongoose.Schema({
   attachments: [{
     type: String, // URLs to medical documents/reports
   }],
+  // Flag to track if patient has reached the referred doctor
+  patientReached: {
+    type: Boolean,
+    default: false
+  },
   createdAt: {
     type: Date,
     default: Date.now

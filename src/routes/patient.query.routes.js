@@ -82,7 +82,8 @@ router.post('/queries', patientAuth, async (req, res) => {
 
     // Get patient data from JWT token
     const patient = req.patient;
-    const patientName = patient.fullName || patient.name || 'Patient'; // Try both fullName and name fields
+    console.log('patientpatientpatient',patient)
+    const patientName = patient.phoneNumber ||  'Patient'; // Try both fullName and name fields
 
     const query = new PatientQuery({
       patient: patient._id,
@@ -108,7 +109,7 @@ router.post('/queries', patientAuth, async (req, res) => {
       queryId: query._id.toString(),
       patientId: patient._id.toString(),
       patientName: patientName,
-      patientContactNo: patientContactNo || '',
+      patientContactNo: patient.phoneNumber|| '',
       query: symptoms || '',
       subject: subject || 'Medical Query',
       urgency: urgency || 'medium',

@@ -159,9 +159,10 @@ class NotificationService {
    * @returns {Promise<Object>} - Result of sending notification
    */
   async sendPatientQueryNotification(doctorId, queryData) {
+    console.log('queryDataqueryDataqueryData',queryData);
     const notification = {
       title: 'New Patient Query',
-      body: `You have received a new query from ${queryData.patientName || 'a patient'}`,
+      body: `You have received a new query from a patient with phone no${queryData.patientContactNo ? ` ${queryData.patientContactNo}` : ''}`,
       clickAction: 'OPEN_PATIENT_QUERY',
       priority: 'high'
     };

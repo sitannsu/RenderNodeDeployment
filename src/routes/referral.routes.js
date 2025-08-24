@@ -45,34 +45,27 @@ router.post('/', auth, async (req, res) => {
   }
 });
 
-// Get all referrals for a doctor (both sent and received)
+// Get all referrals for a doctor (returns two arrays: sent and received)
 router.get('/', auth, async (req, res) => {
   try {
-    const { status, type } = req.query;
-    let query = {};
-
-    // Filter by status if provided
+    const { status } = req.query;
+    let sentQuery = { referringDoctor: req.user._id };
+    let receivedQuery = { referredDoctor: req.user._id };
     if (status) {
-      query.status = status;
+      sentQuery.status = status;
+      receivedQuery.status = status;
     }
 
-    // Filter by referral type (sent or received)
-    if (type === 'sent') {
-      query.referringDoctor = req.user._id;
-    } else if (type === 'received') {
-      query.referredDoctor = req.user._id;
-    } else {
-      query.$or = [
-        { referringDoctor: req.user._id },
-        { referredDoctor: req.user._id }
-      ];
-    }
+    const [sentReferrals, receivedReferrals] = await Promise.all([
+      Referral.find(sentQuery)
+        .populate('referringDoctor referredDoctor', 'fullName specialization hospitalName')
+        .sort({ createdAt: -1 }),
+      Referral.find(receivedQuery)
+        .populate('referringDoctor referredDoctor', 'fullName specialization hospitalName')
+        .sort({ createdAt: -1 })
+    ]);
 
-    const referrals = await Referral.find(query)
-      .populate('referringDoctor referredDoctor', 'fullName specialization hospitalName')
-      .sort({ createdAt: -1 });
-
-    res.json(referrals);
+    res.json({ sent: sentReferrals, received: receivedReferrals });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -136,6 +129,25 @@ router.patch('/:id/status', auth, async (req, res) => {
       console.log('📱 Status update notification result:', notificationResult);
     }
 
+    res.json(referral);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// Mark patient as reached (only referred doctor can do this)
+router.patch('/:id/patient-reached', auth, async (req, res) => {
+  try {
+    const referral = await Referral.findById(req.params.id);
+    if (!referral) {
+      return res.status(404).json({ message: 'Referral not found' });
+    }
+    if (!referral.referredDoctor.equals(req.user._id)) {
+      return res.status(403).json({ message: 'Not authorized to update this referral' });
+    }
+    referral.patientReached = true;
+    await referral.save();
+    await referral.populate('referringDoctor referredDoctor', 'fullName specialization hospitalName');
     res.json(referral);
   } catch (error) {
     res.status(400).json({ message: error.message });
