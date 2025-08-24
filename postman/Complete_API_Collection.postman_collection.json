@@ -519,7 +519,81 @@
               "path": ["api", "referrals"]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{doctor_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/referrals",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "referrals"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"sent\": [\n    {\n      \"_id\": \"referral_id_1\",\n      \"patientName\": \"John Smith\",\n      \"referredDoctor\": {\n        \"_id\": \"doctor_id_2\",\n        \"fullName\": \"Dr. Jane Doe\"\n      },\n      \"patientReached\": false,\n      ...\n    }\n  ],\n  \"received\": [\n    {\n      \"_id\": \"referral_id_2\",\n      \"patientName\": \"Alice Brown\",\n      \"referringDoctor\": {\n        \"_id\": \"doctor_id_3\",\n        \"fullName\": \"Dr. Sam Lee\"\n      },\n      \"patientReached\": true,\n      ...\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Mark Patient as Reached",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{doctor_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/referrals/{{referral_id}}/patient-reached",
+              "host": ["{{base_url}}"],
+              "path": ["api", "referrals", "{{referral_id}}", "patient-reached"]
+            }
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{doctor_token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/referrals/{{referral_id}}/patient-reached",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "referrals", "{{referral_id}}", "patient-reached"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"_id\": \"referral_id_2\",\n  \"patientName\": \"Alice Brown\",\n  \"patientReached\": true,\n  ...\n}"
+            }
+          ]
         },
         {
           "name": "Get Referrals by Status",
