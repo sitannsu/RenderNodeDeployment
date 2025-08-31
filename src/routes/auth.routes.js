@@ -27,9 +27,14 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ message: 'Invalid email or password' });
     }
 
-    // Generate JWT token
+    // Generate JWT token with additional claims
     const token = jwt.sign(
-      { id: user._id },
+      {
+        id: user._id,
+        email: user.email,
+        fullName: user.fullName,
+        contactNumber: user.contactNumber1
+      },
       process.env.JWT_SECRET,
       { expiresIn: '30d' }
     );
@@ -278,7 +283,12 @@ router.post('/login', async (req, res) => {
 
     // Generate JWT token
     const token = jwt.sign(
-      { id: user._id, email: user.email },
+      {
+        id: user._id,
+        email: user.email,
+        fullName: user.fullName,
+        contactNumber: user.contactNumber1
+      },
       process.env.JWT_SECRET,
       { expiresIn: '30d' }
     );
@@ -330,10 +340,17 @@ router.post('/doctor/login', async (req, res) => {
       await user.save({ validateBeforeSave: false });
     }
 
-    // Generate JWT token
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: '30d'
-    });
+    // Generate JWT token with additional claims
+    const token = jwt.sign(
+      {
+        id: user._id,
+        email: user.email,
+        fullName: user.fullName,
+        contactNumber: user.contactNumber1
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '30d' }
+    );
 
     res.json({
       token,
@@ -392,10 +409,17 @@ router.post('/admin/login', async (req, res) => {
       await user.save({ validateBeforeSave: false });
     }
 
-    // Generate JWT token
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: '30d'
-    });
+    // Generate JWT token with additional claims
+    const token = jwt.sign(
+      {
+        id: user._id,
+        email: user.email,
+        fullName: user.fullName,
+        contactNumber: user.contactNumber1
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '30d' }
+    );
 
     res.json({
       token,

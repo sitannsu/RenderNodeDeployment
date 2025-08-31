@@ -10,7 +10,7 @@ const auth = async (req, res, next) => {
       return res.status(401).json({ message: 'Authentication required' });
     }
 
-    // Verify token and get user ID
+    // Verify token and get claims
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
     // Find user by ID
@@ -20,8 +20,14 @@ const auth = async (req, res, next) => {
       return res.status(401).json({ message: 'User not found' });
     }
 
-    // Add user to request object
+    // Add user and decoded claims to request object
     req.user = user;
+    req.auth = {
+      id: decoded.id,
+      email: decoded.email,
+      fullName: decoded.fullName,
+      contactNumber: decoded.contactNumber
+    };
     
     // Continue to next middleware/route handler
     next();
