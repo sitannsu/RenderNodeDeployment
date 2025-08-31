@@ -153,10 +153,17 @@ router.post('/verify-otp', async (req, res) => {
     patient.verified = true;
     await patient.save();
 
-    // Generate token
-    const token = jwt.sign({ id: patient._id }, process.env.JWT_SECRET, {
-      expiresIn: '30d'
-    });
+    // Generate token with additional claims
+    const token = jwt.sign(
+      {
+        id: patient._id,
+        name: patient.name,
+        email: patient.email,
+        phoneNumber: patient.phoneNumber
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '30d' }
+    );
 
     res.json({
       token,
