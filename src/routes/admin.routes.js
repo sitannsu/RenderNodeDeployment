@@ -472,4 +472,100 @@ router.get('/recent-activities', auth, isAdmin, async (req, res) => {
   }
 });
 
+// ==================== ALL REFERRALS (ADMIN) ====================
+// GET /api/admin/referrals?status=all|pending|accepted|rejected|completed&search=&page=1&limit=10&range=last30
+router.get('/referrals', auth, isAdmin, async (req, res) => {
+  try {
+    const {
+      status = 'all',
+      search = '',
+      page: pageParam = '1',
+      limit: limitParam = '10',
+      sortBy = 'createdAt',
+      sortOrder = 'desc',
+      range = 'last30',
+      startDate,
+      endDate
+    } = req.query;
+
+    const page = Math.max(parseInt(pageParam) || 1, 1);
+    const limit = Math.min(Math.max(parseInt(limitParam) || 10, 1), 100);
+
+    // Date range
+    const now = new Date();
+    let end = endDate ? new Date(endDate) : now;
+    let start;
+    const startOfWeekSunday = d => new Date(d.getFullYear(), d.getMonth(), d.getDate() - d.getDay());
+    const endOfWeekSaturday = d => new Date(d.getFullYear(), d.getMonth(), d.getDate() + (6 - d.getDay()), 23, 59, 59, 999);
+    if (range === 'today') {
+      start = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+    } else if (range === 'yesterday') {
+      const y = new Date(end.getFullYear(), end.getMonth(), end.getDate() - 1);
+      start = new Date(y.getFullYear(), y.getMonth(), y.getDate());
+      end = new Date(y.getFullYear(), y.getMonth(), y.getDate(), 23, 59, 59, 999);
+    } else if (range === 'thisWeek') {
+      const sow = startOfWeekSunday(end);
+      start = new Date(sow.getFullYear(), sow.getMonth(), sow.getDate());
+    } else if (range === 'lastWeek') {
+      const lastWeekEnd = endOfWeekSaturday(new Date(end.getFullYear(), end.getMonth(), end.getDate() - (end.getDay() + 1)));
+      const lastWeekStart = startOfWeekSunday(new Date(lastWeekEnd.getFullYear(), lastWeekEnd.getMonth(), lastWeekEnd.getDate()));
+      start = new Date(lastWeekStart.getFullYear(), lastWeekStart.getMonth(), lastWeekStart.getDate());
+      end = lastWeekEnd;
+    } else if (range === 'last7') {
+      start = new Date(end.getTime() - 7 * 24 * 60 * 60 * 1000);
+    } else if (range === 'last28') {
+      start = new Date(end.getTime() - 28 * 24 * 60 * 60 * 1000);
+    } else if (range === 'last90') {
+      start = new Date(end.getTime() - 90 * 24 * 60 * 60 * 1000);
+    } else if (range === 'last12months') {
+      start = new Date(end.getFullYear(), end.getMonth() - 12, end.getDate());
+    } else if (range === 'custom' && (startDate || endDate)) {
+      start = startDate ? new Date(startDate) : new Date(end.getTime() - 30 * 24 * 60 * 60 * 1000);
+    } else {
+      start = new Date(end.getTime() - 30 * 24 * 60 * 60 * 1000);
+    }
+    const startOfRange = new Date(start.getFullYear(), start.getMonth(), start.getDate(), 0, 0, 0, 0);
+    const endOfRange = new Date(end.getFullYear(), end.getMonth(), end.getDate(), 23, 59, 59, 999);
+
+    // Filters
+    const filter = { createdAt: { $gte: startOfRange, $lte: endOfRange } };
+    if (status && status !== 'all') {
+      filter.status = status;
+    }
+    if (search) {
+      const regex = new RegExp(search, 'i');
+      filter.$or = [
+        { patientName: regex },
+        { patientPhone: regex },
+        { reason: regex },
+        { notes: regex }
+      ];
+    }
+
+    // Sorting
+    const sort = { [sortBy]: sortOrder === 'asc' ? 1 : -1 };
+
+    // Query
+    const [referrals, total] = await Promise.all([
+      Referral.find(filter)
+        .populate('referringDoctor', 'fullName email specialization hospitalName1')
+        .populate('referredDoctor', 'fullName email specialization hospitalName1')
+        .sort(sort)
+        .skip((page - 1) * limit)
+        .limit(limit),
+      Referral.countDocuments(filter)
+    ]);
+
+    res.json({
+      referrals,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
+      dateRange: { start: startOfRange.toISOString(), end: endOfRange.toISOString() }
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 module.exports = router;
