@@ -4,6 +4,7 @@ const DoctorView = require('../models/doctor.view.model');
 const { patientAuth } = require('./patient.auth.routes');
 const jwt = require('jsonwebtoken');
 const Patient = require('../models/patient.model');
+const DoctorVisitTotal = require('../models/doctor.visit.total.model');
 const router = express.Router();
 
 // Search doctors with filters (no auth required for patient app)
@@ -90,6 +91,12 @@ router.get('/:id', optionalPatientAuth, async (req, res) => {
         await DoctorView.findOneAndUpdate(
           { doctor: doctor._id, patient: req.patient._id },
           { $inc: { views: 1 }, $set: { lastViewedAt: new Date() } },
+          { new: true, upsert: true, setDefaultsOnInsert: true }
+        );
+        // Increment global total views for the doctor
+        await DoctorVisitTotal.findOneAndUpdate(
+          { doctor: doctor._id },
+          { $inc: { totalViews: 1 }, $set: { lastViewedAt: new Date() } },
           { new: true, upsert: true, setDefaultsOnInsert: true }
         );
       } catch (e) {
