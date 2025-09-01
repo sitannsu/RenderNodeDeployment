@@ -5,6 +5,8 @@ const Occupation = require('../models/occupation.model');
 const Feature = require('../models/feature.model');
 const Advertisement = require('../models/advertisement.model');
 const auth = require('../middleware/auth');
+const Referral = require('../models/referral.model');
+const PatientQuery = require('../models/patient.query.model');
 const router = express.Router();
 const DoctorView = require('../models/doctor.view.model');
 
@@ -341,6 +343,130 @@ router.get('/doctor-view-stats', auth, isAdmin, async (req, res) => {
     ]);
 
     res.json({ stats });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// ==================== RECENT ACTIVITIES LIST ====================
+// GET /api/admin/recent-activities?range=last30&type=all|doctor|referral|inquiry&limit=10&page=1
+router.get('/recent-activities', auth, isAdmin, async (req, res) => {
+  try {
+    const { range = 'last30', startDate, endDate, type = 'all' } = req.query;
+    const page = Math.max(parseInt(req.query.page) || 1, 1);
+    const limit = Math.min(Math.max(parseInt(req.query.limit) || 10, 1), 100);
+
+    const now = new Date();
+    let end = endDate ? new Date(endDate) : now;
+    let start;
+
+    const startOfWeekSunday = d => new Date(d.getFullYear(), d.getMonth(), d.getDate() - d.getDay());
+    const endOfWeekSaturday = d => new Date(d.getFullYear(), d.getMonth(), d.getDate() + (6 - d.getDay()), 23, 59, 59, 999);
+
+    if (range === 'today') {
+      start = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+    } else if (range === 'yesterday') {
+      const y = new Date(end.getFullYear(), end.getMonth(), end.getDate() - 1);
+      start = new Date(y.getFullYear(), y.getMonth(), y.getDate());
+      end = new Date(y.getFullYear(), y.getMonth(), y.getDate(), 23, 59, 59, 999);
+    } else if (range === 'thisWeek') {
+      const sow = startOfWeekSunday(end);
+      start = new Date(sow.getFullYear(), sow.getMonth(), sow.getDate());
+    } else if (range === 'lastWeek') {
+      const lastWeekEnd = endOfWeekSaturday(new Date(end.getFullYear(), end.getMonth(), end.getDate() - (end.getDay() + 1)));
+      const lastWeekStart = startOfWeekSunday(new Date(lastWeekEnd.getFullYear(), lastWeekEnd.getMonth(), lastWeekEnd.getDate()));
+      start = new Date(lastWeekStart.getFullYear(), lastWeekStart.getMonth(), lastWeekStart.getDate());
+      end = lastWeekEnd;
+    } else if (range === 'last7') {
+      start = new Date(end.getTime() - 7 * 24 * 60 * 60 * 1000);
+    } else if (range === 'last28') {
+      start = new Date(end.getTime() - 28 * 24 * 60 * 60 * 1000);
+    } else if (range === 'last90') {
+      start = new Date(end.getTime() - 90 * 24 * 60 * 60 * 1000);
+    } else if (range === 'last12months') {
+      start = new Date(end.getFullYear(), end.getMonth() - 12, end.getDate());
+    } else if (range === 'custom' && (startDate || endDate)) {
+      start = startDate ? new Date(startDate) : new Date(end.getTime() - 30 * 24 * 60 * 60 * 1000);
+    } else {
+      // default last30
+      start = new Date(end.getTime() - 30 * 24 * 60 * 60 * 1000);
+    }
+
+    const startOfRange = new Date(start.getFullYear(), start.getMonth(), start.getDate(), 0, 0, 0, 0);
+    const endOfRange = new Date(end.getFullYear(), end.getMonth(), end.getDate(), 23, 59, 59, 999);
+
+    const queries = [];
+    if (type === 'all' || type === 'doctor') {
+      queries.push(
+        User.find({ role: 'doctor', createdAt: { $gte: startOfRange, $lte: endOfRange } })
+          .select('fullName email createdAt')
+          .sort({ createdAt: -1 })
+          .lean()
+          .then(list => list.map(d => ({
+            type: 'doctor_registration',
+            title: 'New doctor registered',
+            details: { name: d.fullName, email: d.email },
+            timestamp: d.createdAt
+          })))
+      );
+    }
+
+    if (type === 'all' || type === 'referral') {
+      queries.push(
+        Referral.find({ createdAt: { $gte: startOfRange, $lte: endOfRange } })
+          .populate('referringDoctor', 'fullName')
+          .populate('referredDoctor', 'fullName')
+          .select('patientName status createdAt')
+          .sort({ createdAt: -1 })
+          .lean()
+          .then(list => list.map(r => ({
+            type: 'referral',
+            title: `Referral ${r.status}`,
+            details: {
+              patientName: r.patientName,
+              from: r.referringDoctor?.fullName || 'Unknown',
+              to: r.referredDoctor?.fullName || 'Unknown'
+            },
+            timestamp: r.createdAt
+          })))
+      );
+    }
+
+    if (type === 'all' || type === 'inquiry') {
+      queries.push(
+        PatientQuery.find({ createdAt: { $gte: startOfRange, $lte: endOfRange } })
+          .populate('patient', 'name fullName')
+          .populate('doctor', 'fullName')
+          .select('symptoms status consultationType createdAt')
+          .sort({ createdAt: -1 })
+          .lean()
+          .then(list => list.map(q => ({
+            type: 'inquiry',
+            title: `New inquiry (${q.consultationType || 'general'})`,
+            details: {
+              patient: q.patient?.fullName || q.patient?.name || 'Unknown',
+              doctor: q.doctor?.fullName || 'Unknown',
+              status: q.status
+            },
+            timestamp: q.createdAt
+          })))
+      );
+    }
+
+    const results = (await Promise.all(queries)).flat();
+    results.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+    const total = results.length;
+    const startIndex = (page - 1) * limit;
+    const pageItems = results.slice(startIndex, startIndex + limit);
+
+    res.json({
+      activities: pageItems,
+      total,
+      page,
+      limit,
+      dateRange: { start: startOfRange.toISOString(), end: endOfRange.toISOString() }
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
