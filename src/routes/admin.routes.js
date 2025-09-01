@@ -9,6 +9,7 @@ const Referral = require('../models/referral.model');
 const PatientQuery = require('../models/patient.query.model');
 const router = express.Router();
 const DoctorView = require('../models/doctor.view.model');
+const DoctorVisitTotal = require('../models/doctor.visit.total.model');
 
 // Middleware to check if user is admin
 const isAdmin = async (req, res, next) => {
@@ -312,35 +313,29 @@ router.patch('/patients/:id/restore', auth, isAdmin, async (req, res) => {
 // View stats for all doctors (total views and unique patients per doctor)
 router.get('/doctor-view-stats', auth, isAdmin, async (req, res) => {
   try {
-    const stats = await DoctorView.aggregate([
-      {
-        $group: {
-          _id: '$doctor',
-          totalViews: { $sum: '$views' },
-          uniquePatients: { $sum: 1 }
-        }
-      },
-      {
-        $lookup: {
-          from: 'users',
-          localField: '_id',
-          foreignField: '_id',
-          as: 'doctor'
-        }
-      },
-      { $unwind: '$doctor' },
-      {
-        $project: {
-          doctorId: '$_id',
-          fullName: '$doctor.fullName',
-          email: '$doctor.email',
-          specialization: '$doctor.specialization',
-          totalViews: 1,
-          uniquePatients: 1,
-          _id: 0
-        }
-      }
+    // Combine fast totals with unique counts
+    const [totals, uniques] = await Promise.all([
+      DoctorVisitTotal.aggregate([
+        { $project: { doctor: 1, totalViews: 1 } }
+      ]),
+      DoctorView.aggregate([
+        { $group: { _id: '$doctor', uniquePatients: { $sum: 1 } } }
+      ])
     ]);
+
+    const uniqueMap = new Map(uniques.map(u => [u._id.toString(), u.uniquePatients]));
+
+    const stats = await Promise.all(totals.map(async t => {
+      const doc = await User.findById(t.doctor).select('fullName email specialization');
+      return {
+        doctorId: t.doctor,
+        fullName: doc?.fullName,
+        email: doc?.email,
+        specialization: doc?.specialization,
+        totalViews: t.totalViews || 0,
+        uniquePatients: uniqueMap.get(t.doctor.toString()) || 0
+      };
+    }));
 
     res.json({ stats });
   } catch (error) {
@@ -562,6 +557,89 @@ router.get('/referrals', auth, isAdmin, async (req, res) => {
       page,
       totalPages: Math.ceil(total / limit),
       dateRange: { start: startOfRange.toISOString(), end: endOfRange.toISOString() }
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Patients who viewed a specific doctor (with counts)
+// GET /api/admin/doctor-view-stats/:doctorId/patients?search=&page=1&limit=10&sortBy=views&sortOrder=desc
+router.get('/doctor-view-stats/:doctorId/patients', auth, isAdmin, async (req, res) => {
+  try {
+    const { doctorId } = req.params;
+    const {
+      search = '',
+      page: pageParam = '1',
+      limit: limitParam = '10',
+      sortBy = 'views',
+      sortOrder = 'desc'
+    } = req.query;
+
+    const page = Math.max(parseInt(pageParam) || 1, 1);
+    const limit = Math.min(Math.max(parseInt(limitParam) || 10, 1), 100);
+
+    // Build match filter
+    const match = { doctor: doctorId };
+
+    // Sorting
+    const sort = {};
+    sort[sortBy === 'lastViewedAt' ? 'lastViewedAt' : 'views'] = sortOrder === 'asc' ? 1 : -1;
+
+    // Aggregate to include patient details and optional search
+    const pipeline = [
+      { $match: match },
+      {
+        $lookup: {
+          from: 'patients',
+          localField: 'patient',
+          foreignField: '_id',
+          as: 'patient'
+        }
+      },
+      { $unwind: '$patient' }
+    ];
+
+    if (search) {
+      const regex = new RegExp(search, 'i');
+      pipeline.push({
+        $match: {
+          $or: [
+            { 'patient.name': regex },
+            { 'patient.phoneNumber': regex },
+            { 'patient.email': regex }
+          ]
+        }
+      });
+    }
+
+    pipeline.push(
+      { $project: {
+          _id: 0,
+          patientId: '$patient._id',
+          name: '$patient.name',
+          phoneNumber: '$patient.phoneNumber',
+          email: '$patient.email',
+          views: '$views',
+          lastViewedAt: '$lastViewedAt'
+        }
+      },
+      { $sort: sort },
+      { $skip: (page - 1) * limit },
+      { $limit: limit }
+    );
+
+    const [items, totalCountAgg] = await Promise.all([
+      DoctorView.aggregate(pipeline),
+      DoctorView.countDocuments(match)
+    ]);
+
+    res.json({
+      doctorId,
+      total: totalCountAgg,
+      page,
+      totalPages: Math.ceil(totalCountAgg / limit),
+      patients: items
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

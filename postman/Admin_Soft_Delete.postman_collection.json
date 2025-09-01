@@ -217,6 +217,63 @@
           ]
         }
       }
+    },
+    {
+      "name": "Doctor View Patients (Default)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/admin/doctor-view-stats/{{doctor_id}}/patients?page=1&limit=10",
+          "host": ["{{base_url}}"],
+          "path": ["api","admin","doctor-view-stats","{{doctor_id}}","patients"],
+          "query": [
+            { "key": "page", "value": "1" },
+            { "key": "limit", "value": "10" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Doctor View Patients (Search)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/admin/doctor-view-stats/{{doctor_id}}/patients?search=john&page=1&limit=10",
+          "host": ["{{base_url}}"],
+          "path": ["api","admin","doctor-view-stats","{{doctor_id}}","patients"],
+          "query": [
+            { "key": "search", "value": "john" },
+            { "key": "page", "value": "1" },
+            { "key": "limit", "value": "10" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Doctor View Patients (Sort by lastViewedAt)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/admin/doctor-view-stats/{{doctor_id}}/patients?sortBy=lastViewedAt&sortOrder=desc&page=1&limit=10",
+          "host": ["{{base_url}}"],
+          "path": ["api","admin","doctor-view-stats","{{doctor_id}}","patients"],
+          "query": [
+            { "key": "sortBy", "value": "lastViewedAt" },
+            { "key": "sortOrder", "value": "desc" },
+            { "key": "page", "value": "1" },
+            { "key": "limit", "value": "10" }
+          ]
+        }
+      }
     }
   ]
 }
