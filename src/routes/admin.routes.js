@@ -6,6 +6,7 @@ const Feature = require('../models/feature.model');
 const Advertisement = require('../models/advertisement.model');
 const auth = require('../middleware/auth');
 const router = express.Router();
+const DoctorView = require('../models/doctor.view.model');
 
 // Middleware to check if user is admin
 const isAdmin = async (req, res, next) => {
@@ -303,6 +304,45 @@ router.patch('/patients/:id/restore', auth, isAdmin, async (req, res) => {
     res.json({ message: 'Patient restored successfully', patient: updated });
   } catch (error) {
     res.status(400).json({ message: error.message });
+  }
+});
+
+// View stats for all doctors (total views and unique patients per doctor)
+router.get('/doctor-view-stats', auth, isAdmin, async (req, res) => {
+  try {
+    const stats = await DoctorView.aggregate([
+      {
+        $group: {
+          _id: '$doctor',
+          totalViews: { $sum: '$views' },
+          uniquePatients: { $sum: 1 }
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'doctor'
+        }
+      },
+      { $unwind: '$doctor' },
+      {
+        $project: {
+          doctorId: '$_id',
+          fullName: '$doctor.fullName',
+          email: '$doctor.email',
+          specialization: '$doctor.specialization',
+          totalViews: 1,
+          uniquePatients: 1,
+          _id: 0
+        }
+      }
+    ]);
+
+    res.json({ stats });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 

@@ -63,6 +63,20 @@
           "path": ["api","admin","patients","{{patient_id}}","restore"]
         }
       }
+    },
+    {
+      "name": "Doctor View Stats (All Doctors)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/admin/doctor-view-stats",
+          "host": ["{{base_url}}"],
+          "path": ["api","admin","doctor-view-stats"]
+        }
+      }
     }
   ]
 }
