@@ -1,0 +1,140 @@
+{
+  "info": {
+    "name": "Admin Dashboard Ranges",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Stats",
+      "item": [
+        {
+          "name": "Today",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/dashboard/stats?range=today",
+              "host": ["{{base_url}}"],
+              "path": ["api","dashboard","stats"],
+              "query": [ { "key": "range", "value": "today" } ]
+            }
+          }
+        },
+        {
+          "name": "Last 7 days",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/dashboard/stats?range=last7",
+              "host": ["{{base_url}}"],
+              "path": ["api","dashboard","stats"],
+              "query": [ { "key": "range", "value": "last7" } ]
+            }
+          }
+        },
+        {
+          "name": "Last 30 days",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/dashboard/stats?range=last30",
+              "host": ["{{base_url}}"],
+              "path": ["api","dashboard","stats"],
+              "query": [ { "key": "range", "value": "last30" } ]
+            }
+          }
+        },
+        {
+          "name": "Last 1 year",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/dashboard/stats?range=last12months",
+              "host": ["{{base_url}}"],
+              "path": ["api","dashboard","stats"],
+              "query": [ { "key": "range", "value": "last12months" } ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Referral Trends",
+      "item": [
+        {
+          "name": "Today",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/dashboard/referral-trends?range=today",
+              "host": ["{{base_url}}"],
+              "path": ["api","dashboard","referral-trends"],
+              "query": [ { "key": "range", "value": "today" } ]
+            }
+          }
+        },
+        {
+          "name": "Last 7 days",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/dashboard/referral-trends?range=last7",
+              "host": ["{{base_url}}"],
+              "path": ["api","dashboard","referral-trends"],
+              "query": [ { "key": "range", "value": "last7" } ]
+            }
+          }
+        },
+        {
+          "name": "Last 30 days",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/dashboard/referral-trends?range=last30",
+              "host": ["{{base_url}}"],
+              "path": ["api","dashboard","referral-trends"],
+              "query": [ { "key": "range", "value": "last30" } ]
+            }
+          }
+        },
+        {
+          "name": "Last 1 year",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/dashboard/referral-trends?range=last12months",
+              "host": ["{{base_url}}"],
+              "path": ["api","dashboard","referral-trends"],
+              "query": [ { "key": "range", "value": "last12months" } ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
+
+

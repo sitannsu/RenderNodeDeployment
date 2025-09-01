@@ -21,111 +21,135 @@ const isAdmin = async (req, res, next) => {
 // GET /api/dashboard/stats - Returns dashboard statistics
 router.get('/stats', auth, isAdmin, async (req, res) => {
   try {
-    const now = new Date();
-    const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
-    const twoMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 2, now.getDate());
+    // Support ranges: last7, last30, or custom startDate/endDate (ISO date strings)
+    const { range, startDate, endDate } = req.query;
 
-    // Get current month and previous month data
+    const now = new Date();
+    const end = endDate ? new Date(endDate) : now;
+
+    let start;
+    const startOfWeekSunday = d => new Date(d.getFullYear(), d.getMonth(), d.getDate() - d.getDay());
+    const endOfWeekSaturday = d => new Date(d.getFullYear(), d.getMonth(), d.getDate() + (6 - d.getDay()), 23, 59, 59, 999);
+
+    if (range === 'today') {
+      start = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+    } else if (range === 'yesterday') {
+      const y = new Date(end.getFullYear(), end.getMonth(), end.getDate() - 1);
+      start = new Date(y.getFullYear(), y.getMonth(), y.getDate());
+      end.setFullYear(y.getFullYear(), y.getMonth(), y.getDate());
+      end.setHours(23, 59, 59, 999);
+    } else if (range === 'thisWeek') {
+      const sow = startOfWeekSunday(end);
+      start = new Date(sow.getFullYear(), sow.getMonth(), sow.getDate());
+    } else if (range === 'lastWeek') {
+      const lastWeekEnd = endOfWeekSaturday(new Date(end.getFullYear(), end.getMonth(), end.getDate() - (end.getDay() + 1)));
+      const lastWeekStart = startOfWeekSunday(new Date(lastWeekEnd.getFullYear(), lastWeekEnd.getMonth(), lastWeekEnd.getDate()));
+      start = new Date(lastWeekStart.getFullYear(), lastWeekStart.getMonth(), lastWeekStart.getDate());
+      end.setTime(lastWeekEnd.getTime());
+    } else if (range === 'last7') {
+      start = new Date(end.getTime() - 7 * 24 * 60 * 60 * 1000);
+    } else if (range === 'last28') {
+      start = new Date(end.getTime() - 28 * 24 * 60 * 60 * 1000);
+    } else if (range === 'last30' || !range) {
+      start = new Date(end.getTime() - 30 * 24 * 60 * 60 * 1000);
+    } else if (range === 'last90') {
+      start = new Date(end.getTime() - 90 * 24 * 60 * 60 * 1000);
+    } else if (range === 'last12months') {
+      const e = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+      start = new Date(e.getFullYear(), e.getMonth() - 12, e.getDate());
+    } else if (range === 'custom' && startDate) {
+      start = new Date(startDate);
+    } else {
+      start = new Date(end.getTime() - 30 * 24 * 60 * 60 * 1000);
+    }
+
+    // Normalize to start of day and end of day
+    const startOfRange = new Date(start.getFullYear(), start.getMonth(), start.getDate(), 0, 0, 0, 0);
+    const endOfRange = new Date(end.getFullYear(), end.getMonth(), end.getDate(), 23, 59, 59, 999);
+
+    // Previous range of equal length
+    const rangeMs = endOfRange - startOfRange;
+    const previousEnd = new Date(startOfRange.getTime() - 1);
+    const previousStart = new Date(previousEnd.getTime() - rangeMs);
+
     const [
       totalDoctors,
-      currentMonthDoctors,
-      previousMonthDoctors,
-      currentMonthReferrals,
-      previousMonthReferrals,
+      rangeDoctors,
+      previousRangeDoctors,
+      rangeReferrals,
+      previousRangeReferrals,
       pendingInquiries,
-      previousMonthInquiries,
-      currentMonthSearches,
-      previousMonthSearches
+      rangeInquiries,
+      previousRangeInquiries,
+      rangeSearches,
+      previousRangeSearches
     ] = await Promise.all([
-      // Total doctors
+      // Total doctors overall
       User.countDocuments({ role: 'doctor' }),
-      
-      // Current month doctor registrations
+
+      // Doctors created in range
       User.countDocuments({
         role: 'doctor',
-        createdAt: { $gte: new Date(now.getFullYear(), now.getMonth(), 1) }
+        createdAt: { $gte: startOfRange, $lte: endOfRange }
       }),
-      
-      // Previous month doctor registrations
+
+      // Doctors created in previous range
       User.countDocuments({
         role: 'doctor',
-        createdAt: { 
-          $gte: new Date(lastMonth.getFullYear(), lastMonth.getMonth(), 1),
-          $lt: new Date(now.getFullYear(), now.getMonth(), 1)
-        }
+        createdAt: { $gte: previousStart, $lte: previousEnd }
       }),
-      
-      // Current month referrals
+
+      // Referrals in range
       Referral.countDocuments({
-        createdAt: { $gte: new Date(now.getFullYear(), now.getMonth(), 1) }
+        createdAt: { $gte: startOfRange, $lte: endOfRange }
       }),
-      
-      // Previous month referrals
+
+      // Referrals in previous range
       Referral.countDocuments({
-        createdAt: { 
-          $gte: new Date(lastMonth.getFullYear(), lastMonth.getMonth(), 1),
-          $lt: new Date(now.getFullYear(), now.getMonth(), 1)
-        }
+        createdAt: { $gte: previousStart, $lte: previousEnd }
       }),
-      
-      // Current pending inquiries
+
+      // Current pending inquiries (independent of range)
       PatientQuery.countDocuments({ status: 'pending' }),
-      
-      // Previous month inquiries
-      PatientQuery.countDocuments({
-        createdAt: { 
-          $gte: new Date(lastMonth.getFullYear(), lastMonth.getMonth(), 1),
-          $lt: new Date(now.getFullYear(), now.getMonth(), 1)
-        }
-      }),
-      
-      // Current month searches (approximated by patient queries)
-      PatientQuery.countDocuments({
-        createdAt: { $gte: new Date(now.getFullYear(), now.getMonth(), 1) }
-      }),
-      
-      // Previous month searches
-      PatientQuery.countDocuments({
-        createdAt: { 
-          $gte: new Date(lastMonth.getFullYear(), lastMonth.getMonth(), 1),
-          $lt: new Date(now.getFullYear(), now.getMonth(), 1)
-        }
-      })
+
+      // Inquiries created in range
+      PatientQuery.countDocuments({ createdAt: { $gte: startOfRange, $lte: endOfRange } }),
+
+      // Inquiries created in previous range
+      PatientQuery.countDocuments({ createdAt: { $gte: previousStart, $lte: previousEnd } }),
+
+      // Searches approximated by patient queries in range
+      PatientQuery.countDocuments({ createdAt: { $gte: startOfRange, $lte: endOfRange } }),
+
+      // Searches in previous range
+      PatientQuery.countDocuments({ createdAt: { $gte: previousStart, $lte: previousEnd } })
     ]);
 
-    // Calculate trends (percentage change)
-    const doctorTrend = previousMonthDoctors > 0 
-      ? ((currentMonthDoctors - previousMonthDoctors) / previousMonthDoctors * 100).toFixed(1)
-      : currentMonthDoctors > 0 ? 100 : 0;
-
-    const referralTrend = previousMonthReferrals > 0 
-      ? ((currentMonthReferrals - previousMonthReferrals) / previousMonthReferrals * 100).toFixed(1)
-      : currentMonthReferrals > 0 ? 100 : 0;
-
-    const inquiryTrend = previousMonthInquiries > 0 
-      ? ((pendingInquiries - previousMonthInquiries) / previousMonthInquiries * 100).toFixed(1)
-      : pendingInquiries > 0 ? 100 : 0;
-
-    const searchTrend = previousMonthSearches > 0 
-      ? ((currentMonthSearches - previousMonthSearches) / previousMonthSearches * 100).toFixed(1)
-      : currentMonthSearches > 0 ? 100 : 0;
+    const pctChange = (curr, prev) => {
+      if (prev > 0) return parseFloat(((curr - prev) / prev * 100).toFixed(1));
+      return curr > 0 ? 100 : 0;
+    };
 
     res.json({
+      dateRange: {
+        start: startOfRange.toISOString(),
+        end: endOfRange.toISOString()
+      },
       doctors: {
         total: totalDoctors,
-        trend: parseFloat(doctorTrend)
+        trend: pctChange(rangeDoctors, previousRangeDoctors)
       },
       referrals: {
-        monthly: currentMonthReferrals,
-        trend: parseFloat(referralTrend)
+        monthly: rangeReferrals,
+        trend: pctChange(rangeReferrals, previousRangeReferrals)
       },
       inquiries: {
         pending: pendingInquiries,
-        trend: parseFloat(inquiryTrend)
+        trend: pctChange(rangeInquiries, previousRangeInquiries)
       },
       searches: {
-        monthly: currentMonthSearches,
-        trend: parseFloat(searchTrend)
+        monthly: rangeSearches,
+        trend: pctChange(rangeSearches, previousRangeSearches)
       }
     });
   } catch (error) {
@@ -236,9 +260,43 @@ router.get('/activity', auth, isAdmin, async (req, res) => {
 // GET /api/dashboard/referral-trends - Returns daily referral counts
 router.get('/referral-trends', auth, isAdmin, async (req, res) => {
   try {
-    const days = parseInt(req.query.days) || 30;
-    const endDate = new Date();
-    const startDate = new Date(endDate.getTime() - (days * 24 * 60 * 60 * 1000));
+    const { startDate: startParam, endDate: endParam, days, range } = req.query;
+    const now = new Date();
+    let endDate = endParam ? new Date(endParam) : new Date();
+    let startDate;
+
+    const startOfWeekSunday = d => new Date(d.getFullYear(), d.getMonth(), d.getDate() - d.getDay());
+    const endOfWeekSaturday = d => new Date(d.getFullYear(), d.getMonth(), d.getDate() + (6 - d.getDay()), 23, 59, 59, 999);
+
+    if (range === 'today') {
+      startDate = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+    } else if (range === 'yesterday') {
+      const y = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate() - 1);
+      startDate = new Date(y.getFullYear(), y.getMonth(), y.getDate());
+      endDate = new Date(y.getFullYear(), y.getMonth(), y.getDate(), 23, 59, 59, 999);
+    } else if (range === 'thisWeek') {
+      const sow = startOfWeekSunday(now);
+      startDate = new Date(sow.getFullYear(), sow.getMonth(), sow.getDate());
+    } else if (range === 'lastWeek') {
+      const lastWeekEnd = endOfWeekSaturday(new Date(now.getFullYear(), now.getMonth(), now.getDate() - (now.getDay() + 1)));
+      const lastWeekStart = startOfWeekSunday(new Date(lastWeekEnd.getFullYear(), lastWeekEnd.getMonth(), lastWeekEnd.getDate()));
+      startDate = new Date(lastWeekStart.getFullYear(), lastWeekStart.getMonth(), lastWeekStart.getDate());
+      endDate = lastWeekEnd;
+    } else if (range === 'last7') {
+      startDate = new Date(endDate.getTime() - 7 * 24 * 60 * 60 * 1000);
+    } else if (range === 'last28') {
+      startDate = new Date(endDate.getTime() - 28 * 24 * 60 * 60 * 1000);
+    } else if (range === 'last30' || !range) {
+      startDate = new Date(endDate.getTime() - 30 * 24 * 60 * 60 * 1000);
+    } else if (range === 'last90') {
+      startDate = new Date(endDate.getTime() - 90 * 24 * 60 * 60 * 1000);
+    } else if (range === 'last12months') {
+      startDate = new Date(endDate.getFullYear(), endDate.getMonth() - 12, endDate.getDate());
+    } else if (range === 'custom' && (startParam || endParam)) {
+      startDate = startParam ? new Date(startParam) : new Date(endDate.getTime() - ((parseInt(days) || 30) * 24 * 60 * 60 * 1000));
+    } else {
+      startDate = startParam ? new Date(startParam) : new Date(endDate.getTime() - ((parseInt(days) || 30) * 24 * 60 * 60 * 1000));
+    }
 
     // Generate daily referral counts
     const dailyReferrals = await Referral.aggregate([
