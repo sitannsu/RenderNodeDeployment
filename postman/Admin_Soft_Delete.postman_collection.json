@@ -78,5 +78,82 @@
         }
       }
     }
+    ,
+    {
+      "name": "Recent Activities (Last 30 days)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/admin/recent-activities?range=last30&limit=10&page=1",
+          "host": ["{{base_url}}"],
+          "path": ["api","admin","recent-activities"],
+          "query": [
+            { "key": "range", "value": "last30" },
+            { "key": "limit", "value": "10" },
+            { "key": "page", "value": "1" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Recent Activities (Today)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/admin/recent-activities?range=today&limit=10&page=1",
+          "host": ["{{base_url}}"],
+          "path": ["api","admin","recent-activities"],
+          "query": [
+            { "key": "range", "value": "today" },
+            { "key": "limit", "value": "10" },
+            { "key": "page", "value": "1" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Recent Activities (Last 7 days)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/admin/recent-activities?range=last7&limit=10&page=1",
+          "host": ["{{base_url}}"],
+          "path": ["api","admin","recent-activities"],
+          "query": [
+            { "key": "range", "value": "last7" },
+            { "key": "limit", "value": "10" },
+            { "key": "page", "value": "1" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Recent Activities (Last 1 year)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/admin/recent-activities?range=last12months&limit=10&page=1",
+          "host": ["{{base_url}}"],
+          "path": ["api","admin","recent-activities"],
+          "query": [
+            { "key": "range", "value": "last12months" },
+            { "key": "limit", "value": "10" },
+            { "key": "page", "value": "1" }
+          ]
+        }
+      }
+    }
   ]
 }
