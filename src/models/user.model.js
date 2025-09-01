@@ -235,6 +235,12 @@ const userSchema = new mongoose.Schema({
     max: 100
   },
   
+  // Soft delete flag
+  isDeleted: {
+    type: Boolean,
+    default: false
+  },
+  
   // FCM Token for Push Notifications
   fcmToken: {
     type: String,

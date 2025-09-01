@@ -1,5 +1,6 @@
 const express = require('express');
 const User = require('../models/user.model');
+const Patient = require('../models/patient.model');
 const Occupation = require('../models/occupation.model');
 const Feature = require('../models/feature.model');
 const Advertisement = require('../models/advertisement.model');
@@ -230,6 +231,76 @@ router.patch('/advertisements/:id/status', auth, isAdmin, async (req, res) => {
       return res.status(404).json({ message: 'Advertisement not found' });
     }
     res.json(advertisement);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// ==================== USER SOFT DELETE MANAGEMENT ====================
+
+// Soft delete a doctor
+router.patch('/doctors/:id/delete', auth, isAdmin, async (req, res) => {
+  try {
+    const updated = await User.findOneAndUpdate(
+      { _id: req.params.id, role: 'doctor' },
+      { isDeleted: true },
+      { new: true }
+    ).select('-password');
+    if (!updated) {
+      return res.status(404).json({ message: 'Doctor not found' });
+    }
+    res.json({ message: 'Doctor soft-deleted successfully', user: updated });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// Restore a doctor
+router.patch('/doctors/:id/restore', auth, isAdmin, async (req, res) => {
+  try {
+    const updated = await User.findOneAndUpdate(
+      { _id: req.params.id, role: 'doctor' },
+      { isDeleted: false },
+      { new: true }
+    ).select('-password');
+    if (!updated) {
+      return res.status(404).json({ message: 'Doctor not found' });
+    }
+    res.json({ message: 'Doctor restored successfully', user: updated });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// Soft delete a patient
+router.patch('/patients/:id/delete', auth, isAdmin, async (req, res) => {
+  try {
+    const updated = await Patient.findByIdAndUpdate(
+      req.params.id,
+      { isDeleted: true },
+      { new: true }
+    );
+    if (!updated) {
+      return res.status(404).json({ message: 'Patient not found' });
+    }
+    res.json({ message: 'Patient soft-deleted successfully', patient: updated });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// Restore a patient
+router.patch('/patients/:id/restore', auth, isAdmin, async (req, res) => {
+  try {
+    const updated = await Patient.findByIdAndUpdate(
+      req.params.id,
+      { isDeleted: false },
+      { new: true }
+    );
+    if (!updated) {
+      return res.status(404).json({ message: 'Patient not found' });
+    }
+    res.json({ message: 'Patient restored successfully', patient: updated });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }

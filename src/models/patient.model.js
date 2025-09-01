@@ -66,5 +66,13 @@ const patientSchema = new mongoose.Schema({
   timestamps: true
 });
 
+// Soft delete flag
+patientSchema.add({
+  isDeleted: {
+    type: Boolean,
+    default: false
+  }
+});
+
 const Patient = mongoose.model('Patient', patientSchema);
 module.exports = Patient;

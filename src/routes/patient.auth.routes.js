@@ -95,6 +95,11 @@ router.post('/verify-otp', async (req, res) => {
       return res.status(400).json({ message: 'Invalid phone number' });
     }
 
+    // Block login if patient is soft-deleted
+    if (patient.isDeleted) {
+      return res.status(403).json({ message: 'Account is deleted. Contact support to restore.' });
+    }
+
     console.log('Environment:', { 
       NODE_ENV: process.env.NODE_ENV,
       isDev: process.env.NODE_ENV === 'development'
