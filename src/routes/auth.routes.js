@@ -21,6 +21,11 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
+    // Block login if user is soft-deleted
+    if (user.isDeleted) {
+      return res.status(403).json({ message: 'Account is deleted. Contact support to restore.' });
+    }
+
     // Check password
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
@@ -275,6 +280,11 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
+    // Block login if user is soft-deleted
+    if (user.isDeleted) {
+      return res.status(403).json({ message: 'Account is deleted. Contact support to restore.' });
+    }
+
     // Check password
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
@@ -324,6 +334,11 @@ router.post('/doctor/login', async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({ message: 'User not found' });
+    }
+
+    // Block login if user is soft-deleted
+    if (user.isDeleted) {
+      return res.status(403).json({ message: 'Account is deleted. Contact support to restore.' });
     }
 
     // Check if user is a doctor
@@ -392,6 +407,11 @@ router.post('/admin/login', async (req, res) => {
     // Check if user is an admin
     if (user.role !== 'admin') {
       return res.status(401).json({ message: 'This login is only for administrators' });
+    }
+
+    // Block login if user is soft-deleted
+    if (user.isDeleted) {
+      return res.status(403).json({ message: 'Account is deleted. Contact support to restore.' });
     }
 
     // Check password

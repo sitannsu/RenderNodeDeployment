@@ -1,0 +1,68 @@
+{
+  "info": {
+    "name": "Admin Soft Delete",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Soft Delete Doctor",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{admin_token}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/admin/doctors/{{doctor_id}}/delete",
+          "host": ["{{base_url}}"],
+          "path": ["api","admin","doctors","{{doctor_id}}","delete"]
+        }
+      }
+    },
+    {
+      "name": "Restore Doctor",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{admin_token}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/admin/doctors/{{doctor_id}}/restore",
+          "host": ["{{base_url}}"],
+          "path": ["api","admin","doctors","{{doctor_id}}","restore"]
+        }
+      }
+    },
+    {
+      "name": "Soft Delete Patient",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{admin_token}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/admin/patients/{{patient_id}}/delete",
+          "host": ["{{base_url}}"],
+          "path": ["api","admin","patients","{{patient_id}}","delete"]
+        }
+      }
+    },
+    {
+      "name": "Restore Patient",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{admin_token}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/admin/patients/{{patient_id}}/restore",
+          "host": ["{{base_url}}"],
+          "path": ["api","admin","patients","{{patient_id}}","restore"]
+        }
+      }
+    }
+  ]
+}
