@@ -60,6 +60,12 @@ router.post('/register', async (req, res) => {
         state: 'Admin State',
         country: 'Admin Country'
       },
+      // Provide minimal required homeAddress fields
+      homeAddress: {
+        city: 'Admin City',
+        state: 'Admin State',
+        country: 'Admin Country'
+      },
       practiceStartDate: new Date(), // Required by schema
       verificationStatus: 'verified' // Auto-verify admin
     });
