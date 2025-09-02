@@ -1,0 +1,40 @@
+{
+  "info": {
+    "name": "Patient Doctor Views",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Doctor Details (records a view)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{patient_token}}" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/patient/doctors/{{doctor_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["api","patient","doctors","{{doctor_id}}"]
+        }
+      }
+    },
+    {
+      "name": "Record View Explicitly",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{patient_token}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": { "mode": "raw", "raw": "{}" },
+        "url": {
+          "raw": "{{base_url}}/api/patient/doctors/{{doctor_id}}/view",
+          "host": ["{{base_url}}"],
+          "path": ["api","patient","doctors","{{doctor_id}}","view"]
+        }
+      }
+    }
+  ]
+}
+
+
