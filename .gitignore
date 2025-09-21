@@ -10,4 +10,7 @@ environments/.dev.env
 environments/dev.env
 environments/*.env
 
+# Firebase service account credentials
+firebase-service-account.json
+
 
