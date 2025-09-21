@@ -1,0 +1,45 @@
+{
+  "info": {
+    "_postman_id": "6e4e7e5c-1234-4c1e-bc6f-collection-patient-doctor-view",
+    "name": "Patient Doctor View - Mark Visit",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Mark Doctor Visit (POST /api/patient/doctors/:id/view)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{patient_jwt_token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/patient/doctors/68cfa82ce3c926032049fcc0/view",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "patient",
+            "doctors",
+            "68cfa82ce3c926032049fcc0",
+            "view"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      },
+      "response": []
+    }
+  ]
+}

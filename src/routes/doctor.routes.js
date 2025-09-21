@@ -7,10 +7,11 @@ const auth = require('../middleware/auth');
 const router = express.Router();
 
 // Get all doctors
-router.get('/', async (req, res) => {
+router.get('/', auth, async (req, res) => {
   console.log('GET /api/doctor/ called');
   try {
-    const doctors = await User.find({ role: 'doctor' })
+    // Exclude the current user's own doctor profile from the results
+    const doctors = await User.find({ role: 'doctor', _id: { $ne: req.user._id } })
       .select('-password')
       .sort({ fullName: 1 });
     res.json(doctors);
@@ -20,11 +21,11 @@ router.get('/', async (req, res) => {
 });
 
 // Search doctors by specialization or name
-router.get('/search', async (req, res) => {
+router.get('/search', auth, async (req, res) => {
   console.log('GET /api/doctor/search called');
   try {
     const { query, specialization, page = 1, limit = 10 } = req.query;
-    let searchQuery = { role: 'doctor' };
+    let searchQuery = { role: 'doctor', _id: { $ne: req.user._id } };
 
     if (query) {
       searchQuery.$or = [

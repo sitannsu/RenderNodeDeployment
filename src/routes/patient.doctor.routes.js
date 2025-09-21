@@ -164,4 +164,17 @@ router.get('/:id/view-stats', async (req, res) => {
   }
 });
 
+// Get detailed list of patients who visited a doctor (with visit times)
+router.get('/:id/visitors', async (req, res) => {
+  try {
+    const doctorId = req.params.id;
+    const visits = await DoctorView.find({ doctor: doctorId })
+      .populate('patient', 'name email phoneNumber') // use correct patient fields
+      .select('patient views lastViewedAt');
+    res.json(visits);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 module.exports = router;
