@@ -1,0 +1,72 @@
+{
+  "info": {
+    "_postman_id": "rendernode-full-collection-001",
+    "name": "RenderNodeDeployment Full API Collection",
+    "description": "Full API collection for all endpoints in RenderNodeDeployment. Generated automatically from codebase.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Admin",
+      "item": [
+        { "name": "Register Admin", "request": { "method": "POST", "header": [], "url": { "raw": "/api/admin/register", "host": ["{{baseUrl}}"], "path": ["api", "admin", "register"] }, "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"password123\"\n}" } } },
+        { "name": "Get Statistics", "request": { "method": "GET", "header": [], "url": { "raw": "/api/admin/statistics", "host": ["{{baseUrl}}"], "path": ["api", "admin", "statistics"] } } },
+        { "name": "Manage Occupations", "request": { "method": "POST", "header": [], "url": { "raw": "/api/admin/occupations", "host": ["{{baseUrl}}"], "path": ["api", "admin", "occupations"] }, "body": { "mode": "raw", "raw": "{\n  \"name\": \"Cardiologist\"\n}" } } },
+        { "name": "List Occupations", "request": { "method": "GET", "header": [], "url": { "raw": "/api/admin/occupations", "host": ["{{baseUrl}}"], "path": ["api", "admin", "occupations"] } } },
+        { "name": "Soft Delete Doctor", "request": { "method": "PATCH", "header": [], "url": { "raw": "/api/admin/doctors/:id/delete", "host": ["{{baseUrl}}"], "path": ["api", "admin", "doctors", ":id", "delete"] } } },
+        { "name": "Restore Doctor", "request": { "method": "PATCH", "header": [], "url": { "raw": "/api/admin/doctors/:id/restore", "host": ["{{baseUrl}}"], "path": ["api", "admin", "doctors", ":id", "restore"] } } },
+        { "name": "Soft Delete Patient", "request": { "method": "PATCH", "header": [], "url": { "raw": "/api/admin/patients/:id/delete", "host": ["{{baseUrl}}"], "path": ["api", "admin", "patients", ":id", "delete"] } } },
+        { "name": "Restore Patient", "request": { "method": "PATCH", "header": [], "url": { "raw": "/api/admin/patients/:id/restore", "host": ["{{baseUrl}}"], "path": ["api", "admin", "patients", ":id", "restore"] } } },
+        { "name": "Recent Activities", "request": { "method": "GET", "header": [], "url": { "raw": "/api/admin/recent-activities", "host": ["{{baseUrl}}"], "path": ["api", "admin", "recent-activities"] } } }
+      ]
+    },
+    {
+      "name": "Doctor",
+      "item": [
+        { "name": "Get All Doctors", "request": { "method": "GET", "header": [], "url": { "raw": "/api/doctor/", "host": ["{{baseUrl}}"], "path": ["api", "doctor"] } } },
+        { "name": "Search Doctors", "request": { "method": "GET", "header": [], "url": { "raw": "/api/doctor/search", "host": ["{{baseUrl}}"], "path": ["api", "doctor", "search"] } } },
+        { "name": "Get All Patient Queries for Doctor", "request": { "method": "GET", "header": [], "url": { "raw": "/api/doctor/queries", "host": ["{{baseUrl}}"], "path": ["api", "doctor", "queries"] } } },
+        { "name": "Get Doctor By ID", "request": { "method": "GET", "header": [], "url": { "raw": "/api/doctor/:id", "host": ["{{baseUrl}}"], "path": ["api", "doctor", ":id"] } } },
+        { "name": "Doctor Statistics", "request": { "method": "GET", "header": [], "url": { "raw": "/api/doctor/stats/:id", "host": ["{{baseUrl}}"], "path": ["api", "doctor", "stats", ":id"] } } },
+        { "name": "Doctor Detailed Statistics", "request": { "method": "GET", "header": [], "url": { "raw": "/api/doctor/statsDetails/:id", "host": ["{{baseUrl}}"], "path": ["api", "doctor", "statsDetails", ":id"] } } },
+        { "name": "Register New Doctor", "request": { "method": "POST", "header": [], "url": { "raw": "/api/doctor/register", "host": ["{{baseUrl}}"], "path": ["api", "doctor", "register"] }, "body": { "mode": "raw", "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"email\": \"doctor@example.com\",\n  \"password\": \"password123\"\n}" } } },
+        { "name": "Get Doctor Profile", "request": { "method": "GET", "header": [], "url": { "raw": "/api/doctor/profile", "host": ["{{baseUrl}}"], "path": ["api", "doctor", "profile"] } } },
+        { "name": "Update Doctor Profile", "request": { "method": "PATCH", "header": [], "url": { "raw": "/api/doctor/profile", "host": ["{{baseUrl}}"], "path": ["api", "doctor", "profile"] }, "body": { "mode": "raw", "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\"\n}" } } },
+        { "name": "Get All Patient Queries for Doctor (Alt)", "request": { "method": "GET", "header": [], "url": { "raw": "/api/doctor/queries", "host": ["{{baseUrl}}"], "path": ["api", "doctor", "queries"] } } },
+        { "name": "Get Specific Patient Query Details", "request": { "method": "GET", "header": [], "url": { "raw": "/api/doctor/queries/:queryId", "host": ["{{baseUrl}}"], "path": ["api", "doctor", "queries", ":queryId"] } } },
+        { "name": "Reply to Patient Query", "request": { "method": "PATCH", "header": [], "url": { "raw": "/api/doctor/queries/:queryId/reply", "host": ["{{baseUrl}}"], "path": ["api", "doctor", "queries", ":queryId", "reply"] }, "body": { "mode": "raw", "raw": "{\n  \"response\": \"Your reply here\",\n  \"status\": \"answered\"\n}" } } },
+        { "name": "Update Patient Query Status", "request": { "method": "PATCH", "header": [], "url": { "raw": "/api/doctor/queries/:queryId/status", "host": ["{{baseUrl}}"], "path": ["api", "doctor", "queries", ":queryId", "status"] }, "body": { "mode": "raw", "raw": "{\n  \"status\": \"in-progress\",\n  \"appointmentTime\": \"2025-10-05T10:00:00Z\"\n}" } } },
+        { "name": "Get Doctor's Query Statistics", "request": { "method": "GET", "header": [], "url": { "raw": "/api/doctor/queries/stats/summary", "host": ["{{baseUrl}}"], "path": ["api", "doctor", "queries", "stats", "summary"] } } }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        { "name": "Login", "request": { "method": "POST", "header": [], "url": { "raw": "/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] }, "body": { "mode": "raw", "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\"\n}" } } },
+        { "name": "Set Password", "request": { "method": "POST", "header": [], "url": { "raw": "/api/auth/set-password", "host": ["{{baseUrl}}"], "path": ["api", "auth", "set-password"] }, "body": { "mode": "raw", "raw": "{\n  \"password\": \"newpassword\",\n  \"confirmPassword\": \"newpassword\"\n}" } } }
+      ]
+    },
+    {
+      "name": "Patient",
+      "item": [
+        { "name": "Request OTP", "request": { "method": "POST", "header": [], "url": { "raw": "/api/patient/auth/request-otp", "host": ["{{baseUrl}}"], "path": ["api", "patient", "auth", "request-otp"] }, "body": { "mode": "raw", "raw": "{\n  \"phoneNumber\": \"9876543210\"\n}" } } },
+        { "name": "Verify OTP & Login", "request": { "method": "POST", "header": [], "url": { "raw": "/api/patient/auth/verify-otp", "host": ["{{baseUrl}}"], "path": ["api", "patient", "auth", "verify-otp"] }, "body": { "mode": "raw", "raw": "{\n  \"phoneNumber\": \"9876543210\",\n  \"otp\": \"123456\",\n  \"fcmToken\": \"token\",\n  \"deviceType\": \"android\",\n  \"appVersion\": \"1.0.0\"\n}" } } },
+        { "name": "Update FCM Token", "request": { "method": "POST", "header": [], "url": { "raw": "/api/patient-auth/update-fcm-token", "host": ["{{baseUrl}}"], "path": ["api", "patient-auth", "update-fcm-token"] }, "body": { "mode": "raw", "raw": "{\n  \"fcmToken\": \"token\",\n  \"deviceType\": \"android\",\n  \"appVersion\": \"1.0.0\"\n}" } } },
+        { "name": "Update Patient Profile", "request": { "method": "PATCH", "header": [], "url": { "raw": "/api/patient-auth/profile", "host": ["{{baseUrl}}"], "path": ["api", "patient-auth", "profile"] }, "body": { "mode": "raw", "raw": "{\n  \"name\": \"Jane Doe\",\n  \"email\": \"jane@example.com\",\n  \"age\": 30,\n  \"gender\": \"female\",\n  \"address\": \"123 Main St\"\n}" } } },
+        { "name": "Get Patient Profile", "request": { "method": "GET", "header": [], "url": { "raw": "/api/patient-auth/profile", "host": ["{{baseUrl}}"], "path": ["api", "patient-auth", "profile"] } } },
+        { "name": "Advanced Doctor Search", "request": { "method": "GET", "header": [], "url": { "raw": "/api/patient-query/doctors/search", "host": ["{{baseUrl}}"], "path": ["api", "patient-query", "doctors", "search"] } } },
+        { "name": "Visit Doctor Profile (record view)", "request": { "method": "POST", "header": [], "url": { "raw": "/api/patient/doctors/:id/view", "host": ["{{baseUrl}}"], "path": ["api", "patient", "doctors", ":id", "view"] }, "body": { "mode": "raw", "raw": "{}" } } },
+        { "name": "Create Doctor Query", "request": { "method": "POST", "header": [], "url": { "raw": "/api/patient-query/queries", "host": ["{{baseUrl}}"], "path": ["api", "patient-query", "queries"] }, "body": { "mode": "raw", "raw": "{\n  \"doctorId\": \"doctor_id\",\n  \"question\": \"My question text\"\n}" } } },
+        { "name": "Get Patient Queries", "request": { "method": "GET", "header": [], "url": { "raw": "/api/patient-query/queries", "host": ["{{baseUrl}}"], "path": ["api", "patient-query", "queries"] } } },
+        { "name": "Get Specific Query Details", "request": { "method": "GET", "header": [], "url": { "raw": "/api/patient-query/queries/:id", "host": ["{{baseUrl}}"], "path": ["api", "patient-query", "queries", ":id"] } } },
+        { "name": "Update Query (attachments, etc.)", "request": { "method": "PATCH", "header": [], "url": { "raw": "/api/patient-query/queries/:id", "host": ["{{baseUrl}}"], "path": ["api", "patient-query", "queries", ":id"] }, "body": { "mode": "raw", "raw": "{\n  \"attachments\": [\"file1.jpg\", \"file2.pdf\"],\n  \"preferredTime\": \"2025-10-05T10:00:00Z\",\n  \"consultationType\": \"video\"\n}" } } }
+      ]
+    },
+    {
+      "name": "External",
+      "item": [
+        { "name": "NMC Doctor Search (Validation)", "request": { "method": "GET", "header": [], "url": { "raw": "https://api.nmc.org.in/api/v1/doctors/search?name={{name}}&registrationNo={{registrationNo}}&year={{year}}", "host": ["api.nmc.org.in"], "path": ["api", "v1", "doctors", "search"], "query": [ { "key": "name", "value": "{{name}}" }, { "key": "registrationNo", "value": "{{registrationNo}}" }, { "key": "year", "value": "{{year}}" } ] } } }
+      ]
+    }
+  ]
+}

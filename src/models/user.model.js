@@ -94,6 +94,46 @@ const userSchema = new mongoose.Schema({
     required: [true, 'Specialization is required'],
     trim: true
   },
+
+  // Education details with year/college per degree (optional)
+  education: {
+    mbbs: {
+      enabled: { type: Boolean, default: false },
+      year: { type: String, default: '' },
+      college: { type: String, default: '' }
+    },
+    md: {
+      enabled: { type: Boolean, default: false },
+      year: { type: String, default: '' },
+      college: { type: String, default: '' }
+    },
+    ms: {
+      enabled: { type: Boolean, default: false },
+      year: { type: String, default: '' },
+      college: { type: String, default: '' }
+    },
+    mch: {
+      enabled: { type: Boolean, default: false },
+      year: { type: String, default: '' },
+      college: { type: String, default: '' }
+    },
+    dnb: {
+      enabled: { type: Boolean, default: false },
+      year: { type: String, default: '' },
+      college: { type: String, default: '' }
+    },
+    fellowship: {
+      enabled: { type: Boolean, default: false },
+      year: { type: String, default: '' },
+      college: { type: String, default: '' }
+    },
+    dm: {
+      enabled: { type: Boolean, default: false },
+      year: { type: String, default: '' },
+      college: { type: String, default: '' }
+    },
+    practicingAs: { type: String, default: '' }
+  },
   
   // Hospital Information
   hospitalName1: {

@@ -539,6 +539,8 @@ router.get('/profile', auth, async (req, res) => {
     // Create response object with profile completion and referral code
     const userResponse = user.toObject();
     userResponse.profileCompletion = profileCompletion;
+    // Ensure education object is always present in response
+    userResponse.education = user.education || {};
     
     // Convert individual hospital fields to hospitals array
     const hospitals = [];
@@ -577,7 +579,7 @@ router.patch('/profile', auth, async (req, res) => {
   const allowedUpdates = [
     'firstName', 'lastName', 'middleName', 'gender', 'dateOfBirth',
     'contactNumber1', 'contactNumber2', 'showContactDetails',
-    'homeAddress', 'medicalLicenseNumber', 'medicalDegrees', 'specialization',
+    'homeAddress', 'medicalLicenseNumber', 'medicalDegrees', 'specialization', 'education',
     'hospitals', 'clinicAddress', 'practiceStartDate', 'treatedDiseases', 'documents',
     'communityDetails', 'communicationPreferences'
   ];
@@ -605,6 +607,22 @@ router.patch('/profile', auth, async (req, res) => {
             req.user.hospitalName2 = secondaryHospital.name || '';
             req.user.hospitalAddress2 = secondaryHospital.address || {};
           }
+        }
+      } else if (update === 'education') {
+        // Deep merge education object fields safely
+        if (!req.user.education) req.user.education = {};
+        const incoming = req.body.education || {};
+        const keys = ['mbbs','md','ms','mch','dnb','fellowship','dm'];
+        keys.forEach(key => {
+          if (incoming[key]) {
+            req.user.education[key] = {
+              ...req.user.education[key],
+              ...incoming[key]
+            };
+          }
+        });
+        if (incoming.practicingAs !== undefined) {
+          req.user.education.practicingAs = incoming.practicingAs;
         }
       } else {
         req.user[update] = req.body[update];
