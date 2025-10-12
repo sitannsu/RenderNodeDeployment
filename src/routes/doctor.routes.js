@@ -229,13 +229,113 @@ router.get('/stats/:id', auth, async (req, res) => {
 
 // Get detailed doctor statistics with referral doctor lists
 router.get('/statsDetails/:id', auth, async (req, res) => {
-  console.log('GET /api/doctor/statsDetails/:id called');
+  console.log('GET /api/doctors/statsDetails/:id called');
   console.log('Request params:', JSON.stringify(req.params));
   console.log('Request query:', JSON.stringify(req.query));
-  console.log('GET /api/doctor/statsDetails/:id called');
+  console.log('GET /api/doctors/statsDetails/:id called');
   try {
+    const doctorObjectId = new mongoose.Types.ObjectId(req.params.id);
+
     const stats = await User.aggregate([
-      // ... (aggregation pipeline unchanged)
+      { $match: { _id: doctorObjectId } },
+      // Referrals sent by this doctor
+      {
+        $lookup: {
+          from: 'referrals',
+          localField: '_id',
+          foreignField: 'referringDoctor',
+          as: 'referralsSent'
+        }
+      },
+      // Referrals received by this doctor
+      {
+        $lookup: {
+          from: 'referrals',
+          localField: '_id',
+          foreignField: 'referredDoctor',
+          as: 'referralsReceived'
+        }
+      },
+      // Messages received by this doctor
+      {
+        $lookup: {
+          from: 'messages',
+          localField: '_id',
+          foreignField: 'recipient',
+          as: 'messagesReceived'
+        }
+      },
+      // Resolve user info for referred and referring doctors
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'referralsSent.referredDoctor',
+          foreignField: '_id',
+          as: 'referredDoctorUsers'
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'referralsReceived.referringDoctor',
+          foreignField: '_id',
+          as: 'referringDoctorUsers'
+        }
+      },
+      {
+        $project: {
+          totalReferralsSent: { $size: '$referralsSent' },
+          totalReferralsReceived: { $size: '$referralsReceived' },
+          pendingReferrals: {
+            $size: {
+              $filter: {
+                input: '$referralsReceived',
+                as: 'ref',
+                cond: { $eq: ['$$ref.status', 'pending'] }
+              }
+            }
+          },
+          unreadMessages: {
+            $size: {
+              $filter: {
+                input: '$messagesReceived',
+                as: 'msg',
+                cond: { $eq: ['$$msg.read', false] }
+              }
+            }
+          },
+          referredDoctors: {
+            $map: {
+              input: '$referredDoctorUsers',
+              as: 'd',
+              in: {
+                _id: '$$d._id',
+                fullName: '$$d.fullName',
+                specialization: '$$d.specialization',
+                hospitalName1: '$$d.hospitalName1',
+                profileImage: '$$d.profileImage'
+              }
+            }
+          },
+          referringDoctors: {
+            $map: {
+              input: '$referringDoctorUsers',
+              as: 'd',
+              in: {
+                _id: '$$d._id',
+                fullName: '$$d.fullName',
+                specialization: '$$d.specialization',
+                hospitalName1: '$$d.hospitalName1',
+                profileImage: '$$d.profileImage'
+              }
+            }
+          },
+          referralInfo: {
+            myReferralCode: '$myReferralCode',
+            referredBy: '$referredBy'
+          }
+        }
+      }
     ]);
     console.log('GET /api/doctor/statsDetails/:id response:', JSON.stringify(stats[0] || {}, null, 2));
     res.json(stats[0] || {
