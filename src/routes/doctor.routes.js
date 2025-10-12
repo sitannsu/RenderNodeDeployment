@@ -871,6 +871,12 @@ router.patch('/profile', auth, async (req, res) => {
         const primaryHospital = hospitals[0];
         doctor.hospitalName1 = primaryHospital.name || '';
         doctor.hospitalAddress1 = primaryHospital.address || {};
+        if (primaryHospital.position !== undefined) {
+          doctor.hospitalPosition1 = primaryHospital.position;
+        }
+        if (primaryHospital.tenure !== undefined) {
+          doctor.hospitalTenure1 = primaryHospital.tenure;
+        }
       }
       
       // Set second hospital if exists
@@ -878,6 +884,12 @@ router.patch('/profile', auth, async (req, res) => {
         const secondaryHospital = hospitals[1];
         doctor.hospitalName2 = secondaryHospital.name || '';
         doctor.hospitalAddress2 = secondaryHospital.address || {};
+        if (secondaryHospital.position !== undefined) {
+          doctor.hospitalPosition2 = secondaryHospital.position;
+        }
+        if (secondaryHospital.tenure !== undefined) {
+          doctor.hospitalTenure2 = secondaryHospital.tenure;
+        }
       }
     } else {
       // Fallback to individual hospital fields for backward compatibility

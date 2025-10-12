@@ -547,13 +547,17 @@ router.get('/profile', auth, async (req, res) => {
     if (user.hospitalName1) {
       hospitals.push({
         name: user.hospitalName1,
-        address: user.hospitalAddress1 || {}
+        address: user.hospitalAddress1 || {},
+        position: user.hospitalPosition1 || '',
+        tenure: user.hospitalTenure1 || ''
       });
     }
     if (user.hospitalName2) {
       hospitals.push({
         name: user.hospitalName2,
-        address: user.hospitalAddress2 || {}
+        address: user.hospitalAddress2 || {},
+        position: user.hospitalPosition2 || '',
+        tenure: user.hospitalTenure2 || ''
       });
     }
     userResponse.hospitals = hospitals;
@@ -599,6 +603,12 @@ router.patch('/profile', auth, async (req, res) => {
             const primaryHospital = req.body.hospitals[0];
             req.user.hospitalName1 = primaryHospital.name || '';
             req.user.hospitalAddress1 = primaryHospital.address || {};
+            if (primaryHospital.position !== undefined) {
+              req.user.hospitalPosition1 = primaryHospital.position;
+            }
+            if (primaryHospital.tenure !== undefined) {
+              req.user.hospitalTenure1 = primaryHospital.tenure;
+            }
           }
           
           // Set second hospital if exists
@@ -606,6 +616,12 @@ router.patch('/profile', auth, async (req, res) => {
             const secondaryHospital = req.body.hospitals[1];
             req.user.hospitalName2 = secondaryHospital.name || '';
             req.user.hospitalAddress2 = secondaryHospital.address || {};
+            if (secondaryHospital.position !== undefined) {
+              req.user.hospitalPosition2 = secondaryHospital.position;
+            }
+            if (secondaryHospital.tenure !== undefined) {
+              req.user.hospitalTenure2 = secondaryHospital.tenure;
+            }
           }
         }
       } else if (update === 'education') {
@@ -624,6 +640,43 @@ router.patch('/profile', auth, async (req, res) => {
         if (incoming.practicingAs !== undefined) {
           req.user.education.practicingAs = incoming.practicingAs;
         }
+      } else if (update === 'documents') {
+        // Normalize documents to URLs only (strings)
+        const docs = req.body.documents || {};
+        if (docs.medicalCertificates && Array.isArray(docs.medicalCertificates)) {
+          req.user.documents.medicalCertificates = docs.medicalCertificates
+            .map(item => (typeof item === 'string' ? item : item?.url))
+            .filter(Boolean);
+        }
+        if (docs.casteCertificate !== undefined) {
+          req.user.documents.casteCertificate =
+            typeof docs.casteCertificate === 'string'
+              ? docs.casteCertificate
+              : docs.casteCertificate?.url || '';
+        }
+        if (docs.identificationProof !== undefined) {
+          req.user.documents.identificationProof =
+            typeof docs.identificationProof === 'string'
+              ? docs.identificationProof
+              : docs.identificationProof?.url || '';
+        }
+      } else if (update === 'communityDetails') {
+        // Merge community details booleans and referrals
+        const cd = req.body.communityDetails || {};
+        // Use Mongoose set to ensure nested change is tracked
+        if (cd.kapuCommunityAffiliation !== undefined) {
+          req.user.set(
+            'communityDetails.kapuCommunityAffiliation',
+            !!cd.kapuCommunityAffiliation
+          );
+        }
+        if (cd.communityReferrals !== undefined) {
+          req.user.set(
+            'communityDetails.communityReferrals',
+            cd.communityReferrals || []
+          );
+        }
+        req.user.markModified('communityDetails');
       } else {
         req.user[update] = req.body[update];
       }

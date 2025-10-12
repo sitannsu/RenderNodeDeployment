@@ -156,6 +156,15 @@ const userSchema = new mongoose.Schema({
       required: [true, 'Hospital country 1 is required']
     }
   },
+  // Additional hospital details for primary hospital
+  hospitalPosition1: {
+    type: String,
+    trim: true
+  },
+  hospitalTenure1: {
+    type: String,
+    trim: true
+  },
   hospitalName2: {
     type: String,
     trim: true
@@ -165,6 +174,15 @@ const userSchema = new mongoose.Schema({
     city: String,
     state: String,
     country: String
+  },
+  // Additional hospital details for secondary hospital
+  hospitalPosition2: {
+    type: String,
+    trim: true
+  },
+  hospitalTenure2: {
+    type: String,
+    trim: true
   },
   
   // Clinic Information
@@ -342,43 +360,60 @@ userSchema.pre('save', async function(next) {
 
 // Calculate profile completion percentage
 userSchema.methods.calculateProfileCompletion = function() {
-  const requiredFields = [
-    'firstName', 'lastName', 'gender', 'dateOfBirth', 'contactNumber1',
-    'email', 'homeAddress.city', 'homeAddress.state', 'homeAddress.country',
-    'medicalLicenseNumber', 'medicalDegrees', 'specialization',
-    'hospitalName1', 'hospitalAddress1.city', 'hospitalAddress1.state', 'hospitalAddress1.country',
-    'practiceStartDate'
-  ];
-  
-  const optionalFields = [
-    'contactNumber2', 'homeAddress.street', 'homeAddress.pincode',
-    'hospitalName2', 'hospitalAddress2.street', 'hospitalAddress2.city', 'hospitalAddress2.state', 'hospitalAddress2.country',
-    'clinicAddress.street', 'clinicAddress.city', 'clinicAddress.state', 'clinicAddress.country',
-    'treatedDiseases', 'documents.medicalCertificates', 'documents.casteCertificate', 'documents.identificationProof',
-    'communityDetails.kapuCommunityAffiliation', 'communityDetails.communityReferrals',
-    'communicationPreferences.notificationPreference', 'communicationPreferences.emailCommunication'
-  ];
-  
-  let completedFields = 0;
-  const totalFields = requiredFields.length + optionalFields.length;
-  
-  // Check required fields
-  requiredFields.forEach(field => {
-    const value = this.get(field);
-    if (value && (typeof value === 'string' ? value.trim() !== '' : true)) {
-      completedFields++;
-    }
+  // Section-based completion aligned with app tabs
+  // Mandatory sections: Hospital, Practice, Documents, Community
+  const isNonEmptyString = (v) => typeof v === 'string' && v.trim() !== '';
+
+  // Hospital section
+  const hospitalComplete =
+    isNonEmptyString(this.hospitalName1) &&
+    isNonEmptyString(this.get('hospitalAddress1.city')) &&
+    isNonEmptyString(this.get('hospitalAddress1.state')) &&
+    isNonEmptyString(this.get('hospitalAddress1.country')) &&
+    // Position is required in UI
+    isNonEmptyString(this.hospitalPosition1 || '');
+
+  // Practice section
+  const practiceComplete = !!this.practiceStartDate ||
+    isNonEmptyString(this.get('clinicAddress.city') || '') ||
+    (Array.isArray(this.treatedDiseases) && this.treatedDiseases.length > 0);
+
+  // Documents section
+  const docs = this.documents || {};
+  const documentsComplete =
+    (Array.isArray(docs.medicalCertificates) && docs.medicalCertificates.length > 0) ||
+    isNonEmptyString(docs.casteCertificate || '') ||
+    isNonEmptyString(docs.identificationProof || '');
+
+  // Community section
+  const communityComplete = !!this.get('communityDetails.kapuCommunityAffiliation') ||
+    (Array.isArray(this.get('communityDetails.communityReferrals')) &&
+      this.get('communityDetails.communityReferrals').length > 0);
+
+  // Optional Education section (does not affect reaching 100%)
+  const edu = this.education || {};
+  const degreeKeys = ['mbbs','md','ms','mch','dnb','fellowship','dm'];
+  const educationComplete = degreeKeys.some(k => {
+    const d = edu[k] || {};
+    return d.enabled === true || isNonEmptyString(d.year || '') || isNonEmptyString(d.college || '');
   });
-  
-  // Check optional fields
-  optionalFields.forEach(field => {
-    const value = this.get(field);
-    if (value && (typeof value === 'string' ? value.trim() !== '' : true)) {
-      completedFields++;
-    }
-  });
-  
-  return Math.round((completedFields / totalFields) * 100);
+
+  const mandatorySections = [hospitalComplete, practiceComplete, documentsComplete, communityComplete];
+  const completedMandatory = mandatorySections.filter(Boolean).length;
+  const mandatoryTotal = mandatorySections.length; // 4
+
+  let percentage = Math.round((completedMandatory / mandatoryTotal) * 100);
+
+  // If not all mandatory complete, optionally give partial credit for education
+  if (percentage < 100 && educationComplete) {
+    // Treat education as a fifth section for incremental progress only
+    percentage = Math.round(((completedMandatory + 1) / (mandatoryTotal + 1)) * 100);
+  }
+
+  // Cap to [0,100]
+  if (percentage < 0) percentage = 0;
+  if (percentage > 100) percentage = 100;
+  return percentage;
 };
 
 // Calculate work experience based on practice start date

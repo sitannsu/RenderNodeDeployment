@@ -5,6 +5,7 @@ const cors = require('cors');
 const authRoutes = require('./routes/auth.routes');
 const doctorRoutes = require('./routes/doctor.routes');
 const referralRoutes = require('./routes/referral.routes');
+const uploadRoutes = require('./routes/upload.routes');
 const messageRoutes = require('./routes/message.routes');
 const nmcRoutes = require('./routes/nmc.routes');
 const dashboardRoutes = require('./routes/dashboard.routes');
@@ -57,6 +58,7 @@ mongoose.connect(process.env.MONGODB_URI, {
 app.use('/api/auth', authRoutes);
 app.use('/api/doctors', doctorRoutes);
 app.use('/api/referrals', referralRoutes);
+app.use('/api/upload', uploadRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api', nmcRoutes);
 app.use('/api/dashboard', dashboardRoutes);
