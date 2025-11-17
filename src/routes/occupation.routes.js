@@ -94,11 +94,10 @@ router.delete('/:id', auth, async (req, res) => {
       return res.status(404).json({ message: 'Occupation not found' });
     }
 
-    // Soft delete by setting isActive to false
-    occupation.isActive = false;
-    await occupation.save();
-    
-    res.json({ message: 'Occupation deleted successfully' });
+    // Hard delete: remove document from database
+    await Occupation.findByIdAndDelete(req.params.id);
+
+    res.json({ message: 'Occupation permanently deleted' });
   } catch (error) {
     console.error('Error deleting occupation:', error);
     res.status(500).json({ message: error.message });
