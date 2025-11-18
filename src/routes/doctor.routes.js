@@ -20,6 +20,45 @@ router.get('/', auth, async (req, res) => {
   }
 });
 
+// Recent doctors joined (for community updates)
+// GET /api/doctors/recent?limit=5
+router.get('/recent', auth, async (req, res) => {
+  try {
+    const limit = Math.min(Math.max(parseInt(req.query.limit) || 5, 1), 50);
+    const recentDoctors = await User.find({
+      role: 'doctor',
+      _id: { $ne: req.user._id }
+    })
+      .select('fullName email specialization homeAddress hospitalAddress1 createdAt')
+      .sort({ createdAt: -1 })
+      .limit(limit);
+
+    const items = recentDoctors.map((doctor) => {
+      const city =
+        (doctor.homeAddress && doctor.homeAddress.city) ||
+        (doctor.hospitalAddress1 && doctor.hospitalAddress1.city) ||
+        '';
+      const state =
+        (doctor.homeAddress && doctor.homeAddress.state) ||
+        (doctor.hospitalAddress1 && doctor.hospitalAddress1.state) ||
+        '';
+
+      return {
+        id: doctor._id,
+        fullName: doctor.fullName,
+        specialization: doctor.specialization,
+        city,
+        state,
+        createdAt: doctor.createdAt
+      };
+    });
+
+    res.json({ items, total: items.length });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // Search doctors by specialization or name
 router.get('/search', auth, async (req, res) => {
   console.log('GET /api/doctor/search called');
